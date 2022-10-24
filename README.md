@@ -14,38 +14,49 @@ After the above dependencies have been installed, you can install this plugin vi
 To manually install this plugin, copy the `manifest.json` and `main.js` from the release you want and add them to a new plugin folder named `metadata-api` within your `.obsidian` folder of your Vault.
 
 ## Api
+The api is built off of the class `Metadata` in `main.ts`/`main.js`.
+**NOTE**: Most of the properties of this class are accessable in caps or lower camel case so you can adapt to your desired style.
+
 ### Global Access
 #### Metadata
 You can access the full api via the global variable: `meta`, via the standards js app api path, or via one of the `.Instance` properties on either the `Metadata` or `MetadataApiPlugin` classes:
 ```
 const {
-  Current: metadata,
-  CurrentMatter: frontmatter,
-  CurrentCache: cache
+  Data: metadata,
+  Current: {
+    Matter: frontmatter,
+    Cache: cache
+  }
 } = meta;
 
 // or
 
 const {
-  Current: metadata,
-  CurrentMatter: frontmatter,
-  CurrentCache: cache
+  Data: metadata,
+  Current: {
+    Matter: frontmatter,
+    Cache: cache
+  }
 } = app.plugins.plugins["metadata-api"].api;
 
 // or
 
 const {
-  Current: metadata,
-  CurrentMatter: frontmatter,
-  CurrentCache: cache
-} = Metadata.Instance;
+  Data: metadata,
+  Current: {
+    Matter: frontmatter,
+    Cache: cache
+  }
+} = Metadata.Api;
 
 // or 
 
 const {
-  Current: metadata,
-  CurrentMatter: frontmatter,
-  CurrentCache: cache
+  Data: metadata,
+  Current: {
+    Matter: frontmatter,
+    Cache: cache
+  }
 } = MetadataPluginApi.Instance;
 ```
 
@@ -63,57 +74,76 @@ const {
 
 //   or:
 const {
-  CurrentCache: {
-    name
+  Current: {
+    Cache: {
+      name
+    }
   }
 } = meta;
 ```
 **NOTE**: The names of these two global variables can be changed in the settings.
 
 ### Properties
+**NOTE**: The non-static properties are accessable in caps or lower camel case so you can adapt to your desired style.
+ 
+Ex:
+```
+meta.current === meta.Current;
+```
+- Instance methods will always be lower camel case
+- Static properties and methods will always in caps camel case.
+
 #### Instance
 ***Static**: The singleton instance of the Metadata api object.
 
 #### DefaultMetadataSources
-The default Metadata Sources used in the Get Method.
+***Static**: The default Metadata Sources used in the Get Method.
 
 #### DataviewApi
-The dataview api.
+***Static**: The dataview api.
 
 #### MetaeditApi
-The metaedit api.
+***Static**: The metaedit api.
 
 #### Current
-Fetches the current note's default metadata.
+Sub-class used to fetch info about the current note's metadata.
 
-#### CurrentNote
+##### Current.Data
+Fetches the current note's default metadata from the default sources. Same as `meta.data`.
+
+##### Current.Note
 Fetches the current note's TFile.
 
-#### CurrentPath
+##### Current.Path
 Fetches the current note's file path in the vault.
 
-#### CurrentMatter
+##### Current.Matter
 Fetches the current note's frontmatter without other metadata.
 
-#### CurrentCache
+##### Current.Cache
 Fetches the current note's file cache without other metadata.
 
+#### Data
+Fetches the current note's default metadata from the default sources.
+
 ### Methods
-#### Get
+**NOTE**: Instance methods will always be lower camel case and Static properties and methods will always in caps camel case.
+
+#### get
 Get the metadata for a given file from the requested sources (fromtmatter, dataview, cache, etc).
 
 *Params*:
 - file(string|TFile|null): Defaults to the current file if one isn't provided.
 - sources(Optional)(MetadataSources|boolean) Defaults to DefaultMetadataSources. If a boolean is provided, all options in MetadataSources are treated as that boolean.
 
-#### Set
+#### set
 Replace the existing frontmatter of a file entirely with the provided object's properties and values.
 
 *Params*:
 - file(string|TFile|null): Defaults to the current file if one isn't provided.
 - frontmatterData(object) The properties and values to set. 
 
-#### Patch
+#### patch
 Patch/update individual frontmatter properties of a file.
 
 *Params*:
@@ -121,33 +151,33 @@ Patch/update individual frontmatter properties of a file.
 - frontmatterData(object|any) The properties and values to patch. This can be used to patch properties multiple keys deep as well (ex: "name.first"). If a value is also provided to the propertyName parameter: then this entire object/value is set to that single property key instead.
 - propertyName(Optional)(string|null) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here. Otherwise, leave this unset/null so the property keys in frontmatterData are used instead.
 
-#### Clear
+#### clear
 Used to clear values from fromtmatter. Can clear the whole file's frontmatter or just the frontmatter value of a single property. This removes it from the frontmatter entirely and does not leave an empty key.
 
 *Params*:
 - file(string|TFile|null): Defaults to the current file if one isn't provided.
 - frontmatterProperties(string|array(string)|object|null) The property to remove, an array of the properties to remove, an object with the key's to remove, or null to remove the full frontmatter.
 
-#### Frontmatter
+#### frontmatter
 Fetch just the frontmatter of the desired file without any other metadata.
 
 *Params*:
 - file(string|TFile|null): Defaults to the current file if one isn't provided.
 
-#### Cache
+#### cache
 Fetch just the cache of the desired file without any other metadata.
 
 *Params*:
 - file(string|TFile|null): Defaults to the current file if one isn't provided.
 
-#### Prototypes
+#### prototypes
 Fetch prototypes from a Prototype Data Storage File
 
 *Params*:
 - prototypePath(string)
 
-#### Data
-Fetch data from a Data Storage File
+#### values
+Fetch data from a Data Values Storage File
 
 *Params*:
 - prototypePath(string)
@@ -265,14 +295,14 @@ This plugin provides a system for storing easily accessable data in specific fil
 
 You can set the Data Values Path in the Data Storage Settings in the Obsidian app plugin settings to point to a specific folder. This folder will be assumed to have `.md` files containing YAML data.
 
-You can instantly access these YAML files as objects using the Data method of the API described above, and edit them using the `toDataFile` property of the Patch, Set, and Clear methods described above.
+You can instantly access these YAML files as objects using the `values` method of the API described above, and edit them using the `toDataFile` property of the Patch, Set, and Clear methods described above.
 
 #### Data Prototypes
 This plugin provides a system for storing easily accessable data in specific files via YAML using Data Values. It also supports storing prototypes/metadata in a seperate repository for convenience. This functionality is pretty much dientical to the Data Values functionality above, but with a seperate filesystem and access function.
 
 You can set the Data Prototypes Path in the Data Storage Settings in the Obsidian app plugin settings to point to a specific folder. This folder will be assumed to have `.md` files containing YAML data.
 
-You can instantly access these YAML files as objects using the Prorotype method of the API described above, and edit them using the `prototype` property of the Patch, Set, and Clear methods described above.
+You can instantly access these YAML files as objects using the `prototypes` method of the API described above, and edit them using the `prototype` property of the Patch, Set, and Clear methods described above.
 
 ## Configuration
 
