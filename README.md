@@ -305,17 +305,20 @@ You can set the Data Prototypes Path in the Data Storage Settings in the Obsidia
 You can instantly access these YAML files as objects using the `prototypes` method of the API described above, and edit them using the `prototype` property of the Patch, Set, and Clear methods described above.
 
 ## Configuration
-
 ### Global Names
+The names of the global variables `meta` and `cache` can be changed in these settings.
 
 ### Declare Object Property Helper Methods?
+If true, this sets the Instance Methods on `Object.prototype` that help deal with accessing and setting deep object properties.
 
 ### Data Storage Settings
+Settings related to the paths used for prototype and value data storage.
 
 ## Compatibility
 Tested and working in the following codeblocks:
   - [dataviewjs](https://github.com/blacksmithgu/obsidian-dataview)
   - [jsx](https://github.com/elias-sundqvist/obsidian-react-components)
+  - [customJS](https://github.com/saml-dev/obsidian-custom-js) class defenition files. (**NOTE**: the cache is not officially supported in these files.)
 
 **NOTE**: The cache is designed to work between different types of codeblocks in the same file.
 EX: 
