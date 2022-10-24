@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "obsidian-metadata-api-plugin",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "This plugin provides a global js api for accessing and updating frontmatter and other note metadatas.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

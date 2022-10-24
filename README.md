@@ -1,73 +1,222 @@
 # Obsidian Sample Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+This is a plugin for [Obsidian](https://obsidian.md) that adds tools to help easily read and update frontmatter and other metadata.
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+## Installation
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+## Dependencies
+This plugin requires the following Obsidian plugins to be installed as dependencies prior to being activated:
+  - [Dataview](https://github.com/blacksmithgu/obsidian-dataview)
+  - [MetaEdit](https://github.com/chhoumann/MetaEdit)
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Changes the default font color to red using `styles.css`.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Plugin Installation
+After the above dependencies have been installed, you can install this plugin via the Obsidian Community Plugins menu, or manually.
 
-## First time developing plugins?
+### Manual Installation
+To manually install this plugin, copy the `manifest.json` and `main.js` from the release you want and add them to a new plugin folder named `metadata-api` within your `.obsidian` folder of your Vault.
 
-Quick starting guide for new plugin devs:
+## Api
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+### Global Access
 
-## Releasing new releases
+#### Metadata
+You can access the full api via the global variable: `meta`, via the standards js app api path, or via one of the `.Instance` properties on either the `Metadata` or `MetadataApiPlugin` classes:
+```
+const {
+  Current: metadata,
+  CurrentMatter: frontmatter,
+  CurrentCache: cache
+} = meta;
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+// or
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+const {
+  Current: metadata,
+  CurrentMatter: frontmatter,
+  CurrentCache: cache
+} = app.plugins.plugins["metadata-api"].api;
 
-## Adding your plugin to the community plugin list
+// or
 
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+const {
+  Current: metadata,
+  CurrentMatter: frontmatter,
+  CurrentCache: cache
+} = Metadata.Instance;
 
-## How to use
+// or 
 
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
+const {
+  Current: metadata,
+  CurrentMatter: frontmatter,
+  CurrentCache: cache
+} = MetadataPluginApi.Instance;
+```
 
-## Manually installing the plugin
+#### Cache
+You can also access the current file's cache via the global variable `cache`:
+```
+// set:
+cache["name"] = "tim";
+cache["color"] = "blue";
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+// get:
+const {
+  name
+} = cache;
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+//   or:
+const {
+  CurrentCache: {
+    name
+  }
+} = meta;
+```
+**NOTE**: The names of these two global variables can be changed in the settings.
 
+### Properties
 
-## API Documentation
+#### Instance
+***Static**: The singleton instance of the Metadata api object.
 
-See https://github.com/obsidianmd/obsidian-api
+#### DefaultMetadataSources
+The default Metadata Sources used in the Get Method.
+
+#### DataviewApi
+The dataview api.
+
+#### MetaeditApi
+The metaedit api.
+
+#### Current
+Fetches the current note's default metadata.
+
+#### CurrentNote
+Fetches the current note's TFile.
+
+#### CurrentPath
+Fetches the current note's file path in the vault.
+
+#### CurrentMatter
+Fetches the current note's frontmatter without other metadata.
+
+#### CurrentCache
+Fetches the current note's file cache without other metadata.
+
+### Methods
+
+#### Get
+
+#### Set
+
+#### Patch
+
+#### Clear
+
+#### Frontmatter
+Fetch just the frontmatter of the desired file without any other metadata.
+
+*Params*:
+- file(string|TFile|null): Defaults to the current file if one isn't provided.
+
+#### Cache
+Fetch just the cache of the desired file without any other metadata.
+
+*Params*:
+- file(string|TFile|null): Defaults to the current file if one isn't provided.
+
+#### Prototypes
+Fetch prototypes from a Prototype Data Storage File
+
+*Params*:
+- prototypePath(string)
+
+#### Data
+Fetch data from a Data Storage File
+
+*Params*:
+- prototypePath(string)
+
+#### Object Property Helper Methods
+
+##### Object Instance Methods
+
+###### hasProp
+
+###### getProp
+
+###### setProp
+
+##### Api Methods
+
+###### ContainsDeepProperty
+
+###### GetDeepProperty
+
+###### TryToGetDeepProperty
+
+###### SetDeepProperty
+
+### Data Storage
+
+#### Cache
+The cache is designed to work between different types of codeblocks in the same file. This allows you to store custom js values easily between codeblocks in the same note without needing to modify global state yourself!
+
+EX: 
+```
+---
+name:
+  first: John
+  last: Madden
+---
+'``dataview
+const {
+  name {
+    first: firstName,
+    last: lastName
+  }
+} = meta.Current;
+
+cache["fullName"] = `${firstName} ${lastName}`;
+'``
+# Full Name
+'``jsx:
+<p>{cache.fullName}</p>
+'``
+```
+
+#### Data Values
+
+#### Data Prototypes
+
+## Configuration
+
+### Global Names
+
+### Declare Object Property Helper Methods?
+
+### Data Storage Settings
+
+## Compatibility
+Tested and working in the following codeblocks:
+  - [dataviewjs](https://github.com/blacksmithgu/obsidian-dataview)
+  - [jsx](https://github.com/elias-sundqvist/obsidian-react-components)
+
+**NOTE**: The cache is designed to work between different types of codeblocks in the same file.
+EX: 
+```
+'``dataview
+const {
+  name {
+    first: firstName,
+    last: lastName
+  }
+} = meta.Current;
+
+cache["fullName"] = `${firstName} ${lastName}`;
+'``
+
+'``jsx:
+<p>{cache.fullName}</p>
+'``
+```
