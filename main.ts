@@ -100,7 +100,11 @@ export default class MetadataApiPlugin extends Plugin {
       value: function (path: string|Array<string>, defaultValue: any) {
         const value = Metadata.Instance.GetDeepProperty(path, this);
         if (defaultValue !== undefined && (value === undefined)) {
-          return defaultValue;
+          if (typeof defaultValue === "function") {
+            return defaultValue();
+          } else {
+            return defaultValue;
+          }
         }
 
         return value;
@@ -117,8 +121,8 @@ export default class MetadataApiPlugin extends Plugin {
      * @returns The found deep property, or undefined if not found.
      */
     Object.defineProperty(Object.prototype, 'setProp', {
-      value: function (path: string|Array<string>, value: any) {
-        return Metadata.Instance.SetDeepProperty(path, value, this);
+      value: function (propertyPath: string|Array<string>, value: any) {
+        return Metadata.Instance.SetDeepProperty(propertyPath, value, this);
       },
       enumerable: false
     });
@@ -442,7 +446,7 @@ class Metadata {
    * @returns An object containing the prototypes in the givne file
    */
   Prototypes(prototypePath: string) : object {
-    return this.Frontmatter(app.plugins.plugins["metadata-api"].settings.prototypePath + prototypePath);
+    return this.Frontmatter(this.BuildPrototypeFileFullPath(prototypePath));
   }
 
   /**
@@ -453,7 +457,7 @@ class Metadata {
    * @returns An object containing the frontmatter stored in the given file
    */
   Data(dataPath: string) : object {
-    return this.Frontmatter(app.plugins.plugins["metadata-api"].settings.dataFilesPath + dataPath);
+    return this.Frontmatter(this.BuildDataFileFullPath(dataPath));
   }
 
   /**
@@ -530,13 +534,19 @@ class Metadata {
    * @param {object|string} file The name of the file or the file object with a path
    * @param {*|object} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
    * @param {string} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
+   * @param {boolean|string} toDataFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
    * 
    * @returns The updated Metadata.
    */
-  Patch(file: string|TFile|null, frontmatterData: any, propertyName: string|null = null) : object {
-    const { update } = this.MetaeditApi;
-    const fileName = this.ParseFileName(file) || this.CurrentPath;
+  Patch(file: string|TFile|null, frontmatterData: any, propertyName: string|null = null, toDataFile: boolean|string = false, prototype: string|boolean = false) : object {
+    if (prototype && toDataFile) {
+      throw "Cannot patch toDataFile and prototype at the same time.";
+    }
 
+    const { update } = this.MetaeditApi;
+    const fileName = this.ParseFileNameFromDataFileFileOrPrototype(toDataFile, file, prototype);
+      
     if (propertyName != null) {
       update(propertyName, frontmatterData, fileName);
     } else {
@@ -546,18 +556,24 @@ class Metadata {
 
     return this.Get(fileName);
   }
-  
+
   /**
    * Replace the existing frontmatter of a file with entirely new data, clearing out all old data in the process.
    * 
    * @param {object|string} file The name of the file or the file object with a path
    * @param {object} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
+   * @param {boolean|string} toDataFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
    * 
    * @returns The updated Metadata
    */
-  Set(file: string|TFile|null, frontmatterData: any) : object {
+  Set(file: string|TFile|null, frontmatterData: any, toDataFile: boolean|string = false, prototype: string|boolean = false) : object {
+    if (prototype && toDataFile) {
+      throw "Cannot patch toDataFile and prototype at the same time.";
+    }
+
     const { update } = this.MetaeditApi;
-    const fileName = this.ParseFileName(file) || this.CurrentPath;
+    const fileName = this.ParseFileNameFromDataFileFileOrPrototype(toDataFile, file, prototype);
 
     this.Clear(fileName);
     Object.keys(frontmatterData).forEach(propertyName =>
@@ -571,22 +587,28 @@ class Metadata {
    * 
    * @param {object|string} file The file to clear properties for. defaults to the current file.
    * @param {string|array} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
+   * @param {boolean|string} toDataFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
    */
-  Clear(file: string|TFile|null = null , frontmatterProperties: any = null) {
-    const fileName = this.ParseFileName(file) || this.CurrentPath;
+  Clear(file: string|TFile|null = null , frontmatterProperties: string|Array<string>|object|null = null, toDataFile: boolean|string = false, prototype: string|boolean = false) {
+    if (prototype && toDataFile) {
+      throw "Cannot patch toDataFile and prototype at the same time.";
+    }
+    
+    const fileName = this.ParseFileNameFromDataFileFileOrPrototype(toDataFile, file, prototype);
     let propsToClear = [];
     
     if (typeof frontmatterProperties === "string") {
       propsToClear.push(frontmatterProperties);
     } else if (typeof frontmatterProperties === 'object') {
-      if (Array.isArray(frontmatterProperties)) {
+      if (frontmatterProperties === null) {
+        propsToClear = Object.keys(this.Frontmatter(fileName));
+      } else if (Array.isArray(frontmatterProperties)) {
         propsToClear = frontmatterProperties;
       } else {
         propsToClear = Object.keys(frontmatterProperties);
       }
-    } else {
-      propsToClear = Object.keys(this.Frontmatter(fileName));
-    }
+    } 
 
     throw "not implemented";
   }
@@ -705,6 +727,8 @@ class Metadata {
       parent.value = value;
     }
   }
+
+  //#region Utility
   
   /**
    * Get a file path string based on a file path string or file object.
@@ -713,7 +737,7 @@ class Metadata {
    * 
    * @returns The file path
    */
-  private ParseFileName(file : string|TFile|null) : string|null {
+  ParseFileName(file : string|TFile|null) : string|null {
     let fileName = file || null;
     if (typeof file === "object" && file !== null) {
       fileName == file.path || file.name;
@@ -721,4 +745,44 @@ class Metadata {
     
     return fileName;
   }
+  
+  /**
+   * Get the full path of a data file from it's data path.
+   * 
+   * @param dataPath The path after the value set in settings for the path to data value files.
+   * 
+   * @returns the full path from the root of the vault.
+   */
+  BuildDataFileFullPath(dataPath : string) {
+    return app.plugins.plugins["metadata-api"].settings.dataFilesPath + dataPath;
+  }
+  
+  /**
+   * Get the full path of a prototype file from it's data path.
+   * 
+   * @param prototypePath The path after the value set in settings for the path to data prototypes files.
+   * 
+   * @returns the full path from the root of the vault.
+   */
+  BuildPrototypeFileFullPath(prototypePath : string) {
+    return app.plugins.plugins["metadata-api"].settings.prototypesPath + prototypePath;
+  }
+  
+  private ParseFileNameFromDataFileFileOrPrototype(toDataFile: string | boolean, file: string | TFile | null, prototype: string | boolean) {
+    return toDataFile
+      ? file
+        ? this.BuildDataFileFullPath(this.ParseFileName(file))
+        : (typeof toDataFile === "string"
+          ? this.BuildDataFileFullPath(toDataFile)
+          : this.BuildDataFileFullPath(this.CurrentPath))
+      : prototype
+        ? file
+          ? this.BuildPrototypeFileFullPath(this.ParseFileName(file))
+          : (typeof prototype === "string"
+            ? this.BuildPrototypeFileFullPath(prototype)
+            : this.BuildPrototypeFileFullPath(this.CurrentPath))
+        : this.ParseFileName(file) || this.CurrentPath;
+  }
+  
+  //#endregion
 }
