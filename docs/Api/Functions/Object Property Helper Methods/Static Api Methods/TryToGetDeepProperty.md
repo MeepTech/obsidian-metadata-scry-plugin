@@ -1,4 +1,5 @@
 # Metadata.TryToGetDeepProperty
+**function, static**
 Try to find a deep property in an object. Returning true if it's found and executing the appropriate callback.
 ## *Params*
 - **propertyPath** *(string|array(string))* Array of keys, or dot seperated propery key string.
