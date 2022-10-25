@@ -3,7 +3,7 @@
 Set a deep property in an object, even if it doesn't exist.
 
 **NOTE**: This is a wrapper for [SetDeepProperty](../Static%20Api%20Methods/SetDeepProperty.md).
-**NOTE**: This function is unavailable if the [Configuration > Declare Object Property Helper Methods](../../../../Configuration.md#Declare Object Property Helper Methods) setting is disabled.
+**NOTE**: This function is unavailable if the [Configuration > Declare Object Property Helper Methods](../../../../Configuration.md) setting is disabled.
 ## *Params*
 - **propertyPath** *(string|array(string))* Array of keys, or dot seperated propery key string.
 - **value** *(any)* The value to set.
