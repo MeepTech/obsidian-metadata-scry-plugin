@@ -1,5 +1,5 @@
-# Current
-Property containing a class object used to fetch info about the current note's metadata.
+# Metadata.Current
+Property containing an object of the `CurrentMetadata` class which is used to fetch info about the current note's metadata.
 ## Properties
 **NOTE**: The properties are accessable in caps or lower camel case so you can adapt to your desired style.
 ### Data

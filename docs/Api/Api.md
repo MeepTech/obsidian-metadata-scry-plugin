@@ -55,3 +55,5 @@ These are methods on the API object that aid in checking and setting dee pproper
 - [GetDeepProperty](Static%20Api%20Methods/GetDeepProperty.md)
 - [TryToGetDeepProperty](Static%20Api%20Methods/TryToGetDeepProperty.md)
 - [SetDeepProperty](Static%20Api%20Methods/SetDeepProperty.md)
+## Examples
+For examples, see the [Tests folder](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/tree/master/tests) in the root of the github repository.

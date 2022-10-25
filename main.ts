@@ -46,13 +46,13 @@ export default class MetadataApiPlugin extends Plugin {
   
 	async saveSettings() {
     await this.saveData(this.settings);
+    // reset the api when settings are updated.
     this._deinitApi();
     this._initApi();
   }
   
   private _initApi() {
     this._verifyDependencies();
-
     MetadataApiPlugin._instance = new Metadata();
 
     this._initGlobalMetadata();
@@ -62,9 +62,13 @@ export default class MetadataApiPlugin extends Plugin {
     }
   }
 
+  /** 
+   * if one of the dependenies is missing, disable the plugin and warn the user.
+   */
   private _verifyDependencies() {
     if (!app.plugins.plugins.dataview || !app.plugins.plugins.metaedit) {
-      const error = `Cannot initialize plugin: Metadata-Api. Dependency plugin is missing: ${!app.plugins.plugins.dataview ? "Dataview" : "Metaedit"}`;
+      const error = `Cannot initialize plugin: Metadata-Api. Dependency plugin is missing: ${!app.plugins.plugins.dataview ? "Dataview" : "Metaedit"}. (The metadata-api plugin has been automatically disabled.)`;
+      app.plugins.disablePlugin("metadata-api");
       alert(error);
       throw error;
     }
@@ -129,43 +133,51 @@ export default class MetadataApiPlugin extends Plugin {
   }
 
   private _initGlobalMetadata() {
-    /**
-     * Global access to the metadata on desktop.
-     */
-    Object.defineProperty(global, this.settings.globalMetadataApiName, {
-      get() {
-        return Metadata.Api;
-      }
-    });
+    try {
+      /**
+       * Global access to the metadata on desktop.
+       */
+      Object.defineProperty(global, this.settings.globalMetadataApiName, {
+        get() {
+          return Metadata.Api;
+        }
+      });
+    } catch { }
 
-    /**
-     * Global access to the metadata on mobile.
-     */
-    Object.defineProperty(window, this.settings.globalMetadataApiName, {
-      get() {
-        return Metadata.Api;
-      }
-    });
+    try {
+      /**
+       * Global access to the metadata on mobile.
+       */
+      Object.defineProperty(window, this.settings.globalMetadataApiName, {
+        get() {
+          return Metadata.Api;
+        }
+      });
+    } catch { }
   }
 
   private _initGlobalCache() {
-    /**
-     * Global access to the cache on desktop.
-     */
-    Object.defineProperty(global, this.settings.globalCacheName, {
-      get() {
-        return Metadata.Api.Current.Cache;
-      }
-    });
+    try {
+      /**
+       * Global access to the cache on desktop.
+       */
+      Object.defineProperty(global, this.settings.globalCacheName, {
+        get() {
+          return Metadata.Api.Current.Cache;
+        }
+      });
+    } catch { }
 
-    /**
-     * Global access to the cache on mobile.
-     */
-    Object.defineProperty(window, this.settings.globalCacheName, {
-      get() {
-        return Metadata.Api.Current.Cache;
-      }
-    });
+    try {
+      /**
+       * Global access to the cache on mobile.
+       */
+      Object.defineProperty(window, this.settings.globalCacheName, {
+        get() {
+          return Metadata.Api.Current.Cache;
+        }
+      });
+    } catch { }
   }
 
   private _deinitApi() {
@@ -732,7 +744,7 @@ class Metadata {
     let parent = fromObject;
     for (const currentKey of keys) {
       if (typeof parent !== "object" || !parent.hasOwnProperty(currentKey)) {
-        if (thenDo.onFalse) {
+        if (thenDo && thenDo.onFalse) {
           thenDo.onFalse();
         }
         return false;
@@ -741,9 +753,11 @@ class Metadata {
       parent = parent[currentKey];
     }
 
-    const then = thenDo.onTrue || thenDo;
-    if (then) {
-      return then.onTrue(parent);
+    if (thenDo) {
+      const then = thenDo.onTrue || thenDo;
+      if (then) {
+        return then(parent);
+      }
     }
 
     return true;

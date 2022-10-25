@@ -1,0 +1,10 @@
+{
+	"id": "metadata-api",
+	"name": "Obsidian Metadata Api Plugin",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "This plugin provides a global js api for accessing and updating frontmatter and other note metadatas.",
+	"author": "Meep.Tech",
+	"authorUrl": "http://Meep.Tech",
+	"isDesktopOnly": false
+}
