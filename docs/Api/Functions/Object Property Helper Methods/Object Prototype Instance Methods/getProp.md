@@ -9,4 +9,3 @@ Get a deep property from an object, or return null.
 - **defaultValue** *(any|function)* The default value to use if this value wasn't found. If a function is passed in it will be called to fetch the value.
 # Examples
 - *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20Object.prototype.getProp/test.md)*
-![test](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20Object.prototype.getProp/test.md)

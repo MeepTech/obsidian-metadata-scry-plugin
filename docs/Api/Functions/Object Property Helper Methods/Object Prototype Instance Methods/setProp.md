@@ -7,3 +7,5 @@ Set a deep property in an object, even if it doesn't exist.
 ## *Params*
 - **propertyPath** *(string|array(string))* Array of keys, or dot seperated propery key string.
 - **value** *(any)* The value to set.
+# Examples
+- *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20Object.prototype.setProp/test.md)*

@@ -19,3 +19,6 @@ const {
   }
 } = app.plugins.plugins["metadata-api"].api;
 ```
+
+# Examples
+- *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/global%20meta/test.md)*
