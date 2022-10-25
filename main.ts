@@ -814,28 +814,34 @@ class Metadata {
    *  
    * @returns The found deep property, or null if not found. 
    */
-  static SetDeepProperty(propertyPath: string|Array<string>, value: any, onObject: any) : void {
+  static SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void {
     const keys = (typeof (propertyPath) == "string")
       ? propertyPath
         .split('.')
       : propertyPath;
     
     let parent = onObject;
-    for (const currentKey of keys) {
+    let currentKey;
+    for (currentKey of keys) {
       if (typeof parent !== "object") {
         throw `Property: ${currentKey}, in Path: ${propertyPath}, is not an object. Child property values cannot be set!`;
       }
+
+      // if this parent doesn't have the property we want, add it as an empty object for now.
       if (!parent.hasOwnProperty(currentKey)) {
         parent[currentKey] = {};
       }
       
-      parent = parent[currentKey];
+      // if this isn't the last one, set it as parent.
+      if (currentKey != keys[keys.length - 1]) {
+        parent = parent[currentKey];
+      }
     }
 
     if (typeof value === "function") {
-      parent.value = value(parent.value);
+      parent[currentKey] = value(parent[currentKey]);
     } else {
-      parent.value = value;
+      parent[currentKey] = value;
     }
   }
 
