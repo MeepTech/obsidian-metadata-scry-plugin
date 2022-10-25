@@ -49,9 +49,9 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/setProp.md",
-                "mode": "source",
-                "source": false
+                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
+                "mode": "preview",
+                "source": true
               }
             }
           },
@@ -146,7 +146,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/setProp.md",
+                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -163,7 +163,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/setProp.md",
+                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -186,7 +186,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/setProp.md"
+                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md"
               }
             }
           }
@@ -199,15 +199,15 @@
   },
   "active": "03084400ccb0191a",
   "lastOpenFiles": [
-    "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/hasProp.md",
+    "README.md",
+    "Installation.md",
+    "Configuration.md",
+    "Compatibility.md",
     "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
-    "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/setProp.md",
-    "Api/Globals/Metadata.md",
-    "Api/Globals/Cache.md",
-    "Api/Functions/values.md",
-    "Api/Functions/Object Property Helper Methods/Static Api Methods/TryToGetDeepProperty.md",
-    "Api/Functions/Object Property Helper Methods/Static Api Methods/SetDeepProperty.md",
-    "Api/Functions/Object Property Helper Methods/Static Api Methods/GetDeepProperty.md",
-    "Api/Functions/Object Property Helper Methods/Static Api Methods/ContainsDeepProperty.md"
+    "Data Storage/Data Values.md",
+    "Data Storage/Cache.md",
+    "Api/Properties/MetaeditApi.md",
+    "Api/Properties/Instance.md",
+    "Api/Properties/DefaultMetadataSources.md"
   ]
 }

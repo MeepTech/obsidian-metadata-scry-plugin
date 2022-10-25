@@ -1,4 +1,5 @@
-### Metadata
+# global.meta
+**property, global**
 You can access the full api via the global variable: `meta` or via the standards js app api path for plugins.
 ```
 const {

@@ -1,2 +1,3 @@
 # DataviewApi
-***Static**: The dataview api.
+**property, static**
+The dataview api.

@@ -1,2 +1,3 @@
 ### MetaeditApi
-***Static**: The metaedit api.
+**property, static**
+The metaedit api.

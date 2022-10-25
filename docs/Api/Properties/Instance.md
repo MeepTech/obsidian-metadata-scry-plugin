@@ -1,2 +1,3 @@
 # Instance
-***Static**: The singleton instance of the Metadata api object.
+**property, static**
+The singleton instance of the Metadata api object.

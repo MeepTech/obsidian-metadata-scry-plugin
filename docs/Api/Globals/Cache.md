@@ -1,4 +1,5 @@
-#### Cache
+# global.cache
+**property, global**
 You can also access the current file's cache via the global variable `cache`:
 ```
 // set:
