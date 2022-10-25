@@ -54,6 +54,30 @@ dv.el('p', path);
 ```
 ## -Expected
 Metadata Api/global meta/test
+# Accessable via Static Class Api Property
+## -Code
+*dataviewjs*
+```js
+const {
+   current: {
+     path
+   }
+} = Metadata.Api;
+
+dv.el('p', path);
+```
+## -Result
+```dataviewjs
+const {
+   current: {
+     path
+   }
+} = Metadata.Api;
+
+dv.el('p', path);
+```
+## -Expected
+Metadata Api/global meta/test
 # Accessable via Plugin Api
 ## -Code
 *dataviewjs*
