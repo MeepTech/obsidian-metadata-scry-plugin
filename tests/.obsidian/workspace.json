@@ -37,9 +37,9 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/global meta/test.md",
-                "mode": "source",
-                "source": false
+                "file": "Metadata Api/global cache/test.md",
+                "mode": "preview",
+                "source": true
               }
             }
           },
@@ -64,7 +64,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -130,6 +130,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Metadata Api/global cache/test.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -146,6 +147,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Metadata Api/global cache/test.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -167,25 +169,27 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "Metadata Api/global cache/test.md"
+              }
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
-  "active": "bfcdbf9b21fb4572",
+  "active": "67d90f3244d4dcf7",
   "lastOpenFiles": [
-    "Metadata Api/global meta/test.data.md",
-    "Metadata Api/global meta/test.md",
     "Metadata Api/global cache/test.cont.md",
+    "Metadata Api/global meta/test.md",
     "Metadata Api/global cache/test.md",
-    "Metadata Api/function Object.prototype.hasProp/test.md",
+    "Metadata Api/global meta/test.data.md",
     "Metadata Api/function Object.prototype.getProp/test.md",
-    "test.txt",
-    "Untitled.md"
+    "Metadata Api/function Object.prototype.hasProp/test.md",
+    "Untitled.md",
+    "test.txt"
   ]
 }
