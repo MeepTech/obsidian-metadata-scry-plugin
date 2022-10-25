@@ -49,8 +49,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Properties/Current.md",
-                "mode": "preview",
+                "file": "Api/Properties/DataviewApi.md",
+                "mode": "source",
                 "source": true
               }
             }
@@ -146,7 +146,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/Properties/Current.md",
+                "file": "Api/Properties/DataviewApi.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -163,7 +163,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/Properties/Current.md",
+                "file": "Api/Properties/DataviewApi.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -186,7 +186,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/Properties/Current.md"
+                "file": "Api/Properties/DataviewApi.md"
               }
             }
           }
@@ -199,15 +199,15 @@
   },
   "active": "03084400ccb0191a",
   "lastOpenFiles": [
-    "Api/README.md",
+    "Api/Properties/DefaultMetadataSources.md",
+    "Api/Properties/DataviewApi.md",
+    "Api/Properties/Data.md",
+    "Api/Properties/Current.md",
+    "Api/Properties/Api.md",
     "README.md",
-    "Compatibility.md",
+    "Api/README.md",
     "Data Storage/README.md",
-    "Data Storage/Data Prototypes.md",
-    "Data Storage/Data Values.md",
-    "Data Storage/Cache.md",
-    "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
-    "Installation.md",
-    "Configuration.md"
+    "Compatibility.md",
+    "Data Storage/Data Prototypes.md"
   ]
 }

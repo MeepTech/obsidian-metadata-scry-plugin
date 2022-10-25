@@ -137,13 +137,33 @@ export default class MetadataApiPlugin extends Plugin {
       /**
        * Global access to the metadata on desktop.
        */
+      Object.defineProperty(global, "Metadata", {
+        get() {
+          return Metadata;
+        }
+      });
+    } catch { }
+    try {
+      /**
+       * Global access to the metadata on mobile.
+       */
+      Object.defineProperty(window, "Metadata", {
+        get() {
+          return Metadata;
+        }
+      });
+    } catch { }
+
+    try {
+      /**
+       * Global access to the metadata on desktop.
+       */
       Object.defineProperty(global, this.settings.globalMetadataApiName, {
         get() {
           return Metadata.Api;
         }
       });
     } catch { }
-
     try {
       /**
        * Global access to the metadata on mobile.
@@ -198,6 +218,12 @@ export default class MetadataApiPlugin extends Plugin {
   }
 
   private _deinitGlobalMetadata() {
+    try {
+      delete global["Metadata"];
+    } catch { }
+    try {
+      delete window["Metadata"];
+    } catch { }
     try {
       delete global[this.settings.globalMetadataApiName];
     } catch { }

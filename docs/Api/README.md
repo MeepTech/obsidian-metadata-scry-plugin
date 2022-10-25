@@ -18,7 +18,7 @@ meta.current === meta.Current; //these are aliases
 - Instance methods will always be lower camel case
 - Static properties and methods will always in caps camel case.
 ### Static
-- [Instance](Properties/Instance.md)
+- [Api](Properties/Api.md)
 - [DefaultMetadataSources](Properties/DefaultMetadataSources.md)
 - [DataviewApi](Properties/DataviewApi.md)
 - [MetaeditApi](Properties/MetaeditApi.md)
@@ -60,4 +60,4 @@ These are methods on the API object that aid in checking and setting dee pproper
 - [TryToGetDeepProperty](Static%20Api%20Methods/TryToGetDeepProperty.md)
 - [SetDeepProperty](Static%20Api%20Methods/SetDeepProperty.md)
 ## Examples
-For examples, see the [Tests folder](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/tree/master/tests) in the root of the github repository.
+For many more examples please see the [Tests folder](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/tree/master/tests) in the root of the github repository.
