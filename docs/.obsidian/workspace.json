@@ -49,7 +49,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
+                "file": "Api/Properties/Current.md",
                 "mode": "preview",
                 "source": true
               }
@@ -146,7 +146,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
+                "file": "Api/Properties/Current.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -163,7 +163,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
+                "file": "Api/Properties/Current.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -186,7 +186,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md"
+                "file": "Api/Properties/Current.md"
               }
             }
           }
@@ -199,15 +199,15 @@
   },
   "active": "03084400ccb0191a",
   "lastOpenFiles": [
+    "Api/README.md",
     "README.md",
-    "Installation.md",
-    "Configuration.md",
     "Compatibility.md",
-    "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
+    "Data Storage/README.md",
+    "Data Storage/Data Prototypes.md",
     "Data Storage/Data Values.md",
     "Data Storage/Cache.md",
-    "Api/Properties/MetaeditApi.md",
-    "Api/Properties/Instance.md",
-    "Api/Properties/DefaultMetadataSources.md"
+    "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
+    "Installation.md",
+    "Configuration.md"
   ]
 }

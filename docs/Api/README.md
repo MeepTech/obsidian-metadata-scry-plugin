@@ -1,16 +1,20 @@
 # Api
-The api is built off of the class `Metadata` in `main.ts`/`main.js`.
+The api is an object that can be used to retreive, edit, delete, and create frontmatter data, as well as other note metadata quickly and easily within any codeblock or custom javascript script files used in the [compatible plugins](../Compatibility.md).
+
+**NOTE**: The api is built off of the js class `Metadata` in `main.ts`/`main.js`.
 **NOTE**: Most of the properties of this class are accessable in caps or lower camel case so you can adapt to your desired style.
-## Global Access
-- *See: [Metadata](Globals/Metadata.md)*
-- *See: [cache](Functions/cache.md)*
+## Global Access and Objects
+There are two root global objects accessable in all contexts.
+- The  [Metadata](Globals/Metadata.md) Api object. (Defaults to `meta`)
+- The Current Note's [Cache](Functions/cache.md) object. (Defaults to `cache`)
 ## Properties
-**NOTE**: The non-static properties are accessable in caps or lower camel case so you can adapt to your desired style.
- 
-Ex:
+**NOTE**: These properties of the [Metadata Global Object](Globals/Metadata.md) are all read-only (get).
+**NOTE**: The non-static properties are all accessable in caps or lower camel case so you can adapt to your desired style.
+**Ex:**
 ```
-meta.current === meta.Current;
+meta.current === meta.Current; //these are aliases
 ```
+**Also**:
 - Instance methods will always be lower camel case
 - Static properties and methods will always in caps camel case.
 ### Static
