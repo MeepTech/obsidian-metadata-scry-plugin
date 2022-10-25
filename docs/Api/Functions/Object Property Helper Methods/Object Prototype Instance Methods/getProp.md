@@ -8,5 +8,5 @@ Get a deep property from an object, or return null.
 - **propertyPath** *(string|array(string))* Array of keys, or dot seperated propery key string.
 - **defaultValue** *(any|function)* The default value to use if this value wasn't found. If a function is passed in it will be called to fetch the value.
 # Examples
-- *see: [tests](../../../../../tests/function Object.prototype.getProp/test.md)*
-![test](../../../../../tests/function Object.prototype.getProp/test.md)
+- *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20Object.prototype.getProp/test.md)*
+![test](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20Object.prototype.getProp/test.md)
