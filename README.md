@@ -319,6 +319,7 @@ Tested and working in the following codeblocks:
   - [dataviewjs](https://github.com/blacksmithgu/obsidian-dataview)
   - [jsx](https://github.com/elias-sundqvist/obsidian-react-components)
   - [customJS](https://github.com/saml-dev/obsidian-custom-js) class defenition files. (**NOTE**: the cache is not officially supported in these files.)
+  - [templater]()
 
 **NOTE**: The cache is designed to work between different types of codeblocks in the same file.
 EX: 

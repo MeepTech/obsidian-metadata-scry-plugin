@@ -1,0 +1,201 @@
+{
+  "main": {
+    "id": "e7c7aa74f2157ddc",
+    "type": "split",
+    "children": [
+      {
+        "id": "955f2d47bf2e8bb6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "94b08ee2b2ab8b3e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Functions/cache.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "e6a2473f215075e5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Functions/values.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "300130f6b93a41bf",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Globals/Metadata.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "03084400ccb0191a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Properties/Current.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "5c760ab74d46427e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Functions/cache.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "1e80e1dfba707790",
+    "type": "split",
+    "children": [
+      {
+        "id": "92b9fbf00a4a83a3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f66bc394a85ee79c",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "365091a86ce72b4f",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "48b824b99fb32d43",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 447.5
+  },
+  "right": {
+    "id": "6c5aea8906a7cd90",
+    "type": "split",
+    "children": [
+      {
+        "id": "e0482a7f90d81e76",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "38635d490c853d22",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Api/Properties/Current.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "307c27c051d5b62b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Api/Properties/Current.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "99d0a6c982ca00ac",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "1613f7b5a6bb3354",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Api/Properties/Current.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "03084400ccb0191a",
+  "lastOpenFiles": [
+    "Api/Api.md",
+    "Api/Functions/cache.md",
+    "Api/Globals/Metadata.md",
+    "Api/Properties/Current.md",
+    "Api/Functions/prototypes.md",
+    "Api/Functions/Object Property Helper Methods/Object Property Helper Methods.md",
+    "Api/Functions/Object Property Helper Methods/Static Api Methods/ContainsDeepProperty.md",
+    "Api/Functions/values.md",
+    "Api/Untitled.md",
+    "Api/Globals/Cache.md"
+  ]
+}
