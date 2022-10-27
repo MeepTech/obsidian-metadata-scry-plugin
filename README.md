@@ -16,9 +16,9 @@ This plugin requires the following Obsidian plugins to be installed as dependenc
   - [MetaEdit](https://github.com/chhoumann/MetaEdit)  (**For:** *Basic Api for Updating Frontmatter*)
 
 ### Plugin Installation
-After the above dependencies have been installed, you can install this plugin via the Obsidian Community Plugins menu, or manually.
+After the above dependencies have been installed, you can install this plugin via the Obsidian Community Plugins menu, or manually:
 
-#### Manual Installation
+#### Manual Plugin Installation
 To manually install this plugin, copy the `manifest.json` and `main.js` from the release you want and add them to a new plugin folder named `metadata-api` within your `.obsidian` folder of your Vault.
 
 ## Api
@@ -29,7 +29,7 @@ This api is designed to help you quickly edit and access metadata for any file e
 ### Global API Access
 You can access the api from anywhere you use js in obsidian with a few handy variables.
 
-#### Metadata
+### Metadata
 You can access the full api via the global variable: `meta`, via the standards js app api path, or via one of the `.Instance` properties on either the `Metadata` or `MetadataApiPlugin` classes:
 ```
 //example frontmatter:
