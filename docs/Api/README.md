@@ -35,6 +35,7 @@ meta.current === meta.Current; //these are aliases
 	- [cache](Functions/cache.md)
 	- [prototypes](Functions/prototypes.md)
 	- [values](Functions/values.md)
+- [path](Functions/path.md)
 ### Object Property Helper Methods
 This plugin api provides methods to help with accessing 'deep' properies in js objects. This is usefull for accessing metadata that you're not sure exists.
 

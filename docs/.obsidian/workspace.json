@@ -61,8 +61,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Functions/clear.md",
-                "mode": "source",
+                "file": "README.md",
+                "mode": "preview",
                 "source": true
               }
             }
@@ -158,7 +158,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/Functions/clear.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -175,7 +175,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/Functions/clear.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -198,7 +198,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/Functions/clear.md"
+                "file": "README.md"
               }
             }
           }
@@ -211,15 +211,15 @@
   },
   "active": "3de123feafcbfdef",
   "lastOpenFiles": [
+    "Api/README.md",
+    "Api/Properties/Api.md",
+    "Api/Functions/clear.md",
     "Api/Functions/frontmatter.md",
     "Api/Functions/get.md",
     "Api/Functions/Object Property Helper Methods/Static Api Methods/TryToGetDeepProperty.md",
     "Api/Functions/Object Property Helper Methods/Static Api Methods/SetDeepProperty.md",
     "Api/Functions/Object Property Helper Methods/Static Api Methods/ContainsDeepProperty.md",
     "Api/Functions/Object Property Helper Methods/Object Prototype Instance Methods/getProp.md",
-    "Api/Functions/path.md",
-    "Api/Functions/patch.md",
-    "Api/Functions/prototypes.md",
-    "Api/Functions/set.md"
+    "Api/Functions/path.md"
   ]
 }
