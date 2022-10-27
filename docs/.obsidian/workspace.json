@@ -61,9 +61,33 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Functions/cache.md",
-                "mode": "preview",
+                "file": "Api/README.md",
+                "mode": "source",
                 "source": true
+              }
+            }
+          },
+          {
+            "id": "bb83e77f1bdfd170",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Properties/DefaultMetadataSources.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "71e0c5cdfe63e643",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Properties/Data.md",
+                "mode": "source",
+                "source": false
               }
             }
           },
@@ -73,7 +97,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Globals/Metadata.md",
+                "file": "Compatibility.md",
                 "mode": "source",
                 "source": false
               }
@@ -92,7 +116,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 7
       }
     ],
     "direction": "vertical"
@@ -158,7 +182,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/Functions/cache.md",
+                "file": "Compatibility.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -175,7 +199,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/Functions/cache.md",
+                "file": "Compatibility.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -198,7 +222,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/Functions/cache.md"
+                "file": "Compatibility.md"
               }
             }
           }
@@ -209,17 +233,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "3de123feafcbfdef",
+  "active": "555d23d436bd6131",
   "lastOpenFiles": [
-    "Api/Functions/clear.md",
-    "Api/Functions/cache.md",
-    "README.md",
+    "Metadata Sources.md",
+    "Api/Globals/Metadata.md",
+    "Api/Properties/DefaultMetadataSources.md",
+    "Api/Functions/dv.md",
+    "Api/Properties/Data.md",
     "Api/README.md",
-    "Api/Properties/Api.md",
-    "Api/Functions/frontmatter.md",
-    "Api/Functions/get.md",
-    "Api/Functions/Object Property Helper Methods/Static Api Methods/TryToGetDeepProperty.md",
-    "Api/Functions/Object Property Helper Methods/Static Api Methods/SetDeepProperty.md",
-    "Api/Functions/Object Property Helper Methods/Static Api Methods/ContainsDeepProperty.md"
+    "README.md",
+    "Api/Functions/cache.md",
+    "Api/Functions/clear.md",
+    "Api/Properties/Api.md"
   ]
 }

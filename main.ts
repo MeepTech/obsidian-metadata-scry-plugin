@@ -540,6 +540,19 @@ class Metadata {
   }
 
   /**
+   * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
+   * 
+   * @param {object|string} file The file object(with a path property) or the full file path
+   * 
+   * @returns Just the dataview)+frontmatter) values for the file.
+   */
+  dv(file: string | TFile | null = null): object {
+    return Metadata
+      .DataviewApi
+      .page(Metadata.ParseFileName(file));
+  }
+
+  /**
    * Get just the cache data for a file.
    * 
    * @param {object|string} file The file or filename to fetch for.
