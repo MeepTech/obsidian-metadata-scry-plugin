@@ -597,7 +597,7 @@ class Metadata {
    * @returns The requested metadata
    */
   get(file: string|TFile|null = null, sources: MetadataSources|boolean = Metadata.DefaultSources) : object {
-    const fileName = Metadata.ParseFileName(file || this.Current.Path);
+    const fileName = file ? Metadata.ParseFileName(file) : this.Current.Path;
     let values: any = {};
 
     if (sources === true) {
