@@ -16,6 +16,6 @@ This plugin can site note metadata from several sources:
 **included in**: [get](Api/Functions/get.md)(default), [dv](Api/Functions/dv.md), [Data](Api/Properties/Data.md)
 
 # FileCache
-*Cached values from the Metadata.Cache.*
+*Cached values from the Metadata.Cache. These are accessable via a 'cache' property in the returned data object.*
 **source**: Metadata Api
 **included in**: [get](Api/Functions/get.md)(default), [Cache](Api/Globals/Cache.md), [cache](Api/Functions/cache.md), [Data](Api/Properties/Data.md)

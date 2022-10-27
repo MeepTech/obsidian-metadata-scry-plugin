@@ -485,7 +485,7 @@ class Metadata {
        */
       DataviewInline: true,
       /**
-       * Cached values from the Metadata.Cache.
+       * Cached values from the Metadata.Cache in a single field named 'cache'.
        */
       FileCache: true
     };
@@ -647,10 +647,7 @@ class Metadata {
 
     // add cache?
     if (sources === true || sources.FileCache) {
-      values = {
-        ...this.cache(fileName),
-        ...values
-      }
+      values["cache"] = this.cache(fileName);
     }
 
     return values;
