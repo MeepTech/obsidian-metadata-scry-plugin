@@ -133,7 +133,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.frontmatter/Test.md",
+                "file": "Metadata Api/function Metadata.frontmatter/test.md",
                 "mode": "preview",
                 "source": true
               }
@@ -145,7 +145,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md",
+                "file": "Metadata Api/function Metadata.path/test.md",
                 "mode": "source",
                 "source": false
               }
@@ -157,7 +157,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md",
+                "file": "Metadata Api/function Metadata.path/test.md",
                 "mode": "source",
                 "source": false
               }
@@ -169,7 +169,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md",
+                "file": "Metadata Api/function Metadata.path/test.md",
                 "mode": "source",
                 "source": false
               }
@@ -181,7 +181,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md",
+                "file": "Metadata Api/function Metadata.path/test.md",
                 "mode": "source",
                 "source": true
               }
@@ -193,9 +193,9 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md",
+                "file": "Metadata Api/function Metadata.path/test.md",
                 "mode": "source",
-                "source": false
+                "source": true
               }
             }
           }
@@ -266,7 +266,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md",
+                "file": "Metadata Api/function Metadata.path/test.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -283,7 +283,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md",
+                "file": "Metadata Api/function Metadata.path/test.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -306,7 +306,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Metadata Api/function Metadata.path/tests.md"
+                "file": "Metadata Api/function Metadata.path/test.md"
               }
             }
           }
@@ -319,13 +319,13 @@
   },
   "active": "7fbe5e3870aeda73",
   "lastOpenFiles": [
+    "Metadata Api/function Metadata.path/test.extra.md",
+    "Metadata Api/function Metadata.path/test.md",
+    "Metadata Api/function Metadata.frontmatter/test.md",
     "Metadata Api/function Metadata.path/extra/data.md",
-    "Metadata Api/function Metadata.path/tests.md",
-    "Metadata Api/function Metadata.path/tests.extra.md",
     "Metadata Api/shared/data.md",
     "Metadata Api/shared.data.md",
     "Metadata Api/function Object.prototype.getProp/test.md",
-    "Metadata Api/function Metadata.frontmatter/Test.md",
     "Metadata Api/function Metadata.frontmatter/test.data.md",
     "Metadata Api/global cache/test.md",
     "Metadata Api/property Metadata.data/test.md"
