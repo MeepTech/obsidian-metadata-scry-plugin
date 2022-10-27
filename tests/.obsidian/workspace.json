@@ -193,14 +193,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.path/test.md",
+                "file": "Metadata Api/function Metadata.frontmatter/test.md",
+                "mode": "preview",
+                "source": true
+              }
+            }
+          },
+          {
+            "id": "f69cc0d7a2dcf6e6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Metadata Api/function Metadata.cache/test.md",
                 "mode": "source",
                 "source": true
               }
             }
           }
         ],
-        "currentTab": 15
+        "currentTab": 16
       }
     ],
     "direction": "vertical"
@@ -266,7 +278,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Metadata Api/function Metadata.path/test.md",
+                "file": "Metadata Api/function Metadata.cache/test.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -283,7 +295,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Metadata Api/function Metadata.path/test.md",
+                "file": "Metadata Api/function Metadata.cache/test.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -306,7 +318,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Metadata Api/function Metadata.path/test.md"
+                "file": "Metadata Api/function Metadata.cache/test.md"
               }
             }
           }
@@ -317,17 +329,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "7fbe5e3870aeda73",
+  "active": "f69cc0d7a2dcf6e6",
   "lastOpenFiles": [
-    "Metadata Api/function Metadata.path/test.extra.md",
-    "Metadata Api/function Metadata.path/test.md",
+    "Metadata Api/function Metadata.cache/test.data.md",
+    "Metadata Api/function Metadata.cache/test.md",
+    "Metadata Api/function Metadata.dv/test.md",
     "Metadata Api/function Metadata.frontmatter/test.md",
-    "Metadata Api/function Metadata.path/extra/data.md",
-    "Metadata Api/shared/data.md",
-    "Metadata Api/shared.data.md",
-    "Metadata Api/function Object.prototype.getProp/test.md",
+    "Metadata Api/function Metadata.dv/test.data.md",
     "Metadata Api/function Metadata.frontmatter/test.data.md",
-    "Metadata Api/global cache/test.md",
-    "Metadata Api/property Metadata.data/test.md"
+    "Metadata Api/property Metadata.data/test.md",
+    "Metadata Api/property CurrentMetadata.data/test.md",
+    "Metadata Api/property CurrentMetadata.matter/test.md",
+    "Metadata Api/property CurrentMetadata.path/test.md"
   ]
 }

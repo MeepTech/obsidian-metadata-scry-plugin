@@ -549,7 +549,7 @@ class Metadata {
   dv(file: string | TFile | null = null): object {
     return Metadata
       .DataviewApi
-      .page(Metadata.ParseFileName(file));
+      .page(file ? Metadata.ParseFileName(file) : this.Current.Path);
   }
 
   /**
