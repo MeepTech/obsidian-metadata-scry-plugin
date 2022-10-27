@@ -14,6 +14,7 @@ This is a plugin for [Obsidian](https://obsidian.md) that adds tools to help eas
 ## Contents
 - [Dependencies and Installation](Installation.md)
 - [Data Storage Solutions](Data%20Storage/README.md)
+- [Metadata Sources](Metadata%20Sources.md)
 - [Metadata/Frontmatter Api](Api/README.md)
 - [Configuration Options and Settings](Configuration.md)
 - [Compatibility and Tested Plugins](Compatibility.md)

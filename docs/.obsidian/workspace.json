@@ -97,8 +97,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Sources.md",
-                "mode": "source",
+                "file": "README.md",
+                "mode": "preview",
                 "source": false
               }
             }
@@ -182,7 +182,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Metadata Sources.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -199,7 +199,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Metadata Sources.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -222,7 +222,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Metadata Sources.md"
+                "file": "README.md"
               }
             }
           }
@@ -235,8 +235,8 @@
   },
   "active": "555d23d436bd6131",
   "lastOpenFiles": [
-    "Compatibility.md",
     "Metadata Sources.md",
+    "Compatibility.md",
     "Api/Globals/Metadata.md",
     "Api/Properties/DefaultMetadataSources.md",
     "Api/Functions/dv.md",
