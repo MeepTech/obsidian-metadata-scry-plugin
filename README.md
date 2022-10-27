@@ -120,15 +120,16 @@ const {
 
 ### Metadata Fetching
 The api provides several ways to fetch several different kinds of metadata.
-This api packages the metadata update functions from [Dataview](https://github.com/blacksmithgu/obsidian-dataview) and [Obsidian](https://obsidian.md)'s own api into an easy to use api with the following functions:
-- The current file can be accessed via the [current](docs/Api/Properties/Current.md) property on the [meta](docs/Api//Globals/Metadata.md) global variable.
-- the [sources](docs/Metadata Sources.md) of metadata can be specified via different functions to fetch data from just the frontmatter, or the frontmatter plus dataview, or the frontmatter, dataview, cache, and other file info sources:
-  [get](docs/Api/Functions/get.md)
-    - [dv](docs/Api/Functions/dv.md)
-    - [frontmatter](docs/Api/Functions/frontmatter.md)
-    - [cache](docs/Api/Functions/cache.md)
-    - [prototypes](docs/Api/Functions/prototypes.md)
-    - [values](docs/Api/Functions/values.md)
+This api packages the metadata update functions from [Dataview](https://github.com/blacksmithgu/obsidian-dataview) and [Obsidian](https://obsidian.md)'s own api into an easy to use api with increased flexability.
+
+The current file can be accessed via the [current](docs/Api/Properties/Current.md) property on the [meta](docs/Api//Globals/Metadata.md) global variable.
+The [sources](docs/Metadata Sources.md) of metadata can be specified via different functions to fetch data from just the frontmatter, or the frontmatter plus dataview, or the frontmatter, dataview, cache, and other file info sources:
+- [get](docs/Api/Functions/get.md)
+- [dv](docs/Api/Functions/dv.md)
+- [frontmatter](docs/Api/Functions/frontmatter.md)
+- [cache](docs/Api/Functions/cache.md)
+- [prototypes](docs/Api/Functions/prototypes.md)
+- [values](docs/Api/Functions/values.md)
 
 ### Metadata Edit Functions
 This api packages the metadata update functions from [Metaedit](https://github.com/chhoumann/MetaEdit) into an easy to use api with the following functions:
