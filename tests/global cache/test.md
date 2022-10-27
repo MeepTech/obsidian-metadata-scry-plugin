@@ -35,6 +35,7 @@ Cache["second"] = "abc";
 ```jsx
 <p>{cache["second"]}</p>
 ```
+
 ## -Result
 ```dataviewjs
 const {

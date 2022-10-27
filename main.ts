@@ -1,4 +1,4 @@
-import { App, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, TFile, TFolder } from 'obsidian';
 
 interface MetadataApiSettings {
   globalCacheName: string;
@@ -491,6 +491,8 @@ class Metadata {
     };
   }
 
+  //#region Current File Properties
+
   /**
    * Get all Metadata from the default sources for the current file.
    */
@@ -519,6 +521,10 @@ class Metadata {
     return this.Current.Data;
   }
 
+  //#endregion
+
+  //#region Metadata Fetchers
+
   /**
    * Get just the frontmatter for the given file.
    * 
@@ -526,7 +532,7 @@ class Metadata {
    * 
    * @returns Just the frontmatter for the file.
    */
-  frontmatter(file : string|TFile|null = null) : object {
+  frontmatter(file: string | TFile | null = null): object {
     const fileObject = app.vault.getAbstractFileByPath((Metadata.ParseFileName(file) || this.Current.Path) + ".md");
     const fileCache = app.metadataCache.getFileCache(fileObject);
     
@@ -637,6 +643,10 @@ class Metadata {
     return values;
   }
 
+  //#endregion
+
+  //#region Metadata Modifiers
+
   /**
    * Patch individual properties of the frontmatter metadata.
    * 
@@ -721,6 +731,11 @@ class Metadata {
 
     throw "not implemented";
   }
+
+  //#endregion
+
+  //#region Utilities
+  //#region Object Deep Property Utilities
 
   /**
    * Find a deep property in an object.
@@ -845,7 +860,45 @@ class Metadata {
     }
   }
 
-  //#region Utility
+  //#endregion
+  //#region Filename Utilities
+  /**
+   * Turn a relative path into a full path
+   * 
+   * @param relativePath The relative path to map to
+   * @param rootFolder (Optional) The root folder path the relative path is relative too. Defaults to the current note's folder
+   * 
+   * @returns The full file path.
+   */
+  path(relativePath: string|null = null, rootFolder: string | null = null) {
+    if (!relativePath) {
+      return this.current.path;
+    }
+
+    const [fileName, ...folders]
+      = relativePath.split("/").reverse();
+
+    let absolutePath = fileName;
+    let currentFolder: TFolder = rootFolder
+      ? app.vault.getAbstractFileByPath(rootFolder)
+      : this.Current.Note.parent
+  
+    for (var folder of folders.reverse()) {
+      if (folder === "..") {
+        currentFolder = currentFolder.parent;
+      } else if (folder === ".") {
+        continue;
+      } else {
+        absolutePath = folder + "/" + absolutePath;
+      }
+    }
+
+    if (currentFolder.path !== "/") {
+      return currentFolder.path + "/" + absolutePath;
+    } else {
+      return absolutePath;
+    }
+  }
   
   /**
    * Get a file path string based on a file path string or file object.
@@ -857,7 +910,7 @@ class Metadata {
   static ParseFileName(file : string|TFile|null) : string|null {
     let fileName = file || null;
     if (typeof file === "object" && file !== null) {
-      fileName == file.path || file.name;
+      fileName = file.path.split('.').slice(0, -1).join('.');
     }
     
     return fileName;
@@ -901,5 +954,6 @@ class Metadata {
         : Metadata.ParseFileName(file) || Metadata.Api.Current.Path;
   }
   
+  //#endregion
   //#endregion
 }
