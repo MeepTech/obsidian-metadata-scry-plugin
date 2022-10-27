@@ -5,4 +5,4 @@ Used to clear values from fromtmatter. Can clear the whole file's frontmatter or
 - **file** *(string|TFile|null)* Defaults to the current file if one isn't provided.
 - **frontmatterProperties** *(string|array(string)|object|null)* The property to remove, an array of the properties to remove, an object with the key's to remove, or null to remove the full frontmatter.
 ## Examples
-- *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20clear/test.md)*
+- *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20Metadata.clear/test.md)*

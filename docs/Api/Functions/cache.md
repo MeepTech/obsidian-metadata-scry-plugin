@@ -4,7 +4,7 @@ Fetch just the cache of the desired file without any other metadata.
 ## *Params*
 - **file** *(Optional) (string|TFile|null)* The file to fetch the fache for. Defaults to the current file if one isn't provided.
 ## Examples
-- *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20cache/test.md)*
+- *see: [tests](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/blob/master/tests/function%20Metadata.cache/test.md)*
 ### Current File's Cache
 *note.md (dataviewjs)* 
 ```dataviewjs
