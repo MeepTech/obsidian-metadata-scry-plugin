@@ -25,7 +25,7 @@ dv.el('p', leafContents)
 ```
 ## -Result
 ```dataviewjs
-const leafContents = meta.data.getProp("tree.trunk.branch.branch.leaf");
+const leafContents = meta.data;
 dv.el('p', leafContents)
 ```
 ## -Expected

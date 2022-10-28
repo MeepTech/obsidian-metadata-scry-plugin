@@ -49,20 +49,20 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/global meta/test.md",
-                "mode": "preview",
+                "file": "Metadata Api/function Object.prototype.getProp/test.md",
+                "mode": "source",
                 "source": true
               }
             }
           },
           {
-            "id": "a49f7426e10de8e3",
+            "id": "93e5656ede33c67b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/property Metadata.current/test.md",
-                "mode": "preview",
+                "file": "Metadata Api/function Metadata.get/test.md",
+                "mode": "source",
                 "source": false
               }
             }
@@ -205,14 +205,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/function Metadata.cache/test.md",
-                "mode": "source",
+                "file": "Metadata Api/function Metadata.get/test.md",
+                "mode": "preview",
                 "source": true
+              }
+            }
+          },
+          {
+            "id": "22cb48a8b5ff7171",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Metadata Api/function Metadata.get/test.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
         ],
-        "currentTab": 16
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -278,7 +290,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Metadata Api/function Metadata.cache/test.md",
+                "file": "Metadata Api/function Object.prototype.getProp/test.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -295,7 +307,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Metadata Api/function Metadata.cache/test.md",
+                "file": "Metadata Api/function Object.prototype.getProp/test.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -318,7 +330,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Metadata Api/function Metadata.cache/test.md"
+                "file": "Metadata Api/function Object.prototype.getProp/test.md"
               }
             }
           }
@@ -329,17 +341,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "f69cc0d7a2dcf6e6",
+  "active": "5e878174c52245e8",
   "lastOpenFiles": [
-    "Metadata Api/function Metadata.cache/test.data.md",
-    "Metadata Api/function Metadata.cache/test.md",
-    "Metadata Api/function Metadata.dv/test.md",
+    "Metadata Api/function Metadata.path/test.extra.md",
+    "Metadata Api/function Metadata.path/test.md",
+    "Metadata Api/function Metadata.get/test.md",
     "Metadata Api/function Metadata.frontmatter/test.md",
-    "Metadata Api/function Metadata.dv/test.data.md",
-    "Metadata Api/function Metadata.frontmatter/test.data.md",
-    "Metadata Api/property Metadata.data/test.md",
-    "Metadata Api/property CurrentMetadata.data/test.md",
-    "Metadata Api/property CurrentMetadata.matter/test.md",
-    "Metadata Api/property CurrentMetadata.path/test.md"
+    "Metadata Api/function Metadata.dv/test.md",
+    "Metadata Api/function Metadata.cache/test.md",
+    "Metadata Api/function Metadata.cache/test.data.md",
+    "Metadata Api/function Metadata.get/test.data.md",
+    "Metadata Api/global meta/test.md",
+    "Metadata Api/property CurrentMetadata.data/test.md"
   ]
 }
