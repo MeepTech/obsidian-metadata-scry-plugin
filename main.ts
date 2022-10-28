@@ -1,9 +1,18 @@
 import { App, Plugin, PluginSettingTab, Setting, TFile, TFolder } from 'obsidian';
+import { Arr, Obj } from 'tern';
+
+enum SplayKebabCasePropertiesOption {
+  Disabled = 0,
+  Lowercase = 1,
+  LowerCamelCase = 2,
+  LowerAndLowerCamelCase = 3
+}
 
 interface MetadataApiSettings {
   globalCacheName: string;
   globalMetadataApiName: string;
   defineObjectPropertyHelperFunctions: boolean;
+  splayKebabCaseProperties: SplayKebabCasePropertiesOption;
   prototypesPath: string;
   valuesPath: string;
 }
@@ -12,6 +21,7 @@ const DEFAULT_SETTINGS: MetadataApiSettings = {
   globalCacheName: 'cache',
   globalMetadataApiName: 'meta',
   defineObjectPropertyHelperFunctions: true,
+  splayKebabCaseProperties: SplayKebabCasePropertiesOption.LowerAndLowerCamelCase,
   prototypesPath: "_/_assets/_data/_prototypes",
   valuesPath: "_/_assets/_data/_values"
 }
@@ -53,7 +63,7 @@ export default class MetadataApiPlugin extends Plugin {
   
   private _initApi() {
     this._verifyDependencies();
-    MetadataApiPlugin._instance = new Metadata();
+    MetadataApiPlugin._instance = new Metadata(this);
 
     this._initGlobalMetadata();
     this._initGlobalCache();
@@ -73,6 +83,8 @@ export default class MetadataApiPlugin extends Plugin {
       throw error;
     }
   }
+
+  //#region Object property and Global defenitions.
 
   private _initObjectPropertyHelperMethods() {
     /**
@@ -243,6 +255,8 @@ export default class MetadataApiPlugin extends Plugin {
       delete Object.prototype["setProp"];
     } catch { }
   }
+
+  //#endregion
 }
 
 class MetadataApiSettingTab extends PluginSettingTab {
@@ -289,6 +303,20 @@ class MetadataApiSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.defineObjectPropertyHelperFunctions)
         .onChange(async (value) => {
           this.plugin.settings.defineObjectPropertyHelperFunctions = value;
+          await this.plugin.saveSettings();
+        }));
+    
+    new Setting(containerEl)
+      .setName('Splay Kebab-Case Properties.')
+      .setDesc('This option adds copies of any kebab-case properties with the desired naming schemes. This is similar to how a lowercase version of values with uppercase letters are provided in dataview.')
+      .addDropdown(toggle => toggle
+        .setValue(this.plugin.settings.splayKebabCaseProperties.toString())
+        .addOptions(Object.fromEntries(
+          Object.entries(SplayKebabCasePropertiesOption).map(([key, value]) =>
+            [key.toString(), value.toString()]))
+        )
+        .onChange(async (value) => {
+          this.plugin.settings.splayKebabCaseProperties = (<any>SplayKebabCasePropertiesOption)[parseInt(value)];
           await this.plugin.saveSettings();
         }));
     
@@ -428,13 +456,134 @@ class CurrentMetadata {
   get cache(): object {
     return this.Cache;
   }
+
+  /**
+   * Patch individual properties of the current file's frontmatter metadata.
+   * 
+   * @param {*|object} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
+   * @param {string} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
+   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
+   * 
+   * @returns The updated Metadata.
+   */
+  patch(frontmatterData: any, propertyName: string | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false): any|object {
+    return this._api.patch(this.path, frontmatterData, propertyName, toValuesFile, prototype);
+  }
+  
+  /**
+   * Replace the existing frontmatter the current file with entirely new data, clearing out all old data in the process.
+   * 
+   * @param {object} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
+   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
+   * 
+   * @returns The updated Metadata
+   */
+  set(frontmatterData: any, toValuesFile: boolean | string = false, prototype: string | boolean = false): any | object {
+    return this._api.set(this.path, frontmatterData, toValuesFile, prototype)
+  }
+
+  /**
+   * Used to clear values from metadata.
+   * 
+   * @param {object|string} file The file to clear properties for. defaults to the current file.
+   * @param {string|array} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
+   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
+   */
+  clear(frontmatterProperties: string | Array<string> | object | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false) {
+    return this._api.clear(this.path, frontmatterProperties, toValuesFile, prototype);
+  }
 }
 
 /**
  * Access and edit metadata about a file from multiple sources.
  */
 class Metadata {
-  static _temps : any = {};
+  private static _caches: any = {};
+  private _plugin: MetadataApiPlugin;
+  private _kebabPropSplayer: (base: any) => object;
+  
+  //#region Initalization
+
+  constructor(plugin: MetadataApiPlugin) {
+    this._plugin = plugin;
+    this._initializeKebabPropSplayer();
+  }
+
+  /**
+   * set the splay function
+   */
+  private _initializeKebabPropSplayer() {
+    this._kebabPropSplayer = (() => {
+      switch (this.plugin.settings.splayKebabCaseProperties) {
+        case SplayKebabCasePropertiesOption.Lowercase:
+          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayLowercase);
+        case SplayKebabCasePropertiesOption.LowerCamelCase:
+          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayLowerCamelcase);
+        case SplayKebabCasePropertiesOption.LowerAndLowerCamelCase:
+          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayLowerAndLowerCamelcase);
+        case SplayKebabCasePropertiesOption.Disabled:
+        default:
+          return base => base;
+      }
+    })();
+  }
+
+  private static _recurseOnAllObjectProperties(value: any, fn: (key: string, value: any, data: any | object) => any | object): any {
+    if (typeof value === "object") {
+      if (Array.isArray(value)) {
+        value = value.map(i =>
+          this._recurseOnAllObjectProperties(i, fn));
+      } else {
+        const data: any = {};
+        for (const key in Object.keys(value)) {
+          fn(key, this._recurseOnAllObjectProperties(value, fn), data);
+        }
+        
+        return data;
+      }
+    } else {
+      return value;
+    }
+  }
+
+  private static _splayLowercase(key: string, value: any, data: any | object) : any | object {
+    if (key.includes("-")) {
+      data[key.replace(/-/g, "").toLowerCase()] = value;
+    }
+
+    data[key] = value;
+  }
+
+  private static _splayLowerCamelcase(key: string, value: any, data: any | object) : any | object {
+    if (key.includes("-")) {
+      data[key
+        .toLowerCase()
+        .split('-')
+        .map(it => it.charAt(0).toUpperCase() + it.substring(1))
+        .join('')
+      ] = value;
+    }
+
+    data[key] = value;
+  }
+
+  private static _splayLowerAndLowerCamelcase(key: string, value: any, data: any | object) : any | object {
+    if (key.includes("-")) {
+      const lowerKey = key.toLowerCase();
+      data[lowerKey.replace(/-/g, "")] = value;
+      data[lowerKey
+        .split('-')
+        .map(it => it.charAt(0).toUpperCase() + it.substring(1))
+        .join('')] = value;
+    }
+
+    data[key] = value;
+  }
+
+  //#endregion
 
   /**
    * The instance of the Metadata class
@@ -465,6 +614,20 @@ class Metadata {
       .plugins
       .metaedit
       .api;
+  }
+
+  /**
+   * Get the plugin that runs this api
+   */
+  get Plugin(): MetadataApiPlugin {
+    return this.plugin;
+  }
+
+  /**
+   * Get the plugin that runs this api
+   */
+  get plugin(): MetadataApiPlugin {
+    return this._plugin || app.plugins.plugins["metadata-api"];
   }
   
   /**
@@ -536,7 +699,7 @@ class Metadata {
     const fileObject = app.vault.getAbstractFileByPath((Metadata.ParseFileName(file) || this.Current.Path) + ".md");
     const fileCache = app.metadataCache.getFileCache(fileObject);
     
-    return fileCache.frontmatter || {};
+    return (fileCache && fileCache.frontmatter) ? this._kebabPropSplayer(fileCache?.frontmatter) : {};
   }
 
   /**
@@ -547,9 +710,9 @@ class Metadata {
    * @returns Just the dataview)+frontmatter) values for the file.
    */
   dv(file: string | TFile | null = null): object {
-    return Metadata
+    return this._kebabPropSplayer(Metadata
       .DataviewApi
-      .page(file ? Metadata.ParseFileName(file) : this.Current.Path);
+      .page(file ? Metadata.ParseFileName(file) : this.Current.Path));
   }
 
   /**
@@ -561,9 +724,9 @@ class Metadata {
    */
   cache(file : string|TFile|null = null) : object {
     const fileName = Metadata.ParseFileName(file) || this.Current.Path;
-    Metadata._temps[fileName] = Metadata._temps[fileName] || {};
+    Metadata._caches[fileName] = Metadata._caches[fileName] || {};
 
-    return Metadata._temps[fileName];
+    return Metadata._caches[fileName];
   }
 
   /**
@@ -601,9 +764,9 @@ class Metadata {
     let values: any = {};
 
     if (sources === true) {
-      values = Metadata
+      values = this._kebabPropSplayer(Metadata
         .DataviewApi
-        .page(fileName);
+        .page(fileName));
     } else {
       if (sources === false) {
         return {};
@@ -611,9 +774,9 @@ class Metadata {
 
       // if we need dv sources
       if (sources.DataviewInline || sources.FileMetadata) {
-        values = Metadata
+        values = this._kebabPropSplayer(Metadata
           .DataviewApi
-          .page(fileName);
+          .page(fileName));
         
         // remove file metadata?
         if (!sources.FileMetadata) {
@@ -965,5 +1128,6 @@ class Metadata {
   }
   
   //#endregion
+
   //#endregion
 }
