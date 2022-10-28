@@ -13,6 +13,7 @@ interface MetadataApiSettings {
   globalMetadataApiName: string;
   defineObjectPropertyHelperFunctions: boolean;
   splayKebabCaseProperties: SplayKebabCasePropertiesOption;
+  splayFrontmatterWithoutDataview: boolean;
   prototypesPath: string;
   valuesPath: string;
 }
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS: MetadataApiSettings = {
   globalMetadataApiName: 'meta',
   defineObjectPropertyHelperFunctions: true,
   splayKebabCaseProperties: SplayKebabCasePropertiesOption.LowerAndLowerCamelCase,
+  splayFrontmatterWithoutDataview: true,
   prototypesPath: "_/_assets/_data/_prototypes",
   valuesPath: "_/_assets/_data/_values"
 }
@@ -321,6 +323,16 @@ class MetadataApiSettingTab extends PluginSettingTab {
         }));
     
     new Setting(containerEl)
+      .setName('Splay Frontmatter Properties to Lower Case even without Dataview.')
+      .setDesc('Dataview splays property keys with uppercase values to lowercase, creating two keys. If this is true, Metadata Api will add this functionality to the base Frontmatter calls, even without Dataview sources included.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.splayFrontmatterWithoutDataview)
+        .onChange(async (value) => {
+          this.plugin.settings.splayFrontmatterWithoutDataview = value;
+          await this.plugin.saveSettings();
+        }));
+    
+    new Setting(containerEl)
       .setName('Prototypes File Path')
       .setDesc('The path to prototype data storage')
       .addText(text => text
@@ -503,27 +515,29 @@ class CurrentMetadata {
 class Metadata {
   private static _caches: any = {};
   private _plugin: MetadataApiPlugin;
-  private _kebabPropSplayer: (base: any) => object;
+  private _kebabPropSplayer: (base: any, topLevelPropertiesToIgnore: Array<string>|null) => object;
+  private _lowerCaseSplayer: (base: any) => object;
   
   //#region Initalization
 
   constructor(plugin: MetadataApiPlugin) {
     this._plugin = plugin;
     this._initializeKebabPropSplayer();
+    this._initializePropLowercaseSplayer();
   }
 
   /**
-   * set the splay function
+   * set the splay function for kebab case
    */
   private _initializeKebabPropSplayer() {
     this._kebabPropSplayer = (() => {
       switch (this.plugin.settings.splayKebabCaseProperties) {
         case SplayKebabCasePropertiesOption.Lowercase:
-          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayLowercase);
+          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowercase);
         case SplayKebabCasePropertiesOption.LowerCamelCase:
-          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayLowerCamelcase);
+          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerCamelcase);
         case SplayKebabCasePropertiesOption.LowerAndLowerCamelCase:
-          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayLowerAndLowerCamelcase);
+          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerAndLowerCamelcase);
         case SplayKebabCasePropertiesOption.Disabled:
         default:
           return base => base;
@@ -531,15 +545,31 @@ class Metadata {
     })();
   }
 
-  private static _recurseOnAllObjectProperties(value: any, fn: (key: string, value: any, data: any | object) => any | object): any {
-    if (typeof value === "object") {
+  /**
+   * set the frontmatter only splay function
+   */
+  private _initializePropLowercaseSplayer() {
+    this._lowerCaseSplayer = this.plugin.settings.splayFrontmatterWithoutDataview
+        ? base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayToLowerCase)
+        : base => base;
+  }
+
+  /**
+   * Used to recurse splaying
+   */
+  private static _recurseOnAllObjectProperties(value: any, fn: (key: string, value: any, data: any | object) => any | object, topLevelPropertiesToIgnore: Array<string> | null = null): any {
+    if (value && typeof value === "object") {
       if (Array.isArray(value)) {
         value = value.map(i =>
           this._recurseOnAllObjectProperties(i, fn));
       } else {
         const data: any = {};
-        for (const key in Object.keys(value)) {
-          fn(key, this._recurseOnAllObjectProperties(value, fn), data);
+        const keys = topLevelPropertiesToIgnore
+          ? Object.keys(value).filter(key => !topLevelPropertiesToIgnore.includes(key))
+          : Object.keys(value);
+
+        for (const key of keys) {
+          fn(key, this._recurseOnAllObjectProperties(value[key], fn), data);
         }
         
         return data;
@@ -549,7 +579,7 @@ class Metadata {
     }
   }
 
-  private static _splayLowercase(key: string, value: any, data: any | object) : any | object {
+  private static _splayKebabToLowercase(key: string, value: any, data: any | object) : any | object {
     if (key.includes("-")) {
       data[key.replace(/-/g, "").toLowerCase()] = value;
     }
@@ -557,12 +587,12 @@ class Metadata {
     data[key] = value;
   }
 
-  private static _splayLowerCamelcase(key: string, value: any, data: any | object) : any | object {
+  private static _splayKebabToLowerCamelcase(key: string, value: any, data: any | object) : any | object {
     if (key.includes("-")) {
       data[key
         .toLowerCase()
         .split('-')
-        .map(it => it.charAt(0).toUpperCase() + it.substring(1))
+        .map((part, i) => i !== 0 ? part.charAt(0).toUpperCase() + part.substring(1) : part)
         .join('')
       ] = value;
     }
@@ -570,17 +600,22 @@ class Metadata {
     data[key] = value;
   }
 
-  private static _splayLowerAndLowerCamelcase(key: string, value: any, data: any | object) : any | object {
+  private static _splayKebabToLowerAndLowerCamelcase(key: string, value: any, data: any | object) : any | object {
     if (key.includes("-")) {
       const lowerKey = key.toLowerCase();
       data[lowerKey.replace(/-/g, "")] = value;
       data[lowerKey
         .split('-')
-        .map(it => it.charAt(0).toUpperCase() + it.substring(1))
+        .map((part, i) => i !== 0 ? part.charAt(0).toUpperCase() + part.substring(1) : part)
         .join('')] = value;
     }
 
     data[key] = value;
+  }
+
+  private static _splayToLowerCase(key: string, value: any, data: any | object): any | object {
+    data[key] = value;
+    data[key.toLowerCase()] = value;
   }
 
   //#endregion
@@ -699,7 +734,7 @@ class Metadata {
     const fileObject = app.vault.getAbstractFileByPath((Metadata.ParseFileName(file) || this.Current.Path) + ".md");
     const fileCache = app.metadataCache.getFileCache(fileObject);
     
-    return (fileCache && fileCache.frontmatter) ? this._kebabPropSplayer(fileCache?.frontmatter) : {};
+    return (fileCache && fileCache.frontmatter) ? this._lowerCaseSplayer(this._kebabPropSplayer(fileCache?.frontmatter, null)) : {};
   }
 
   /**
@@ -712,7 +747,7 @@ class Metadata {
   dv(file: string | TFile | null = null): object {
     return this._kebabPropSplayer(Metadata
       .DataviewApi
-      .page(file ? Metadata.ParseFileName(file) : this.Current.Path));
+      .page(file ? Metadata.ParseFileName(file) : this.Current.Path), ["file"]);
   }
 
   /**
@@ -766,7 +801,7 @@ class Metadata {
     if (sources === true) {
       values = this._kebabPropSplayer(Metadata
         .DataviewApi
-        .page(fileName));
+        .page(fileName), ["file"]) || {};
     } else {
       if (sources === false) {
         return {};
@@ -776,7 +811,7 @@ class Metadata {
       if (sources.DataviewInline || sources.FileMetadata) {
         values = this._kebabPropSplayer(Metadata
           .DataviewApi
-          .page(fileName));
+          .page(fileName), ["file"]) || {};
         
         // remove file metadata?
         if (!sources.FileMetadata) {
@@ -784,7 +819,7 @@ class Metadata {
         }
 
         // remove dv inline?
-        let frontmatter: object = {};
+        let frontmatter: object = null;
         if (!sources.DataviewInline) {
           frontmatter = this.frontmatter(fileName);
           Object.keys(values).forEach(prop => {
@@ -1024,6 +1059,10 @@ class Metadata {
       if (currentKey != keys[keys.length - 1]) {
         parent = parent[currentKey];
       }
+    }
+
+    if (!currentKey) {
+      throw "No Final Key Provided!?";
     }
 
     if (typeof value === "function") {
