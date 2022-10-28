@@ -4,59 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "47cf443ff15d3215",
+        "id": "aaaf780a907eb71d",
         "type": "tabs",
         "children": [
           {
-            "id": "47dbf63bcf819fb9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Object.prototype.hasProp/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "16dbb9aa86d73003",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/global meta/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "67d90f3244d4dcf7",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Object.prototype.hasProp/test.md",
-                "mode": "preview",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "5e878174c52245e8",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Object.prototype.getProp/test.md",
-                "mode": "source",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "93e5656ede33c67b",
+            "id": "931a1f931b2e9032",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -68,163 +20,19 @@
             }
           },
           {
-            "id": "fa790f25cf401288",
+            "id": "696552176c561b48",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/property Metadata.data/test.md",
+                "file": "Metadata Api/function Metadata.path/extra/data.md",
                 "mode": "preview",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "4e9ec6fc880aacf6",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/property CurrentMetadata.data/test.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "169bbf50f2cce2dd",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/property CurrentMetadata.note/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "e1c06523fd7767b5",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/property CurrentMetadata.cache/test.md",
-                "mode": "preview",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "5ee1dea414bf15ec",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/property Metadata.data/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "249d0ad59354852f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.frontmatter/test.md",
-                "mode": "preview",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "f3e3a7c5a004559a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.path/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "5191d7f73c2b13d8",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.path/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "c6b12a9d97b34b1b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.path/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "7f9afbed3eb81963",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.path/test.md",
-                "mode": "source",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "7fbe5e3870aeda73",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.frontmatter/test.md",
-                "mode": "preview",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "f69cc0d7a2dcf6e6",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.get/test.md",
-                "mode": "preview",
-                "source": true
-              }
-            }
-          },
-          {
-            "id": "22cb48a8b5ff7171",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/function Metadata.get/test.md",
-                "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -290,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Metadata Api/function Object.prototype.getProp/test.md",
+                "file": "Metadata Api/function Metadata.path/extra/data.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -307,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Metadata Api/function Object.prototype.getProp/test.md",
+                "file": "Metadata Api/function Metadata.path/extra/data.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -330,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Metadata Api/function Object.prototype.getProp/test.md"
+                "file": "Metadata Api/function Metadata.path/extra/data.md"
               }
             }
           }
@@ -341,17 +149,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "5e878174c52245e8",
+  "active": "696552176c561b48",
   "lastOpenFiles": [
-    "Metadata Api/function Metadata.path/test.extra.md",
-    "Metadata Api/function Metadata.path/test.md",
     "Metadata Api/function Metadata.get/test.md",
+    "Metadata Api/function Object.prototype.getProp/test.md",
+    "Metadata Api/function Object.prototype.hasProp/test.md",
+    "Metadata Api/global meta/test.md",
+    "Metadata Api/function Metadata.path/test.md",
+    "Metadata Api/function Metadata.path/test.extra.md",
     "Metadata Api/function Metadata.frontmatter/test.md",
     "Metadata Api/function Metadata.dv/test.md",
     "Metadata Api/function Metadata.cache/test.md",
-    "Metadata Api/function Metadata.cache/test.data.md",
-    "Metadata Api/function Metadata.get/test.data.md",
-    "Metadata Api/global meta/test.md",
-    "Metadata Api/property CurrentMetadata.data/test.md"
+    "Metadata Api/function Metadata.cache/test.data.md"
   ]
 }

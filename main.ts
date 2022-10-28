@@ -533,11 +533,11 @@ class Metadata {
     this._kebabPropSplayer = (() => {
       switch (this.plugin.settings.splayKebabCaseProperties) {
         case SplayKebabCasePropertiesOption.Lowercase:
-          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowercase);
+          return (base, topLevelPropertiesToIgnore) => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowercase, topLevelPropertiesToIgnore);
         case SplayKebabCasePropertiesOption.LowerCamelCase:
-          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerCamelcase);
+          return (base, topLevelPropertiesToIgnore) => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerCamelcase, topLevelPropertiesToIgnore);
         case SplayKebabCasePropertiesOption.LowerAndLowerCamelCase:
-          return base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerAndLowerCamelcase);
+          return (base, topLevelPropertiesToIgnore) => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerAndLowerCamelcase, topLevelPropertiesToIgnore);
         case SplayKebabCasePropertiesOption.Disabled:
         default:
           return base => base;
@@ -560,16 +560,16 @@ class Metadata {
   private static _recurseOnAllObjectProperties(value: any, fn: (key: string, value: any, data: any | object) => any | object, topLevelPropertiesToIgnore: Array<string> | null = null): any {
     if (value && typeof value === "object") {
       if (Array.isArray(value)) {
-        value = value.map(i =>
+        return value.map(i =>
           this._recurseOnAllObjectProperties(i, fn));
       } else {
         const data: any = {};
-        const keys = topLevelPropertiesToIgnore
-          ? Object.keys(value).filter(key => !topLevelPropertiesToIgnore.includes(key))
-          : Object.keys(value);
-
-        for (const key of keys) {
-          fn(key, this._recurseOnAllObjectProperties(value[key], fn), data);
+        for (const key of Object.keys(value)) {
+          if (topLevelPropertiesToIgnore && topLevelPropertiesToIgnore.contains(key)) {
+            data[key] = value;
+          } else {
+            fn(key, this._recurseOnAllObjectProperties(value[key], fn), data);
+          }
         }
         
         return data;

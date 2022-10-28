@@ -6,7 +6,7 @@ The api is an object that can be used to retreive, edit, delete, and create fron
 ## Global Access and Objects
 There are two root global objects accessable in all contexts.
 - The  [Metadata](Globals/Metadata.md) Api object. (Defaults to `meta`)
-- The Current Note's [Cache](Functions/cache.md) object. (Defaults to `cache`)
+- The Current Note's [Cache](Functions/Metadata/Metadata%20Fetchers/cache.md) object. (Defaults to `cache`)
 ## Properties
 **NOTE**: These properties of the [Metadata Global Object](Globals/Metadata.md) are all read-only (get).
 **NOTE**: The non-static properties are all accessable in caps or lower camel case so you can adapt to your desired style.
@@ -18,24 +18,24 @@ meta.current === meta.Current; //these are aliases
 - Instance methods will always be lower camel case
 - Static properties and methods will always in caps camel case.
 ### Static
-- [Api](Properties/Api.md)
-- [DefaultMetadataSources](Properties/DefaultMetadataSources.md)
-- [DataviewApi](Properties/DataviewApi.md)
-- [MetaeditApi](Properties/MetaeditApi.md)
+- [Api](Properties/Metadata/Static/Api.md)
+- [DefaultMetadataSources](Properties/Metadata/Static/DefaultMetadataSources.md)
+- [DataviewApi](Properties/Metadata/Static/DataviewApi.md)
+- [MetaeditApi](Properties/Metadata/Static/MetaeditApi.md)
 ### Instance
-- [Current](Properties/Current.md)
-- [Data](Properties/Data.md)
+- [Current](Properties/Metadata/Current.md)
+- [Data](Properties/Metadata/Data.md)
 ## Methods
 **NOTE**: Instance methods will always be lower camel case and Static properties and methods will always in caps camel case.
-- [set](Functions/set.md) 
-- [patch](Functions/patch.md)
-- [clear](Functions/clear.md)
-- [get](Functions/get.md)
-	- [frontmatter](Functions/frontmatter.md)
-	- [cache](Functions/cache.md)
-	- [prototypes](Functions/prototypes.md)
-	- [values](Functions/values.md)
-- [path](Functions/path.md)
+- [set](Functions/Metadata/Metadata%20Updaters/set.md) 
+- [patch](Functions/Metadata/Metadata%20Updaters/patch.md)
+- [clear](Functions/Metadata/Metadata%20Updaters/clear.md)
+- [get](Functions/Metadata/Metadata%20Fetchers/get.md)
+	- [frontmatter](Functions/Metadata/Metadata%20Fetchers/frontmatter.md)
+	- [cache](Functions/Metadata/Metadata%20Fetchers/cache.md)
+	- [prototypes](Functions/Metadata/Metadata%20Fetchers/prototypes.md)
+	- [values](Functions/Metadata/Metadata%20Fetchers/values.md)
+- [path](Functions/Metadata/Utility/path.md)
 ### Object Property Helper Methods
 This plugin api provides methods to help with accessing 'deep' properies in js objects. This is usefull for accessing metadata that you're not sure exists.
 
@@ -51,14 +51,14 @@ Instance methods added to Object.proptotype that allow quick utility for accessi
 
 **NOTE**: These are all wrappers for the Api Methods below.
 **NOTE:** These instance methods are only available if the "Declare Object Property Helper Methods" option is enabled in the app's plugin settings.
-- [hasProp](Object%20Prototype%20Instance%20Methods/hasProp.md)
-- [getProp](Object%20Prototype%20Instance%20Methods/getProp.md)
-- [setProp](Object%20Prototype%20Instance%20Methods/setProp.md)
+- [hasProp](Functions/Object.prototype/hasProp.md)
+- [getProp](Functions/Object.prototype/getProp.md)
+- [setProp](Functions/Object.prototype/setProp.md)
 #### Static Api Methods
 These are methods on the API object that aid in checking and setting dee pproperties on objects.
-- [ContainsDeepProperty](Static%20Api%20Methods/ContainsDeepProperty.md)
-- [GetDeepProperty](Static%20Api%20Methods/GetDeepProperty.md)
-- [TryToGetDeepProperty](Static%20Api%20Methods/TryToGetDeepProperty.md)
-- [SetDeepProperty](Static%20Api%20Methods/SetDeepProperty.md)
+- [ContainsDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/ContainsDeepProperty.md)
+- [GetDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/GetDeepProperty.md)
+- [TryToGetDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/TryToGetDeepProperty.md)
+- [SetDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/SetDeepProperty.md)
 ## Examples
 For many more examples please see the [Tests folder](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/tree/master/tests) in the root of the github repository.
