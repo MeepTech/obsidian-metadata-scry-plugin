@@ -133,7 +133,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Configuration.md",
+                "file": "Api/README.md",
                 "mode": "source",
                 "source": false
               }
@@ -202,7 +202,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 447.5
+    "width": 425.5
   },
   "right": {
     "id": "6c5aea8906a7cd90",
@@ -218,7 +218,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Configuration.md",
+                "file": "Api/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -235,7 +235,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Configuration.md",
+                "file": "Api/README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -258,7 +258,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Configuration.md"
+                "file": "Api/README.md"
               }
             }
           }
@@ -271,6 +271,7 @@
   },
   "active": "c994e0a091ff23dc",
   "lastOpenFiles": [
+    "Configuration.md",
     "Api/Globals/Metadata.md",
     "Api/Globals/Cache.md",
     "Api/Functions/Metadata/Utility/path.md",
@@ -279,7 +280,6 @@
     "Api/Functions/Metadata/Static Object Property Helpers/GetDeepProperty.md",
     "Api/Functions/Metadata/Static Object Property Helpers/ContainsDeepProperty.md",
     "Api/Functions/Metadata/Metadata Updaters/set.md",
-    "Api/Functions/Metadata/Metadata Updaters/patch.md",
-    "Api/Functions/Metadata/Metadata Updaters/clear.md"
+    "Api/Functions/Metadata/Metadata Updaters/patch.md"
   ]
 }

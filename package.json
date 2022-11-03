@@ -8,7 +8,12 @@
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
-	"keywords": [],
+	"keywords": [
+		"Metadata", "Obsidian", "Api", "Plugin", 
+	  "JS", "Scripts", "Script", "Scripting",
+		"DB", "Data", "Frontmatter", "Sections",
+		"Headers", "Dataview", "Edit", "Metaedit"
+	],
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {

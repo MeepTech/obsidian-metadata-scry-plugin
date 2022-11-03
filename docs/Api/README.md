@@ -2,7 +2,7 @@
 The api is an object that can be used to retreive, edit, delete, and create frontmatter data, as well as other note metadata quickly and easily within any codeblock or custom javascript script files used in the [compatible plugins](../Compatibility.md).
 
 **NOTE**: The api is built off of the js class `Metadata` in `main.ts`/`main.js`.
-**NOTE**: Most of the properties of this class are accessable in caps or lower camel case so you can adapt to your desired style.
+**NOTE**: Most of the properties of this class are accessable in caps or lower camel case so you can adapt to your desired style. This also can help with debugging.
 ## Global Access and Objects
 There are two root global objects accessable in all contexts.
 - The  [Metadata](Globals/Metadata.md) Api object. (Defaults to `meta`)
