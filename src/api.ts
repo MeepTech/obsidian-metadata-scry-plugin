@@ -1,4 +1,4 @@
-import { CachedMetadata, Plugin, TFile } from "obsidian";
+import { CachedMetadata, Plugin, TAbstractFile, TFile, TFolder } from "obsidian";
 
 //#region Plugin
 
@@ -161,7 +161,7 @@ export type FileData = {
  * Conmpiled by dataview
  */
 interface DataLink {
-
+  path: string;
 }
 
 /**
@@ -217,6 +217,16 @@ export type DvData = {
   Sections: boolean;
 }
 
+/**
+ * Something we can get a specific file's path from.
+ * 
+ * Either a 'file' object with a '.path' property, or the path itself as a string.
+ */
+export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | DataLink | null
+
+/**
+ * Interface for the Api
+ */
 export interface MetadataApi {
   get Plugin(): MetadataPlugin;
   get plugin(): MetadataPlugin;
@@ -224,19 +234,22 @@ export interface MetadataApi {
   get current(): CurrentApi;
   get Data(): MetaData;
   get data(): MetaData;
-  frontmatter(file?: string | TFile | null): Frontmatter;
-  sections(file?: string | TFile | null): Sections;
-  dv(file?: string | TFile | null): DvData;
-  cache(file?: string | TFile | null): Cache;
-  prototypes(prototypePath: string): object;
-  values(dataPath: string): object;
-  get(file?: string | TFile | null, sources?: MetadataSources | boolean): MetaData;
-  patch(file: string | TFile | null, frontmatterData: any, propertyName?: string | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
-  set(file: string | TFile | null, frontmatterData: any, toValuesFile?: boolean | string, prototype?: string | boolean): void;
-  clear(file?: string | TFile | null, frontmatterProperties?: string | Array<string> | object | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
+  frontmatter(file?: FileSource): Frontmatter | Frontmatter[] | null;
+  sections(file?: FileSource): Sections | Sections[] | null;
+  dv(file?: FileSource): DvData | DvData[] | null;
+  cache(file?: FileSource): Cache | Cache[] | null;
+  prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null;
+  values(dataPath: string): Frontmatter | Frontmatter[] | null;
+  get(file?: FileSource, sources?: MetadataSources | boolean): MetaData | MetaData[] | null;
+  patch(file: FileSource, frontmatterData: any, propertyName?: string | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
+  set(file: FileSource, frontmatterData: any, toValuesFile?: boolean | string, prototype?: string | boolean): void;
+  clear(file?: FileSource, frontmatterProperties?: string | Array<string> | object | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
   path(relativePath?: string | null, extension?: string | boolean, rootFolder?: string | null): string
 }
 
+/**
+ * Interface for the current note within the api
+ */
 export interface CurrentApi {
   get Data(): MetaData;
   get data(): MetaData;
@@ -281,6 +294,7 @@ interface SectionChildren {
 interface SectionsNoteData {
   path: string;
   contents: string;
+  count: number;
   all: Record<string, Section[]>;
   named(name: string): Section[];
 }

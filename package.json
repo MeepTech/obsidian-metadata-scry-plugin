@@ -9,10 +9,22 @@
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [
-		"Metadata", "Obsidian", "Api", "Plugin", 
-	  "JS", "Scripts", "Script", "Scripting",
-		"DB", "Data", "Frontmatter", "Sections",
-		"Headers", "Dataview", "Edit", "Metaedit"
+		"Metadata",
+		"Obsidian",
+		"Api",
+		"Plugin",
+		"JS",
+		"Scripts",
+		"Script",
+		"Scripting",
+		"DB",
+		"Data",
+		"Frontmatter",
+		"Sections",
+		"Headers",
+		"Dataview",
+		"Edit",
+		"Metaedit"
 	],
 	"author": "",
 	"license": "MIT",

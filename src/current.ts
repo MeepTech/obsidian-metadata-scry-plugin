@@ -15,8 +15,8 @@ export class CurrentMetadata implements CurrentApi {
   /**
    * Get all Metadata from the default sources for the current file.
    */
-  get Data(): MetaData {
-    return this._api.get();
+  get Data(): MetaData  {
+    return this._api.get() as MetaData;
   }
 
   /**
@@ -83,7 +83,7 @@ export class CurrentMetadata implements CurrentApi {
    * Get just the frontmatter of the current file
    */
   get Matter(): Frontmatter {
-    return this._api.frontmatter();
+    return this._api.frontmatter() as Frontmatter;
   }
 
   /**
@@ -97,7 +97,7 @@ export class CurrentMetadata implements CurrentApi {
    * Access the cached vales for the current file only.
    */
   get Cache(): Cache {
-    return this._api.cache();
+    return this._api.cache() as Cache;
   }
 
   /**
@@ -111,7 +111,7 @@ export class CurrentMetadata implements CurrentApi {
    * Access the sections for the current file only.
    */
   get Sections(): Sections {
-    return this._api.sections();
+    return this._api.sections() as Sections;
   }
 
   /**

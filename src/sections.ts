@@ -64,7 +64,7 @@ class NoteSection implements Section {
     const header = this.header;
 
     // find the headers that match
-    const results = [...fullNoteContents.matchAll(new RegExp(`/\n${header}/g`))];
+    const results = [...fullNoteContents.matchAll(new RegExp(`^${header}`, "gm"))];
     if (!results) {
       throw `Section Header: "${header}", not found in file: ${this.note.path}.`;
     }
@@ -125,7 +125,7 @@ class NoteSection implements Section {
   addChild(
     child: NoteSection
   ) : void {
-    for (const key in child.keys) {
+    for (const key of child.keys) {
       if (!this.hasOwnProperty(key)) {
         this[key] = child;
       }
@@ -143,51 +143,55 @@ class NoteSection implements Section {
     // clean the key of dataview values and wikilinks
     let cleaned = text;
     if (cleaned.contains("[")) {
-      cleaned = cleaned.replace("/\[\[(?:(?:([^\]]*)\|([^\]]*))|([^\]]*))\]\]/g", "$2$3");
-      if (cleaned.contains("::")) {
-        cleaned = cleaned.replace("/\[(?:(?:(?:([^\[:\|]*)\|([^\[:]*)::([^\]]*)))|(?:(?:([^\[:]*)::([^\]]*))))\]/g", "$2$4");
-      }
+      cleaned = cleaned.replace(new RegExp("\\[\\[(?:(?:([^\\]]*)\\|([^\\]]*))|([^\\]]*))\\]\\]", "g"), "$2$3");
+    }
+    if (cleaned.contains("::")) {
+      cleaned = cleaned.replace(new RegExp("\\[(?:(?:([^\\[:\\|]*)::([^\\]]*)))\\]|\\((?:(?:([^\\[:\\|]*)::([^\\]]*)))\\)", "g"), function (a, b, c, d, e, f) {
+        return b ? `${b} ${c}` : e;
+      });
     }
 
     keys.push(cleaned);
 
     if (PluginContainer.Instance.settings.splayFrontmatterWithoutDataview) {
-      const lower = cleaned.toLowerCase();
-      const camel = cleaned.replace(" ", "");
-      let LowerCamel = camel[0].toUpperCase() + camel.substring(1);
+      const camel = cleaned.replace(/ /g, "");
+      const lower = camel.toLowerCase();
+      const lowerCamel = camel[0].toLowerCase() + camel.substring(1);
 
-      keys.push(lower, camel, LowerCamel);
+      keys.push(lower, camel, lowerCamel);
       if (PluginContainer.Instance.settings.splayKebabCaseProperties && cleaned.contains("-")) {
         if (PluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
-          const lowerKey = cleaned.toLowerCase();
-          keys.push(lowerKey.replace(/-/g, ""));
-          keys.push(lowerKey
+          // lower
+          keys.push(lower.replace(/-/g, ""));
+          // lower camel
+          keys.push(lowerCamel
             .split('-')
             .map((part, i) => i !== 0 ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
-          keys.push(cleaned
+          // upper/default camel
+          keys.push(camel
             .split('-')
             .map(part => part.charAt(0).toUpperCase() + part.substring(1))
             .join(''));
         } else if (PluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
-          keys.push(cleaned.replace(/-/g, "").toLowerCase());
+          // lower
+          keys.push(lower.replace(/-/g, ""));
         } else if (PluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
-          keys.push(cleaned
-            .toLowerCase()
+          // lower camel
+          keys.push(lowerCamel
             .split('-')
             .map((part, i) => i !== 0 ? part.charAt(0).toUpperCase() + part.substring(1) : part)
-            .join('')
-          );
-          keys.push(cleaned
+            .join(''));
+          // upper/default camel
+          keys.push(camel
             .split('-')
             .map(part => part.charAt(0).toUpperCase() + part.substring(1))
-            .join('')
-          );
+            .join(''));
         }
       }
     }
 
-    return keys;
+    return keys.unique();
   }
 
   //#endregion
@@ -203,6 +207,8 @@ export class NoteSections extends Object implements Sections {
   all: Record<string, Section[]> = {};
   // @ts-expect-error: Default Indexer Type Override
   path: string = "";
+  // @ts-expect-error: Default Indexer Type Override
+  count: number = 0;
   
   // @ts-expect-error: Default Indexer Type Override
   get contents()
@@ -232,9 +238,9 @@ export class NoteSections extends Object implements Sections {
         );
 
         // if there's no current parent, or the level of this is the same as or greater than the current parent, switch this to the parent.
-        if (!parent || (current.level >= parent.level)) {
+        if (!parent || (current.level <= parent.level)) {
           parent = current;
-          for (const key in parent.keys) {
+          for (const key of parent.keys) {
             if (!this.hasOwnProperty(key)) {
               this[key] = parent;
             }
@@ -244,13 +250,15 @@ export class NoteSections extends Object implements Sections {
         }
 
         // register all the keys in all
-        for (const key in current.keys) {
+        for (const key of current.keys) {
           if (!this.all[key]) {
-            this.all[key].push(current);
-          } else {
             this.all[key] = [current];
+          } else {
+            this.all[key].push(current);
           }
         }
+
+        this.count += 1;
       }
     }
   }

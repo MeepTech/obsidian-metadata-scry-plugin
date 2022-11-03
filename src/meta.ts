@@ -1,7 +1,7 @@
-import { CachedMetadata, TFile, TFolder } from 'obsidian';
+import { CachedMetadata, TAbstractFile, TFile, TFolder } from 'obsidian';
 import { CurrentMetadata } from "./current";
 import { NoteSections } from './sections';
-import { PluginContainer, CachedFileMetadata, CurrentApi, DvData, FileData, Frontmatter, MetaData, MetadataApi, MetadataPlugin, MetadataSources, Sections, SplayKebabCasePropertiesOption } from './api';
+import { PluginContainer, CachedFileMetadata, CurrentApi, DvData, FileSource, Frontmatter, MetaData, MetadataApi, MetadataPlugin, MetadataSources, Sections, SplayKebabCasePropertiesOption } from './api';
 //TODO: test: import dv = require("../../dataview/main.js");
 
 /**
@@ -231,16 +231,22 @@ export class Metadata implements MetadataApi {
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api
    * 
-   * @param {object|string} file The file object(with a path property) or the full file path
+   * @param {FileSource} file The file object(with a path property) or the full file path
    *
    * @returns The cached file metadata object if it exists.
    */
-  omfc(file: string | TFile | null = null): CachedFileMetadata | null {
+  omfc(file: FileSource = null): CachedFileMetadata | CachedFileMetadata[] | null {
     const path = (Metadata.ParseFileName(file) || this.Current.Path) + ".md";
     const fileObject = app.vault.getAbstractFileByPath(path);
 
     if (!(fileObject instanceof TFile)) {
-      throw `Note Not Found: ${path}`;
+      if (fileObject instanceof TFolder) {
+        return (fileObject as TFolder).children.map(
+          sub => this.omfc(sub)!
+        ).flat();
+      } else {
+        throw `Note or Folder Not Found: ${path}`;
+      }
     }
 
     const result = (app.metadataCache.getFileCache(fileObject) as CachedFileMetadata) || null;
@@ -254,50 +260,74 @@ export class Metadata implements MetadataApi {
   /**
    * Get just the frontmatter for the given file.
    *
-   * @param {object|string} file The file object(with a path property) or the full file path
+   * @param {FileSource} file The file object(with a path property) or the full file path
    *
    * @returns Just the frontmatter for the file.
    */
-  frontmatter(file: string | TFile | null = null): Frontmatter {
-    const fileCache : CachedMetadata | null = this.omfc(file);
-    return (fileCache && fileCache.frontmatter)
-      ? this._lowerCaseSplayer(this._kebabPropSplayer(fileCache?.frontmatter, null))
-      : {};
+  frontmatter(file: FileSource = null): Frontmatter | Frontmatter[] | null {
+    const fileCache = this.omfc(file);
+
+    if (Array.isArray(fileCache)) {
+      return fileCache.map(f => this.frontmatter(f.path) as Frontmatter);
+    } else {
+      return (fileCache && fileCache.frontmatter)
+        ? this._lowerCaseSplayer(this._kebabPropSplayer(fileCache?.frontmatter, null))
+        : null;
+    }
   }
 
   /**
    * Get just the sections for the given file.
    *
-   * @param {object|string} file The file object(with a path property) or the full file path
+   * @param {FileSource} file The file object(with a path property) or the full file path
    *
    * @returns Just the sections under their headings for the file.
    */
-  sections(file: string | TFile | null = null): Sections {
+  sections(file: FileSource = null): Sections | Sections[] | null {
     const fileCache = this.omfc(file);
-    return new NoteSections(fileCache?.path, fileCache?.headings);
+
+    if (Array.isArray(fileCache)) {
+      return fileCache.map(f => this.sections(f.path) as Sections);
+    } else if (!fileCache) {
+      return null;
+    } else {
+      return new NoteSections(fileCache?.path, fileCache?.headings);
+    }
   }
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
    *
-   * @param {object|string} file The file object(with a path property) or the full file path
+   * @param {FileSource} file The file object(with a path property) or the full file path
    *
    * @returns Just the dataview)+frontmatter) values for the file.
    */
-  dv(file: string | TFile | null = null): DvData {
-    return this._kebabPropSplayer(Metadata
+  dv(file: FileSource = null): DvData | DvData[] | null {
+    const paths = Metadata
       .DataviewApi
-      .page(file ? Metadata.ParseFileName(file) : this.Current.Path), ["file"]) as DvData;
+      .pagePaths(file ? Metadata.ParseFileName(file) : this.Current.Path);
+
+    if (paths.length > 1) {
+      return paths.map((p: string) => this.dv(p));
+    } else if (!paths.length) {
+      return null;
+    } else {
+      const result = Metadata
+        .DataviewApi
+        .page(paths[0]);
+    
+      return this._kebabPropSplayer(result, ["file"]) as DvData;
+    }
   }
 
   /**
    * Get just the cache data for a file.
    *
-   * @param {object|string} file The file or filename to fetch for.
+   * @param {FileSource} file The file or filename to fetch for.
    *
    * @returns The cache data only for the requested file
    */
-  cache(file: string | TFile | null = null): Cache {
+  cache(file: FileSource = null): Cache {
     const fileName = Metadata.ParseFileName(file) || this.Current.Path;
     Metadata._caches[fileName] = Metadata._caches[fileName] || {};
 
@@ -311,7 +341,7 @@ export class Metadata implements MetadataApi {
    *
    * @returns An object containing the prototypes in the givne file
    */
-  prototypes(prototypePath: string): Frontmatter {
+  prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null {
     return this.frontmatter(Metadata.BuildPrototypeFileFullPath(prototypePath));
   }
 
@@ -322,20 +352,46 @@ export class Metadata implements MetadataApi {
    *
    * @returns An object containing the frontmatter stored in the given file
    */
-  values(dataPath: string): Frontmatter {
+  values(dataPath: string): Frontmatter | Frontmatter[] | null {
     return this.frontmatter(Metadata.BuildDataFileFullPath(dataPath));
   }
 
   /**
    * Get the Metadata for a given file using the supplied sources.
    *
-   * @param {*} file The name of the file or the file object with a path
+   * @param {FileSource} file The name of the file or the file object with a path
    * @param {bool|object} sources The sources to get metadata from. Defaults to all.
    *
    * @returns The requested metadata
    */
-  get(file: string | TFile | null = null, sources: MetadataSources | boolean = Metadata.DefaultSources): MetaData {
-    const fileName = file ? Metadata.ParseFileName(file) : this.Current.Path;
+  get(file: FileSource = null, sources: MetadataSources | boolean = Metadata.DefaultSources): MetaData | MetaData[] | null {
+    if (file instanceof TFolder) {
+      return file.children.map(c => this.get(c, sources)).flat();
+    }
+
+    const fileName = file
+      ? (Metadata.ParseFileName(file)
+        ?? this.current.path)
+      : this.Current.Path;
+
+    if (fileName?.endsWith("/")) {
+      const folderName = fileName.substring(0, -1);
+      const fileObject = app.vault.getAbstractFileByPath(folderName);
+
+      if (fileObject instanceof TFolder) {
+        return fileObject.children.map(c => this.get(c, sources)).flat();
+      } else {
+        throw "Expecte folder because of trailing slash(/): '" + fileName + "'.";
+      }
+    } else {
+      const fileObject = app.vault.getAbstractFileByPath(fileName + ".md")
+        || app.vault.getAbstractFileByPath(fileName);
+      
+      if (fileObject instanceof TFolder) {
+        return fileObject.children.map(c => this.get(c, sources)).flat();
+      }
+    }
+
     let values: any = {};
 
     if (sources === true) {
@@ -359,9 +415,9 @@ export class Metadata implements MetadataApi {
         }
 
         // remove dv inline?
-        let frontmatter: object = null!;
+        let frontmatter: Frontmatter = null!;
         if (!sources.DataviewInline) {
-          frontmatter = this.frontmatter(fileName);
+          frontmatter = this.frontmatter(fileName) as Frontmatter;
           Object.keys(values).forEach(prop => {
             // if it's not a frontmatter prop or the 'file' metadata prop
             if (!frontmatter.hasOwnProperty(prop) && prop != "file") {
@@ -388,6 +444,16 @@ export class Metadata implements MetadataApi {
       values["cache"] = this.cache(fileName);
     }
 
+    // add sections?
+    if (sources === true || sources.Sections) {
+      if (sources === true || sources.FileInfo) {
+        values.file.sections = this.sections(fileName);
+      } else {
+        values.file = {};
+        values.file.sections = this.sections(fileName);
+      }
+    }
+
     return values;
   }
 
@@ -398,15 +464,15 @@ export class Metadata implements MetadataApi {
   /**
    * Patch individual properties of the frontmatter metadata.
    *
-   * @param {object|string} file The name of the file or the file object with a path
-   * @param {*|object} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
+   * @param {FileSource} file The name of the file or the file object with a path
+   * @param {any|object} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
    * @param {string} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
    *
    * @returns The updated Metadata.
    */
-  patch(file: string | TFile | null, frontmatterData: any, propertyName: string | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false): void {
+  patch(file: FileSource, frontmatterData: any, propertyName: string | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false): void {
     if (prototype && toValuesFile) {
       throw "Cannot patch toValuesFile and prototype at the same time.";
     }
@@ -424,14 +490,14 @@ export class Metadata implements MetadataApi {
   /**
    * Replace the existing frontmatter of a file with entirely new data, clearing out all old data in the process.
    *
-   * @param {object|string} file The name of the file or the file object with a path
+   * @param {FileSource} file The name of the file or the file object with a path
    * @param {object} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
    *
    * @returns The updated Metadata
    */
-  set(file: string | TFile | null, frontmatterData: any, toValuesFile: boolean | string = false, prototype: string | boolean = false): void {
+  set(file: FileSource, frontmatterData: any, toValuesFile: boolean | string = false, prototype: string | boolean = false): void {
     if (prototype && toValuesFile) {
       throw "Cannot patch toValuesFile and prototype at the same time.";
     }
@@ -446,12 +512,12 @@ export class Metadata implements MetadataApi {
   /**
    * Used to clear values from metadata.
    *
-   * @param {object|string} file The file to clear properties for. defaults to the current file.
+   * @param {FileSource} file The file to clear properties for. defaults to the current file.
    * @param {string|array} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
    */
-  clear(file: string | TFile | null = null, frontmatterProperties: string | Array<string> | object | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false) : void {
+  clear(file: FileSource = null, frontmatterProperties: string | Array<string> | object | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false) : void {
     if (prototype && toValuesFile) {
       throw "Cannot patch toValuesFile and prototype at the same time.";
     }
@@ -463,7 +529,7 @@ export class Metadata implements MetadataApi {
       propsToClear.push(frontmatterProperties);
     } else if (typeof frontmatterProperties === 'object') {
       if (frontmatterProperties === null) {
-        propsToClear = Object.keys(this.frontmatter(fileName));
+        propsToClear = Object.keys(this.frontmatter(fileName) as Frontmatter);
       } else if (Array.isArray(frontmatterProperties)) {
         propsToClear = frontmatterProperties;
       } else {
@@ -631,14 +697,25 @@ export class Metadata implements MetadataApi {
     let currentFolder: TFolder = rootFolder
       ? (app.vault.getAbstractFileByPath(rootFolder) as TFolder)
       : this.Current.Note.parent;
+    
+    if (!rootFolder) {
+      throw `Root Folder Not Found: ${rootFolder}.`;
+    }
 
-    for (var folder of folders.reverse()) {
-      if (folder === "..") {
-        currentFolder = currentFolder.parent;
-      } else if (folder === ".") {
-        continue;
-      } else {
-        absolutePath = folder + "/" + absolutePath;
+    if (folders && folders.length) {
+      for (var folder of folders.reverse()) {
+        if (folder === "..") {
+          currentFolder = currentFolder.parent;
+        } else if (folder === ".") {
+          continue;
+        } else {
+          absolutePath = folder + "/" + absolutePath;
+        }
+      }
+    } else {
+      const foundFile = app.metadataCache.getFirstLinkpathDest(this._addExtension(relativePath, extension), rootFolder);
+      if (foundFile) {
+        return foundFile.path;
       }
     }
 
@@ -664,11 +741,11 @@ export class Metadata implements MetadataApi {
   /**
    * Get a file path string based on a file path string or file object.
    *
-   * @param {object|string} file The file object (with a path property) or file name
+   * @param {FileSource} file The file object (with a path property) or file name
    *
    * @returns The file path
    */
-  static ParseFileName(file: string | TFile | FileData | null): string | null {
+  static ParseFileName(file: FileSource): string | null {
     let fileName = file || null;
     if (typeof file === "object" && file !== null) {
       fileName = file.path.split('.').slice(0, -1).join('.');
@@ -702,7 +779,7 @@ export class Metadata implements MetadataApi {
     return app.plugins.plugins["metadata-api"].settings.prototypesPath + prototypePath;
   }
 
-  private static _parseFileNameFromDataFileFileOrPrototype(toValuesFile: string | boolean, file: string | TFile | null, prototype: string | boolean) {
+  private static _parseFileNameFromDataFileFileOrPrototype(toValuesFile: string | boolean, file: FileSource, prototype: string | boolean) {
     return toValuesFile
       ? file
         ? Metadata.BuildDataFileFullPath(Metadata.ParseFileName(file)!)
