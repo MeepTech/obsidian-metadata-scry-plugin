@@ -48,5 +48,6 @@ boolean
 ```jsx:
 <p>{typeof meta.current.Data.file.name}</p>
 ```
+
 ## -Expected
 string

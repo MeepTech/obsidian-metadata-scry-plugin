@@ -20,30 +20,30 @@ Metadata Api/function Metadata.path/test
 # Same Folder using Default
 ## -Code
 ```js
-dv.el("p", meta.path("test.extra"));
+dv.el("p", meta.path("test.data"));
 ```
 
 ## -Result
 ```dataviewjs
-dv.el("p", meta.path("test.extra"));
+dv.el("p", meta.path("test.data"));
 ```
 
 ## -Expected
-Metadata Api/function Metadata.path/test.extra
+Metadata Api/function Metadata.path/test.data
 
 # Same Folder With ./
 ## -Code
 ```jsx
-<p>{meta.path("./test.extra")}</p>;
+<p>{meta.path("./test.data")}</p>;
 ```
 
 ## -Result
 ```jsx:
-<p>{meta.path("./test.extra")}</p>;
+<p>{meta.path("./test.data")}</p>;
 ```
 
 ## -Expected
-Metadata Api/function Metadata.path/test.extra
+Metadata Api/function Metadata.path/test.data
 
 # Parent folder With ../
 ## -Code

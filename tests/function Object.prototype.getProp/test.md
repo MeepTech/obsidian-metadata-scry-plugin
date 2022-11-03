@@ -21,16 +21,15 @@ name:
 *dataviewjs*
 ```js
 const leafContents = meta.data.getProp("tree.trunk.branch.branch.leaf");
-dv.el('p', leafContents)
+dv.el('p', leafContents.join(", "))
 ```
 ## -Result
 ```dataviewjs
 const leafContents = meta.data.getProp("tree.trunk.branch.branch.leaf");
-dv.el('p', leafContents)
+dv.el('p', leafContents.join(", "))
 ```
 ## -Expected
-bug
-bird
+bug, bird
 # Get Property Value Successfully With Backup Provided
 ## -Code
 *dataviewjs*
@@ -50,16 +49,15 @@ Doctor
 *dataviewjs*
 ```js
 const leafContents = meta.data.getProp("tree.branch.leaf", dv.current().tree.trunk.branch.leaf);
-dv.span(leafContents)
+dv.span(leafContents.join(", "))
 ```
 ## -Result
 ```dataviewjs
 const leafContents = meta.data.getProp("tree.branch.leaf", dv.current().tree.trunk.branch.leaf);
-dv.span(leafContents)
+dv.span(leafContents.join(", "))
 ```
 ## -Expected
-bug
-dew
+bug, dew
 # Get Property Value Unsuccessfully
 ## -Code
 *dataviewjs*
