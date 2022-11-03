@@ -1,7 +1,7 @@
 import { TAbstractFile, TFile, TFolder } from 'obsidian';
 import { CurrentMetadata } from "./current";
 import { NoteSections } from './sections';
-import { PluginContainer, CachedFileMetadata, CurrentApi, DvData, FileSource, Frontmatter, MetaData, MetadataApi, MetadataPlugin, MetadataSources, Sections, SplayKebabCasePropertiesOption, FileItem } from './api';
+import { PluginContainer, CachedFileMetadata, CurrentApi, DvData, FileSource, Frontmatter, MetaData, MetadataApi, MetadataPlugin, MetadataSources, Sections, SplayKebabCasePropertiesOption, FileItem, UpdateOptions } from './api';
 //TODO: test: import dv = require("../../dataview/main.js");
 
 /**
@@ -118,7 +118,7 @@ export class Metadata implements MetadataApi {
    * (Read access and Data display)
    * // TODO: can we set these to their specific types?
    */
-  static get DataviewApi() : any {
+  static get DataviewApi(): any {
     return (app as any)
       .plugins
       .plugins
@@ -131,7 +131,7 @@ export class Metadata implements MetadataApi {
    * (Write access)
    * // TODO: can we set these to their specific types?
    */
-  static get MetaeditApi() : any {
+  static get MetaeditApi(): any {
     return (app as any)
       .plugins
       .plugins
@@ -252,7 +252,7 @@ export class Metadata implements MetadataApi {
     } else if (!fileCache) {
       return null;
     } else {
-      return new NoteSections(fileCache?.path, fileCache?.headings);
+      return new NoteSections(fileCache?.path, fileCache?.headings) as Sections;
     }
   }
 
@@ -277,6 +277,12 @@ export class Metadata implements MetadataApi {
   cache(file: FileSource = null): Cache | Cache[] | null {
     const fileObject = this.vault(file);
     if (fileObject === null) {
+      const key = Metadata.ParseFilePathFromSource(file);
+      if (key !== null && key !== undefined) {
+        Metadata._caches[key] = Metadata._caches[key] || {};
+
+        return Metadata._caches[key];
+      }
       return null;
     } else if (fileObject instanceof TFolder) {
       return fileObject.children.map(f => this.cache(f) as (Cache | Cache[])).flat();
@@ -396,13 +402,16 @@ export class Metadata implements MetadataApi {
 
   //#region Metadata Modifiers
 
-  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName: string | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false): void {
-    if (prototype && toValuesFile) {
-      throw "Cannot patch toValuesFile and prototype at the same time.";
+  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName: string | null = null, options: UpdateOptions = {toValuesFile: false, prototype: false}): void {
+    if (options.prototype && options.toValuesFile) {
+      this.patch(file, frontmatterData, propertyName, { ...options, prototype: false });
+      this.patch(file, frontmatterData, propertyName, { ...options, toValuesFile: false });
+
+      return
     }
 
     const { update } = Metadata.MetaeditApi;
-    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(toValuesFile, file, prototype);
+    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
 
     if (propertyName != null) {
       update(propertyName, frontmatterData, fileName);
@@ -411,24 +420,30 @@ export class Metadata implements MetadataApi {
     }
   }
 
-  set(file: FileItem, frontmatterData: any, toValuesFile: boolean | string = false, prototype: string | boolean = false): void {
-    if (prototype && toValuesFile) {
-      throw "Cannot patch toValuesFile and prototype at the same time.";
+  set(file: FileItem, frontmatterData: any, options: UpdateOptions = {toValuesFile: false, prototype: false}): void {
+    if (options.prototype && options.toValuesFile) {
+      this.set(file, frontmatterData, { ...options, prototype: false });
+      this.set(file, frontmatterData, { ...options, toValuesFile: false });
+
+      return;
     }
 
     const { update } = Metadata.MetaeditApi;
-    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(toValuesFile, file, prototype);
+    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
 
     this.clear(fileName);
     Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileName));
   }
 
-  clear(file: FileItem = null, frontmatterProperties: string | Array<string> | Record<string, any> | null = null, toValuesFile: boolean | string = false, prototype: string | boolean = false) : void {
-    if (prototype && toValuesFile) {
-      throw "Cannot patch toValuesFile and prototype at the same time.";
+  clear(file: FileItem = null, frontmatterProperties: string | Array<string> | Record<string, any> | null = null, options: UpdateOptions = {toValuesFile: false, prototype: false}) : void {
+    if (options.prototype && options.toValuesFile) {
+      this.set(file, frontmatterProperties, { ...options, prototype: false });
+      this.set(file, frontmatterProperties, { ...options, toValuesFile: false });
+
+      return;
     }
 
-    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(toValuesFile, file, prototype);
+    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
     let propsToClear = [];
 
     if (typeof frontmatterProperties === "string") {

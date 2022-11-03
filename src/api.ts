@@ -131,6 +131,28 @@ export type CachedFileMetadata = CachedMetadata & {
 };
 
 /**
+ * A full metadata set returned from meta.get.
+ */
+export type MetaData = {
+  /**
+   * The DV file object
+   */
+  file?: FileData;
+  /**
+   * The DV file object
+   */
+  File?: FileData;
+  /**
+   * The metadata api cache
+   */
+  cache?: Cache;
+  /**
+   * The metadata api cache
+   */
+  Cache?: Cache;
+} & Frontmatter;
+
+/**
  * An internal cache for a note.
  */
 export type Cache = {
@@ -184,6 +206,9 @@ export type FileData = {
  * Conmpiled by dataview
  */
 interface DataLink {
+  /**
+   * The path the link points to
+   */
   path: string;
 }
 
@@ -198,17 +223,10 @@ interface DataTask {
 /**
  * A full metadata set returned from meta.get.
  */
-export type MetaData = {
-  file?: FileData;
-  File?: FileData;
-  cache?: Cache;
-  Cache?: Cache;
-} & Frontmatter;
-
-/**
- * A full metadata set returned from meta.get.
- */
 export type DvData = {
+  /**
+   * The dv file object
+   */
   file: FileData;
 } & Frontmatter;
 
@@ -259,6 +277,14 @@ export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | D
  * Either a 'file' object with a '.path' property, or the path itself as a string.
  */
  export type FileItem = string | TFile | FileData | DataLink | null
+
+/**
+ * Passed into any update functions to modify what they do.
+ */
+export type UpdateOptions = {
+  toValuesFile?: boolean | string;
+  prototype?: string | boolean;
+};
 
 /**
  * Interface for the Api.
@@ -388,7 +414,7 @@ export interface MetadataApi {
    *
    * @returns The updated Metadata.
    */
-  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName?: string | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
+  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName?: string | null, options?: UpdateOptions): void;
   
   /**
    * Replace the existing frontmatter of a file with entirely new data, clearing out all old data in the process.
@@ -400,7 +426,7 @@ export interface MetadataApi {
    *
    * @returns The updated Metadata
    */
-  set(file: FileItem, frontmatterData: any, toValuesFile?: boolean | string, prototype?: string | boolean): void;
+  set(file: FileItem, frontmatterData: any, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
 
   /**
    * Used to clear values from metadata.
@@ -410,7 +436,7 @@ export interface MetadataApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
    */
-  clear(file?: FileItem, frontmatterProperties?: string | Array<string> | Record<string, any> | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
+  clear(file?: FileItem, frontmatterProperties?: string | Array<string> | Record<string, any> | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
   
   /**
    * Turn a relative path into a full path
@@ -428,73 +454,358 @@ export interface MetadataApi {
  * Interface for the current note within the api
  */
 export interface CurrentApi {
+
+  /**
+   * Get all Metadata from the default sources for the current file.
+   */
   get Data(): MetaData;
+
+  /**
+   * Get all Metadata from the default sources for the current file.
+   */
   get data(): MetaData;
+  
+  /**
+   * The current note focused by the workspace.
+   */
   get Note(): TFile;
+  
+  /**
+   * The current note focused by the workspace.
+   */
   get note(): TFile;
+
+  /**
+   * The current path of the current note
+   */
   get Path(): string;
+  
+  /**
+   * The current path of the current note
+   */
   get path(): string;
+
+  /**
+   * The current path of the current note with it's extension
+   */
   get PathEx(): string;
+  
+  /**
+   * The current path of the current note with it's extension
+   */
   get pathex(): string;
+
+  /**
+   * Get just the frontmatter of the current file
+   */
   get Matter(): Frontmatter;
+  
+  /**
+   * Get just the frontmatter of the current file
+   */
   get matter(): Frontmatter;
+
+  /**
+   * Access the cached vales for the current file only.
+   */
   get Cache(): Cache;
+
+  /**
+   * Access the cached vales for the current file only.
+   */
   get cache(): Cache;
+
+  /**
+   * Access the sections for the current file only.
+   */
   get Sections(): Sections;
+  
+  /**
+   * Access the sections for the current file only.
+   */
   get sections(): Sections;
-  patch(frontmatterData: any, propertyName?: string | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
-  set(frontmatterData: any, toValuesFile?: boolean | string, prototype?: string | boolean): void;
-  clear(frontmatterProperties?: string | Array<string> | object | null, toValuesFile?: boolean | string, prototype?: string | boolean): void;
+
+  /**
+   * Patch individual properties of the current file's frontmatter metadata.
+   *
+   * @param {Record<string, any>|any} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
+   * @param {string|null} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
+   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
+   *
+   * @returns The updated Metadata.
+   */
+  patch(frontmatterData: any, propertyName?: string | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
+  
+  /**
+   * Replace the existing frontmatter the current file with entirely new data, clearing out all old data in the process.
+   *
+   * @param {Frontmatter} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
+   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
+   *
+   * @returns The updated Metadata
+   */
+  set(frontmatterData: any, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
+  
+  /**
+   * Used to clear values from metadata.
+   *
+   * @param {object|string} file The file to clear properties for. defaults to the current file.
+   * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
+   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
+   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
+   */
+  clear(frontmatterProperties?: string | Array<string> | object | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
 }
 
 //#endregion
 
 //#region Sections
 
-interface SectionInfo {
+export interface Heading {
+
+  /**
+   * The text of the heading/section title. (without the #s)
+   */
+  get Text(): string;
+
+  /**
+   * The text of the heading/section title. (without the #s)
+   */
+  get text(): string;
+
+  /**
+   * The index of the heading (if there's another heading with the same name this gets incremeneted.)
+   */
+  get index(): number;
+
+  /**
+   * The index of the heading (if there's another heading with the same name this gets incremeneted.)
+   */
+  get Index(): number;
+
+  /**
+   * The depth/level of the heading/The number of #s in the header.
+   */
   get Level(): number;
-  get Keys(): string[];
-  get Count(): number;
-  get Title(): string;
-  get Container(): Section|null;
-  get Sections(): Record<string, Section>;
-  get Root(): Sections;
+
+  /**
+   * The depth/level of the heading/The number of #s in the header.
+   */
   get level(): number;
-  get keys(): string[];
-  get count(): number;
-  get title(): string;
-  get container(): Section|null;
-  get sections(): Record<string, Section>;
-  get root(): Sections;
-  get header(): string;
-  get Header(): string;
+
+  /**
+   * The plain-text markdown of the section's header Pre-processed, with the ##s
+   */
   get md(): string;
+
+  /**  
+   * The plain-text markdown of the section's header Pre-processed, with the ##s
+   */
   get Md(): string;
+}
+
+/**
+ * Information about a section of a note
+ */
+interface SectionInfo {
+
+  /**
+   * The keys that can be used to identify and access this section.
+   */
+  get Keys(): string[];
+
+  /**
+   * The keys that can be used to identify and access this section.
+   */
+  get keys(): string[];
+
+  /**
+   * The number of sub-sections directly within this section.
+   */
+  get Count(): number;
+
+  /**
+   * The number of sub-sections directly within this section.
+   */
+  get count(): number;
+
+  /**
+   * The section that contains this one, if there is one. If not this is a root section.
+   */
+  get Container(): Section | null;
+  
+  /**
+   * The section that contains this one, if there is one. If not this is a root section.
+   */
+  get container(): Section | null;
+
+  /**
+   * The sub-sections directly under this section.
+   */
+  get Sections(): Record<string, Section[]>;
+
+  /**
+   * The sub-sections directly under this section.
+   */
+  get sections(): Record<string, Section[]>;
+
+  /**
+   * The unique sub-titles/headings directly under this section heading (not sub-sub headings)
+   */
+  get subtitles(): Heading[];
+
+  /**
+   * The unique sub-titles/headings directly under this section heading (not sub-sub headings)
+   */
+  get Subtitles(): Heading[];
+
+  /**
+   * Get all the unique sub-sections in this section.
+   */
+  get unique(): Section[];
+
+  /**
+   * Get all the unique sub-sections in this section.
+   */
+  get Unique(): Section[];
+
+  /**
+   * The Sections object used to build the sections in the file this section is from.
+   * Contains info about the note/file.
+   */
+  get Root(): Sections;
+
+  /**
+   * The Sections object used to build the sections in the file this section is from.
+   * Contains info about the note/file.
+   */
+  get root(): Sections;
+
+  /**
+   * The direct code of the header, with the #s
+   */
+  get header(): Heading;
+  
+  /**
+   * The direct code of the header, with the #s
+   */
+  get Header(): Heading;
+
+  /**
+   * The plain-text markdown of the section's entire contents. Pre-processed.
+   * This contains all sub-section text and headers as well.
+   */
+  get md(): string;
+
+  /**
+   * The plain-text markdown of the section's entire contents. Pre-processed.
+   * This contains all sub-section text and headers as well.
+   */
+  get Md(): string;
+
+  /**
+   * The html element rendered from the markdown based on all of obsidian's rendering passes.
+   */
   get html(): HTMLElement;
+
+  /**
+   * The html element rendered from the markdown based on all of obsidian's rendering passes.
+   */
   get Html(): HTMLElement;
+
+  /**
+   * The path of the note this section is from with the header appended after a #
+   */
   get path(): string;
+  
+  /**
+   * The path of the note this section is from with the header appended after a #
+   */
   get Path(): string;
 }
 
+/**
+ * Sub-sections of a note section
+ */
 interface SectionChildren {
+  /**
+   * A sub-section of this section.
+   */
   [key: string]: Section
 }
 
+/**
+ * A collection of sections in a note, and the data to fetch them.
+ */
 interface SectionsNoteData {
+  /**
+   * The path to the note for these sections
+   */
   get path(): string;
-  get count(): number;
-  get all(): Record<string, Section[]>;
+  /**
+   * The path to the note for these sections
+   */
   get Path(): string;
+  /**
+   * The number of total sections, and sub sections.
+   */
+  get count(): number;
+  /**
+   * The number of total sections, and sub sections.
+   */
   get Count(): number;
+  /**
+   * All sections and sub-sections in the file, indexed by name. values are in arrays in case of duplicate headings
+   */
+  get all(): Record<string, Section[]>;
+  /**
+   * All sections and sub-sections in the file, indexed by name. values are in arrays in case of duplicate headings
+   */
   get All(): Record<string, Section[]>;
+  /**
+   * All highest level/root sections (not sub-sections) in the file, indexed by name. values are in arrays in case of duplicate headings
+   */
+  get root(): Record<string, Section[]>;
+  /**
+   * All highest level/root sections (not sub-sections) in the file, indexed by name. values are in arrays in case of duplicate headings
+   */
+  get Root(): Record<string, Section[]>;
+  /**
+   * The unique headers and sub-headers in this file
+   */
+  get Headers(): Heading[];
+  /**
+   * The unique headers and sub-headers in this file
+   */
+  get headers(): Heading[];
+  /**
+   * Get all the unique sections in this note.
+   */
+  get unique(): Section[];
+  /**
+   * Get all the unique sections in this note.
+   */
+  get Unique(): Section[];
   named(name: string): Section[];
 }
 
+/**
+ * Information about sections in a note.
+ */
 interface SectionsCollection {
   [key: string]: Section
 }
 
+/**
+ * A section of a note.
+ */
 export type Section = SectionChildren & SectionInfo;
+
+/**
+ * All of the sections in a note.
+ */
 export type Sections = SectionsCollection & SectionsNoteData;
 
 //#endregion

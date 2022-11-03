@@ -1,16 +1,42 @@
-import { Sections, Section, PluginContainer, SplayKebabCasePropertiesOption } from './api';
+import { Sections, Section, PluginContainer, SplayKebabCasePropertiesOption, Heading } from './api';
 import { HeadingCache, MarkdownRenderer } from 'obsidian';
+
+/**
+ * Implementation of Heading
+ */
+export class SectionHeader implements Heading {
+  private _text: string;
+  private _index: number;
+  private _level: number;
+
+  get text(): string { return this._text; }
+  get Text(): string { return this._text; }
+  get index(): number { return this._index; }
+  get Index(): number { return this._index; }
+  get Level(): number { return this._level; }
+  get level(): number { return this._level; }
+  get md(): string { return this.Md; }
+  get Md(): string {
+    return ` ${'#'.repeat(this.level)} ${this.text}`
+  }
+
+  constructor(text: string, level: number, index: number) {
+    this._text = text;
+    this._level = level;
+    this._index = index;
+  }
+}
 
 /**
  * Implementation of Section
  */
 class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
+  private _root: NoteSections;
+  // @ts-expect-error: Default Indexer Type Override
   private _renderContainer: HTMLElement = null!;
   // @ts-expect-error: Default Indexer Type Override
   private _contents: string = null!;
-  // @ts-expect-error: Default Indexer Type Override
-  private _level: number = 0;
   // @ts-expect-error: Default Indexer Type Override
   private _keys: string[] = [];
   // @ts-expect-error: Default Indexer Type Override
@@ -18,79 +44,76 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   private _index: number = 0;
   // @ts-expect-error: Default Indexer Type Override
-  private _title: string = "";
-  // @ts-expect-error: Default Indexer Type Override
-  private _root: NoteSections;
-  // @ts-expect-error: Default Indexer Type Override
   private _container: NoteSection|null = null;
   // @ts-expect-error: Default Indexer Type Override
-  private _sections: Record<string, NoteSection> = {};
+  private _sections: Record<string, NoteSection[]> = {};
+  // @ts-expect-error: Default Indexer Type Override
+  private _subtitles: Heading[] = [];
+  // @ts-expect-error: Default Indexer Type Override
+  private _heading: Heading;
+  // @ts-expect-error: Default Indexer Type Override
+  private _unique: Record<string, NoteSection> = {};
 
   //#region Properties
   
   [key: string]: NoteSection;
   // @ts-expect-error: Default Indexer Type Override
-  get Level(): number { return this._level; }
+  get keys()
+    : string[] { return this._keys; }
   // @ts-expect-error: Default Indexer Type Override
-  get Keys(): string[] { return this._keys; }
+  get Keys()
+    : string[] { return this._keys; }
   // @ts-expect-error: Default Indexer Type Override
-  get Count(): number { return this._count; }
+  get count()
+    : number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
-  get Title(): string { return this._title; }
+  get Count()
+    : number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
-  get Container(): Section | null { return this._container; }
+  get Container()
+    : NoteSection | null { return this._container; }
   // @ts-expect-error: Default Indexer Type Override
-  get Sections(): Record<string, Section> { return this._sections; }
+  get container()
+    : NoteSection | null { return this._container; }
   // @ts-expect-error: Default Indexer Type Override
-  get Root(): NoteSections { return this._root; }
+  get Sections()
+    : Record<string, NoteSection[]> { return this._sections; }
   // @ts-expect-error: Default Indexer Type Override
-  get level(): number { return this._level; }
+  get sections()
+    : Record<string, NoteSection[]> { return this._sections; }
   // @ts-expect-error: Default Indexer Type Override
-  get keys(): string[] { return this._keys; }
+  get Root()
+    : NoteSections { return this._root; }
   // @ts-expect-error: Default Indexer Type Override
-  get count(): number { return this._count; }
+  get root()
+    : NoteSections { return this._root; }
   // @ts-expect-error: Default Indexer Type Override
-  get title(): string { return this._title; }
+  get subtitles()
+    : Heading[] { return this._subtitles; }
   // @ts-expect-error: Default Indexer Type Override
-  get container(): Section | null { return this._container; }
-  // @ts-expect-error: Default Indexer Type Override
-  get sections(): Record<string, Section> { return this._sections; }
-  // @ts-expect-error: Default Indexer Type Override
-  get root(): NoteSections { return this._root; }
+  get Subtitles()
+    : Heading[] { return this._subtitles; }
 
   //#endregion
 
   //#region Load and Get
 
   // @ts-expect-error: Default Indexer Type Override
-  get Header(): string {
-    return this.header;
-  }
-
-  // @ts-expect-error: Default Indexer Type Override
-  get Md(): string {
-    return this.md;
-  }
-
-  // @ts-expect-error: Default Indexer Type Override
-  get Html(): HTMLElement {
-    return this.html;
-  }
-
-  // @ts-expect-error: Default Indexer Type Override
-  get path(): string {
-    return this._root.path + "#" + this._title;
-  }
-
-  // @ts-expect-error: Default Indexer Type Override
-  get Path(): string {
-    return this.path
+  get Header()
+  : Heading {
+    return this._heading;
   }
 
   // @ts-expect-error: Default Indexer Type Override
   get header()
+  : Heading {
+    return this._heading;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Md()
   : string {
-    return `${'#'.repeat(this.level)} ${this.title}`;
+    return this.md;
   }
   
   // @ts-expect-error: Default Indexer Type Override
@@ -101,6 +124,12 @@ class NoteSection implements Section {
     }
 
     return this._contents;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Html()
+  : HTMLElement {
+    return this.html;
   }
   
   // @ts-expect-error: Default Indexer Type Override
@@ -114,11 +143,35 @@ class NoteSection implements Section {
 
     return this._renderContainer;
   }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get path()
+  : string {
+    return this._root.path + "#" + this._title;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Path()
+  : string {
+    return this.path
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get unique()
+  : NoteSection[] {
+    return Object.values(this._unique);
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Unique()
+  : NoteSection[] {
+    return this.unique;  
+  }
     
   // @ts-expect-error: Default Indexer Type Override
   private _find()
     : string {
-    const fullNoteContents = this.root.text();
+    const fullNoteContents = this.root.loadText();
     const header = this.header;
 
     // find the headers that match
@@ -134,7 +187,7 @@ class NoteSection implements Section {
     }
 
     // find the start of this header's content.
-    const start = fullNoteContents.indexOf("\n", result.index + header.length) + 1;
+    const start = fullNoteContents.indexOf("\n", result.index + header.text.length) + 1;
     if (start === 0) {
       return "";
     }
@@ -173,24 +226,41 @@ class NoteSection implements Section {
   constructor(note: NoteSections, index: number, heading: HeadingCache) {
     this._root = note;
     this._index = index;
-    this._level = heading.level;
-    this._title = heading.heading;
+    this._heading = new SectionHeader(
+      heading.heading,
+      heading.level,
+      index
+    );
 
-    // " " deals with empty titles.
-    this._keys = NoteSection.SplayKeys(this.title);
+    this._keys = NoteSection.SplayKeys(this._heading.text);
   }
 
   // @ts-expect-error: Default Indexer Type Override
   addChild(
     child: NoteSection
-  ) : void {
+  ): void {
+    // add to sub-titles
+    this._subtitles.push(child.header);
+
+    // add to all parents:
+    let parent: NoteSection|null = this;
+    while (parent) {
+      parent._unique[NoteSections.BuildHeaderKey(child.header)] = child;
+      parent = parent.container;
+    }
+    
+    // add all keys to this object
     for (const key of child.keys) {
       if (!this.hasOwnProperty(key)) {
         this[key] = child;
       }
       
-      this._sections[key] = child;
-      child.parent = this;
+      if (this._sections[key]) {
+        this._sections[key].push(child);
+      } else {
+        this._sections[key] = [child];
+      }
+      child._container = this;
     }
 
     this._count += 1;
@@ -265,34 +335,55 @@ class NoteSection implements Section {
  */
 export class NoteSections extends Object implements Sections {
   // @ts-expect-error: Default Indexer Type Override
-  _all: Record<string, Section[]> = {};
+  private _all: Record<string, NoteSection[]> = {};
   // @ts-expect-error: Default Indexer Type Override
-  _path: string = "";
+  private _root: Record<string, NoteSection[]> = {};
   // @ts-expect-error: Default Indexer Type Override
-  _count: number = 0;
+  private _unique: Record<string, NoteSection> = {};
+  // @ts-expect-error: Default Indexer Type Override
+  private _path: string = "";
+  // @ts-expect-error: Default Indexer Type Override
+  private _count: number = 0;
 
   // @ts-expect-error: Default Indexer Type Override for Object Extension
-  [key: string]: Section;
+  [key: string]: NoteSection;
   // @ts-expect-error: Default Indexer Type Override
   get path(): string { return this._path; }
   // @ts-expect-error: Default Indexer Type Override
-  get count(): number { return this._count; }
-  // @ts-expect-error: Default Indexer Type Override
-  get all(): Record<string, Section[]> { return this._all; }
-  // @ts-expect-error: Default Indexer Type Override
   get Path(): string { return this._path; }
+  // @ts-expect-error: Default Indexer Type Override
+  get count(): number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
   get Count(): number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
-  get All(): Record<string, Section[]> { return this._all; }
-  
+  get all(): Record<string, NoteSection[]> { return this._all; }
   // @ts-expect-error: Default Indexer Type Override
-  text()
-  : string {
-    return PluginContainer
-      .DataviewApi
-      .io
-      .load(this._note.path);
+  get All(): Record<string, NoteSection[]> { return this._all; }
+  // @ts-expect-error: Default Indexer Type Override
+  get Root(): Record<string, NoteSection[]> { return this._root; }
+  // @ts-expect-error: Default Indexer Type Override
+  get root(): Record<string, NoteSection[]> { return this._root; }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get headers(): Heading[] {
+    return Object
+      .values(this._unique)
+      .map(u => u.header);
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Headers(): Heading[] { return this.headers; }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get unique()
+  : NoteSection[] {
+    return Object.values(this._unique);
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Unique()
+  : NoteSection[] {
+    return this.unique;  
   }
 
   //#region Initialization
@@ -302,7 +393,8 @@ export class NoteSections extends Object implements Sections {
     if (notePath !== undefined && headings !== undefined) {
       this._path = notePath;
 
-      let parent: NoteSection = null!;
+      let parent: NoteSection|null = null;
+      let previous: NoteSection|null = null;
       for (const heading of headings) {
         // make the new section
         const current = new NoteSection(
@@ -313,19 +405,38 @@ export class NoteSections extends Object implements Sections {
           heading
         );
 
-        // if there's no current parent, or the level of this is the same as or greater than the current parent, switch this to the parent.
-        if (!parent || (current.level <= parent.level)) {
+        // check if the last one is the parent of this one
+        if (previous && (previous.level < current.level)) {
+          parent = previous;
+        }
+
+        // check if this one has moved out of the current parent header.
+        while (parent && (current.level <= parent.level)) {
+          parent = parent.Container as NoteSection;
+        }
+
+        // add to root if there's no parent.
+        if (!parent) {
           parent = current;
+
+          if (!this._root[heading.heading]) {
+            this._root[heading.heading] = [current];
+          } else {
+            this._root[heading.heading].push(current);
+          }
+          
           for (const key of parent.keys) {
             if (!this.hasOwnProperty(key)) {
               this[key] = parent;
             }
           }
-        } else {
+        } // add as a child if there is one.
+        else {
           parent?.addChild(current);
         }
 
-        // register all the keys in all
+        // register all the keys and title
+        this._unique[NoteSections.BuildHeaderKey(current.header)] = current;
         for (const key of current.keys) {
           if (!this._all[key]) {
             this._all[key] = [current];
@@ -334,9 +445,18 @@ export class NoteSections extends Object implements Sections {
           }
         }
 
+        // increment 
         this._count += 1;
+        previous = current;
       }
     }
+  }
+
+  /**
+   * Make a uinique header key
+   */
+  static BuildHeaderKey(header: Heading) {
+    return header.index + ":|:" + header.text + ":|:" + header.level;
   }
 
   //#endregion
@@ -349,10 +469,19 @@ export class NoteSections extends Object implements Sections {
   // @ts-expect-error: Default Indexer Type Override
   named(
     name: string
-  ) : Section[] {
+  ) : NoteSection[] {
     return NoteSection.SplayKeys(name)
       .map(k => this._all[k])
       .filter(s => s)
       .flat();
+  }
+  
+  // @ts-expect-error: Default Indexer Type Override
+  loadText()
+  : string {
+    return PluginContainer
+      .DataviewApi
+      .io
+      .load(this._note.path);
   }
 }
