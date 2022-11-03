@@ -125,6 +125,7 @@ export class Metadata implements MetadataApi {
   /**
    * Access to the Dataview Api
    * (Read access and Data display)
+   * // TODO: can we set these to their specific types?
    */
   static get DataviewApi() : any {
     return (app as any)
@@ -137,7 +138,7 @@ export class Metadata implements MetadataApi {
   /**
    * Access to the Metaedit Api
    * (Write access)
-   * TODO: can we set these to their specific types?
+   * // TODO: can we set these to their specific types?
    */
   static get MetaeditApi() : any {
     return (app as any)

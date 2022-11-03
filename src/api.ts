@@ -22,6 +22,32 @@ export class PluginContainer {
    * The current instance of the metadata api plugin.
    */
   static Instance: MetadataPlugin;
+
+  /**
+   * Access to the Metaedit Api
+   * (Write access)
+   * // TODO: can we set these to their specific types?
+   */
+  static get MetaeditApi() : any {
+    return (app as any)
+    .plugins
+    .plugins
+    .metaedit
+    .api;
+  }
+  
+  /**
+   * Access to the Dataview Api
+   * (Read access and Data display)
+   * // TODO: can we set these to their specific types?
+   */
+  static get DataviewApi() : any {
+    return (app as any)
+      .plugins
+      .plugins
+      .dataview
+      .api;
+  }
 }
 
 /**
@@ -240,10 +266,12 @@ interface SectionInfo {
   keys: string[];
   count: number;
   title: string;
-  path: string;
   parent: Section|null;
   children: Record<string, Section>;
+  note: SectionsNoteData;
+  get header(): string;
   get contents(): string;
+  get rendered(): HTMLElement;
 }
 
 interface SectionChildren {
