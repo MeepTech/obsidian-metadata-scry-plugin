@@ -9,25 +9,83 @@ class NoteSection implements Section {
   private _renderContainer: HTMLElement = null!;
   // @ts-expect-error: Default Indexer Type Override
   private _contents: string = null!;
+  // @ts-expect-error: Default Indexer Type Override
+  private _level: number = 0;
+  // @ts-expect-error: Default Indexer Type Override
+  private _keys: string[] = [];
+  // @ts-expect-error: Default Indexer Type Override
+  private _count: number = 0;
+  // @ts-expect-error: Default Indexer Type Override
+  private _index: number = 0;
+  // @ts-expect-error: Default Indexer Type Override
+  private _title: string = "";
+  // @ts-expect-error: Default Indexer Type Override
+  private _root: NoteSections;
+  // @ts-expect-error: Default Indexer Type Override
+  private _container: NoteSection|null = null;
+  // @ts-expect-error: Default Indexer Type Override
+  private _sections: Record<string, NoteSection> = {};
+
+  //#region Properties
+  
   [key: string]: NoteSection;
   // @ts-expect-error: Default Indexer Type Override
-  level: number = 0;
+  get Level(): number { return this._level; }
   // @ts-expect-error: Default Indexer Type Override
-  keys: string[] = [];
+  get Keys(): string[] { return this._keys; }
   // @ts-expect-error: Default Indexer Type Override
-  count: number = 0;
+  get Count(): number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
-  index: number = 0;
+  get Title(): string { return this._title; }
   // @ts-expect-error: Default Indexer Type Override
-  title: string = "";
+  get Container(): Section | null { return this._container; }
   // @ts-expect-error: Default Indexer Type Override
-  note: NoteSections;
+  get Sections(): Record<string, Section> { return this._sections; }
   // @ts-expect-error: Default Indexer Type Override
-  parent: NoteSection|null = null;
+  get Root(): NoteSections { return this._root; }
   // @ts-expect-error: Default Indexer Type Override
-  children: Record<string, NoteSection> = {};
+  get level(): number { return this._level; }
+  // @ts-expect-error: Default Indexer Type Override
+  get keys(): string[] { return this._keys; }
+  // @ts-expect-error: Default Indexer Type Override
+  get count(): number { return this._count; }
+  // @ts-expect-error: Default Indexer Type Override
+  get title(): string { return this._title; }
+  // @ts-expect-error: Default Indexer Type Override
+  get container(): Section | null { return this._container; }
+  // @ts-expect-error: Default Indexer Type Override
+  get sections(): Record<string, Section> { return this._sections; }
+  // @ts-expect-error: Default Indexer Type Override
+  get root(): NoteSections { return this._root; }
+
+  //#endregion
 
   //#region Load and Get
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Header(): string {
+    return this.header;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Md(): string {
+    return this.md;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Html(): HTMLElement {
+    return this.html;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get path(): string {
+    return this._root.path + "#" + this._title;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Path(): string {
+    return this.path
+  }
 
   // @ts-expect-error: Default Indexer Type Override
   get header()
@@ -36,7 +94,7 @@ class NoteSection implements Section {
   }
   
   // @ts-expect-error: Default Indexer Type Override
-  get contents()
+  get md()
   : string {
     if (this._contents === null) {
       this._contents = this._find();
@@ -46,12 +104,12 @@ class NoteSection implements Section {
   }
   
   // @ts-expect-error: Default Indexer Type Override
-  get rendered()
+  get html()
   : HTMLElement {
     if (this._renderContainer === null) {
       this._renderContainer = document.createElement("div");
       //@ts-expect-error: Api should expect null but does not.
-      MarkdownRenderer.renderMarkdown(this.contents, container, this.note.path, null);
+      MarkdownRenderer.renderMarkdown(this._contents, container, this._note.path, null);
     }
 
     return this._renderContainer;
@@ -60,19 +118,19 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   private _find()
     : string {
-    const fullNoteContents = this.note.contents;
+    const fullNoteContents = this.root.text();
     const header = this.header;
 
     // find the headers that match
     const results = [...fullNoteContents.matchAll(new RegExp(`^${header}`, "gm"))];
     if (!results) {
-      throw `Section Header: "${header}", not found in file: ${this.note.path}.`;
+      throw `Section Header: "${header}", not found in file: ${this._note.path}.`;
     }
 
     // find the one at the correct index
-    const result = results.at(this.index);
+    const result = results.at(this._index);
     if (!result || !result.index) {
-      throw `Section Header: "${header}", with index: ${this.index}, not found in file: ${this.note.path}.`;
+      throw `Section Header: "${header}", with index: ${this._index}, not found in file: ${this._note.path}.`;
     }
 
     // find the start of this header's content.
@@ -112,13 +170,14 @@ class NoteSection implements Section {
 
   //#region Initialization
 
-  constructor(note: Sections, index: number, heading: HeadingCache) {
-    this.note = note;
-    this.index = index;
-    this.level = heading.level;
-    this.title = heading.heading;
+  constructor(note: NoteSections, index: number, heading: HeadingCache) {
+    this._root = note;
+    this._index = index;
+    this._level = heading.level;
+    this._title = heading.heading;
 
-    this.keys = NoteSection.SplayKeys(this.title);
+    // " " deals with empty titles.
+    this._keys = NoteSection.SplayKeys(this.title);
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -130,11 +189,11 @@ class NoteSection implements Section {
         this[key] = child;
       }
       
-      this.children[key] = child;
+      this._sections[key] = child;
       child.parent = this;
     }
 
-    this.count += 1;
+    this._count += 1;
   }
 
   static SplayKeys(text: string): string[] {
@@ -155,6 +214,10 @@ class NoteSection implements Section {
 
     if (PluginContainer.Instance.settings.splayFrontmatterWithoutDataview) {
       const camel = cleaned.replace(/ /g, "");
+      if (!camel) {
+        return keys.unique();
+      }
+
       const lower = camel.toLowerCase();
       const lowerCamel = camel[0].toLowerCase() + camel.substring(1);
 
@@ -166,12 +229,12 @@ class NoteSection implements Section {
           // lower camel
           keys.push(lowerCamel
             .split('-')
-            .map((part, i) => i !== 0 ? part.charAt(0).toUpperCase() + part.substring(1) : part)
+            .map((part, i) => (i !== 0 && part) ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
           // upper/default camel
           keys.push(camel
             .split('-')
-            .map(part => part.charAt(0).toUpperCase() + part.substring(1))
+            .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
         } else if (PluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
           // lower
@@ -180,12 +243,12 @@ class NoteSection implements Section {
           // lower camel
           keys.push(lowerCamel
             .split('-')
-            .map((part, i) => i !== 0 ? part.charAt(0).toUpperCase() + part.substring(1) : part)
+            .map((part, i) => (i !== 0 && part) ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
           // upper/default camel
           keys.push(camel
             .split('-')
-            .map(part => part.charAt(0).toUpperCase() + part.substring(1))
+            .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
         }
       }
@@ -201,22 +264,35 @@ class NoteSection implements Section {
  * Implementation of Sections
  */
 export class NoteSections extends Object implements Sections {
+  // @ts-expect-error: Default Indexer Type Override
+  _all: Record<string, Section[]> = {};
+  // @ts-expect-error: Default Indexer Type Override
+  _path: string = "";
+  // @ts-expect-error: Default Indexer Type Override
+  _count: number = 0;
+
   // @ts-expect-error: Default Indexer Type Override for Object Extension
   [key: string]: Section;
   // @ts-expect-error: Default Indexer Type Override
-  all: Record<string, Section[]> = {};
+  get path(): string { return this._path; }
   // @ts-expect-error: Default Indexer Type Override
-  path: string = "";
+  get count(): number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
-  count: number = 0;
+  get all(): Record<string, Section[]> { return this._all; }
+  // @ts-expect-error: Default Indexer Type Override
+  get Path(): string { return this._path; }
+  // @ts-expect-error: Default Indexer Type Override
+  get Count(): number { return this._count; }
+  // @ts-expect-error: Default Indexer Type Override
+  get All(): Record<string, Section[]> { return this._all; }
   
   // @ts-expect-error: Default Indexer Type Override
-  get contents()
+  text()
   : string {
     return PluginContainer
       .DataviewApi
       .io
-      .load(this.note.path);
+      .load(this._note.path);
   }
 
   //#region Initialization
@@ -224,15 +300,15 @@ export class NoteSections extends Object implements Sections {
   constructor(notePath: string | undefined, headings: HeadingCache[] | undefined) {
     super();
     if (notePath !== undefined && headings !== undefined) {
-      this.path = notePath;
+      this._path = notePath;
 
       let parent: NoteSection = null!;
       for (const heading of headings) {
         // make the new section
         const current = new NoteSection(
           this,
-          this.all[heading.heading]
-            ? this.all[heading.heading].length
+          this._all[heading.heading]
+            ? this._all[heading.heading].length
             : 0,
           heading
         );
@@ -246,19 +322,19 @@ export class NoteSections extends Object implements Sections {
             }
           }
         } else {
-          parent.addChild(current);
+          parent?.addChild(current);
         }
 
         // register all the keys in all
         for (const key of current.keys) {
-          if (!this.all[key]) {
-            this.all[key] = [current];
+          if (!this._all[key]) {
+            this._all[key] = [current];
           } else {
-            this.all[key].push(current);
+            this._all[key].push(current);
           }
         }
 
-        this.count += 1;
+        this._count += 1;
       }
     }
   }
@@ -275,7 +351,7 @@ export class NoteSections extends Object implements Sections {
     name: string
   ) : Section[] {
     return NoteSection.SplayKeys(name)
-      .map(k => this.all[k])
+      .map(k => this._all[k])
       .filter(s => s)
       .flat();
   }

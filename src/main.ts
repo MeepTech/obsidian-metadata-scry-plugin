@@ -10,6 +10,11 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
   private static _instance: MetadataApi;
   settings: MetadataApiSettings;
   
+  //#region Api Access
+
+  /**
+   * The current instance of the metadata api
+   */
   static get Instance() : MetadataApi {
     return MetadataApiPlugin._instance;
   }
@@ -17,6 +22,10 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
   get api(): MetadataApi {
     return MetadataApiPlugin._instance;
   }
+
+  //#endregion
+
+  //#region Initialization
 
   async onload() {
     super.onload();
@@ -48,6 +57,8 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
 
     this._initGlobalMetadata();
     this._initGlobalCache();
+    this._initGlobalPath();
+
     if (this.settings.defineObjectPropertyHelperFunctions) {
       this._initObjectPropertyHelperMethods();
     }
@@ -196,9 +207,36 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     } catch { }
   }
 
+  private _initGlobalPath() {
+    try {
+      /**
+       * Global access to the cache on desktop.
+       */
+      Object.defineProperty(global, this.settings.globalPathName, {
+        value: Metadata.Api.path
+      });
+    } catch { }
+
+    try {
+      /**
+       * Global access to the cache on mobile.
+       */
+      Object.defineProperty(window, this.settings.globalPathName, {
+        value: Metadata.Api.path
+      });
+    } catch { }
+  }
+
+  //#endregion
+
+  //#endregion
+
+  //#region De-Initialization
+
   private _deinitApi() {
     this._deinitGlobalMetadata();
     this._deinitGlobalCache();
+    this._deinitGlobalPath();
     this._deinitObjectPropertyHelpers();
     
     MetadataApiPlugin._instance = undefined!;
@@ -214,6 +252,18 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
       delete window[this.settings.globalCacheName];
     } catch { }
   }
+
+  private _deinitGlobalPath() {
+    try {
+      // @ts-ignore: Global Scope
+      delete global[this.settings.globalPathName];
+    } catch { }
+    try {
+      // @ts-ignore: Global Scope
+      delete window[this.settings.globalPathName];
+    } catch { }
+  }
+
 
   private _deinitGlobalMetadata() {
     try {

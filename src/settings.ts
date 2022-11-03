@@ -4,6 +4,7 @@ import { MetadataApiSettings, MetadataPlugin, SplayKebabCasePropertiesOption } f
 export const DefaultSettings: MetadataApiSettings = {
   globalCacheName: 'cache',
   globalMetadataApiName: 'meta',
+  globalPathName: "path",
   defineObjectPropertyHelperFunctions: true,
   splayKebabCaseProperties: SplayKebabCasePropertiesOption.LowerAndCamelCase,
   splayFrontmatterWithoutDataview: true,
@@ -48,6 +49,17 @@ export class MetadataApiSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.globalCacheName)
         .onChange(async (value) => {
           this.plugin.settings.globalCacheName = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('Global Path Variable Name')
+      .setDesc('The name to use for the path global helper function registered by this plugin')
+      .addText(text => text
+        .setPlaceholder('path')
+        .setValue(this.plugin.settings.globalPathName)
+        .onChange(async (value) => {
+          this.plugin.settings.globalPathName = value;
           await this.plugin.saveSettings();
         }));
 
