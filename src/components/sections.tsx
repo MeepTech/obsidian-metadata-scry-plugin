@@ -1,11 +1,23 @@
 import { Section } from "../api";
 
-export namespace Meta {
+export namespace ReactSectionComponents {
 
-  export const RenderModes = [
-    "md",
-    "txt",
-    "html"
+  /**
+   * Enum for the render modes of a section or sections
+   */
+  export enum SectionRenderMode {
+    md = "md",
+    html = "html",
+    txt = "txt"
+  }
+
+  /**
+   * All of the available render modes or sections.
+   */
+  export const SectionRenderModes : Array<SectionRenderMode> = [
+    SectionRenderMode.md,
+    SectionRenderMode.txt,
+    SectionRenderMode.html
   ];
 
   /**
@@ -13,12 +25,12 @@ export namespace Meta {
    */
   export const Section = ({
     data,
-    mode = "md",
+    mode = SectionRenderMode.md,
     renderer = undefined,
     enabled = undefined
   }: {
     data: Section,
-    mode?: string | undefined,
+    mode?: SectionRenderMode | undefined,
     renderer?: ((
       section?: Section,
       renderedContents?: string | HTMLElement
@@ -38,8 +50,8 @@ export namespace Meta {
     if (!section) {
       throw "'data' prop of type Section is required.";
     }
-    if (!RenderModes.includes(mode)) {
-      throw `Unrecognized mode: ${mode}. Valid modes: ${RenderModes.join(", ")}`;
+    if (!SectionRenderModes.includes(mode)) {
+      throw `Unrecognized mode: ${mode}. Valid modes: ${SectionRenderModes.join(", ")}`;
     }
     
     // load the section content we want
@@ -58,13 +70,13 @@ export namespace Meta {
           return renderer(section, renderedContent);
         } else {
           // default markdown renderer
-          if (mode.toLowerCase() == "md") {
+          if (mode.toLowerCase() == SectionRenderMode.md) {
             return <span
               className={`Section-${section.header.text.replace(" ", "-")} Section-Index-${section.header.index} Section-Level-${section.header.level}`}>
               <Markdown src={renderedContent} />
             </span>;
           } // full html post-renderer
-          else if (mode.toLowerCase() == "html") {
+          else if (mode.toLowerCase() == SectionRenderMode.html) {
             return <span
               className={`Section-${section.header.text.replace(" ", "-")} Section-Index-${section.header.index} Section-Level-${section.header.level}`}
               dangerouslySetInnerHTML={{
@@ -72,7 +84,7 @@ export namespace Meta {
                   ? renderedContent.innerHTML
                   : ""
               }} />;
-          } // cleaned text (from html)
+          } // cleaned txt (from html.innerText)
           else {
             return <div
               className={`Section-${section.header.text.replace(" ", "-")} Section-Index-${section.header.index} Section-Level-${section.header.level}`}>
@@ -92,12 +104,12 @@ export namespace Meta {
    */
   export const Sections = ({
     data,
-    mode = "md",
+    mode = SectionRenderMode.md,
     renderer = undefined,
     filter = undefined
   }: {
       data: Section[],
-      mode?: string | undefined,
+      mode?: SectionRenderMode | undefined,
       renderer?: ((
         section?: Section,
         renderedContents?: string | HTMLElement,
@@ -121,8 +133,8 @@ export namespace Meta {
     if (!data) {
       throw "'data' prop of type Section[] is required.";
     }
-    if (!RenderModes.includes(mode)) {
-      throw `Unrecognized mode: ${mode}. Valid modes: ${RenderModes.join(", ")}`;
+    if (!SectionRenderModes.includes(mode)) {
+      throw `Unrecognized mode: ${mode}. Valid modes: ${SectionRenderModes.join(", ")}`;
     }
 
     // hooks to load sections data
@@ -131,7 +143,6 @@ export namespace Meta {
       // load all sections at once.
       const renderedItems: Record<string, string> | Record<string, HTMLElement> = {};
       for (const section of data) {
-        //@ts-expect-error: Indexer makes section expect section as child.
         renderedItems[section.id] = await section[mode];
       }
 
@@ -162,11 +173,19 @@ export namespace Meta {
       // loop though and render the sections:
       return <>
         {data && data.map(section =>
-          <Meta.Section data={section} {...childProps} />)}
+          <Section data={section} {...childProps} />)}
       </>;
     }
 
     // else: loading...
     return <i>{"Loading"}</i>;
+  }
+
+  /**
+   * All components
+   */
+  export const Components = {
+    Section,
+    Sections
   }
 }

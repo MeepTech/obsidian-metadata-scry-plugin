@@ -564,6 +564,17 @@ export interface CurrentApi {
   clear(frontmatterProperties?: string | Array<string> | object | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
 }
 
+/**
+ * Static Api accessed through "Metadata" global calls
+ */
+export type StaticMetaApi = {
+  [key: string | number | symbol]: any;
+  Components?: Record<string, any>;
+  SectionComponents?: Record<string, any>;
+  Api: MetadataApi;
+  Plugin: MetadataPlugin
+}
+
 //#endregion
 
 //#region Sections

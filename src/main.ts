@@ -1,8 +1,8 @@
 import { Plugin } from 'obsidian';
 import { Metadata } from './meta';
 import { DefaultSettings, MetadataApiSettingTab } from './settings';
-import { PluginContainer, MetadataApi, MetadataApiSettings, MetadataPlugin } from "./api";
-import { Meta } from "./components/sections";
+import { PluginContainer, MetadataApi, MetadataApiSettings, MetadataPlugin, StaticMetaApi } from "./api";
+import { ReactSectionComponents } from "./components/sections";
 
 /**
  * Metadata api obsidian.md plugin
@@ -84,12 +84,6 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     }
   }
 
-  private _checkForAndInitializeReact() {
-    // @ts-expect-error: app.plugin is not mapped.
-    if (app.plugins.plugins["obsidian-react-components"]) {
-      this._initReactComponents();
-    }
-  }
   //#region Object property and Global defenitions.
 
   private _initObjectPropertyHelperMethods() {
@@ -210,27 +204,44 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
   }
 
   private _initGlobalMetadata() {
-    try {
-      /**
-       * Global access to the metadata on desktop.
-       */
-      Object.defineProperty(global, "Metadata", {
-        get() {
-          return Metadata;
-        }
-      });
-    } catch { }
-    try {
-      /**
-       * Global access to the metadata on mobile.
-       */
-      Object.defineProperty(window, "Metadata", {
-        get() {
-          return Metadata;
-        }
-      });
-    } catch { }
-
+    const apiAndPlugin = {
+      Api: this.api,
+      Plugin: MetadataApiPlugin.Instance.plugin
+    };
+    const staticApi: StaticMetaApi
+      // if we have react, we want to add the components to the api.
+      // @ts-expect-error: app.plugin is not mapped.
+      = app.plugins.plugins["obsidian-react-components"]
+        ? {
+          ...ReactSectionComponents,
+          Components: {
+            ...ReactSectionComponents.Components
+          },
+          SectionComponents: ReactSectionComponents.Components,
+          ...apiAndPlugin
+        } : apiAndPlugin;
+  
+      try {
+        /**
+         * Global access to the metadata on desktop.
+         */
+        Object.defineProperty(global, "Metadata", {
+          get() {
+            return staticApi;
+          }
+        });
+      } catch { }
+      try {
+        /**
+         * Global access to the metadata on mobile.
+         */
+        Object.defineProperty(window, "Metadata", {
+          get() {
+            return staticApi;
+          }
+        });
+      } catch { }
+    
     try {
       /**
        * Global access to the metadata on desktop.
@@ -296,11 +307,6 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
       });
     } catch { }
   }
-  
-  private _initReactComponents() {
-    Meta.Section
-  }
-
 
   //#endregion
 
