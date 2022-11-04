@@ -6,6 +6,7 @@ export const DefaultSettings: MetadataApiSettings = {
   globalMetadataApiName: 'meta',
   globalPathName: "path",
   defineObjectPropertyHelperFunctions: true,
+  defineArrayHelperFunctions: true,
   splayKebabCaseProperties: SplayKebabCasePropertiesOption.LowerAndCamelCase,
   splayFrontmatterWithoutDataview: true,
   prototypesPath: "_/_assets/_data/_prototypes",
@@ -62,6 +63,18 @@ export class MetadataApiSettingTab extends PluginSettingTab {
           this.plugin.settings.globalPathName = value;
           await this.plugin.saveSettings();
         }));
+    
+
+    new Setting(containerEl)
+    .setName('Add Array Helper Functions.')
+    .setDesc('Adds the functions aggregateby, etc to all arrays for data management.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.defineArrayHelperFunctions)
+      .onChange(async (value) => {
+        this.plugin.settings.defineArrayHelperFunctions = value;
+        await this.plugin.saveSettings();
+      }));
+  
 
     new Setting(containerEl)
       .setName('Add Object Property Helper Functions.')

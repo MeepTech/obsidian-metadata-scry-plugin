@@ -1,10 +1,10 @@
 import { Sections, Section, PluginContainer, SplayKebabCasePropertiesOption, Heading } from './api';
-import { HeadingCache, MarkdownRenderer } from 'obsidian';
+import { HeadingCache, MarkdownRenderer, TFile } from 'obsidian';
 
 /**
  * Implementation of Heading
  */
-export class SectionHeader implements Heading {
+class SectionHeader implements Heading {
   private _text: string;
   private _index: number;
   private _level: number;
@@ -17,7 +17,7 @@ export class SectionHeader implements Heading {
   get level(): number { return this._level; }
   get md(): string { return this.Md; }
   get Md(): string {
-    return ` ${'#'.repeat(this.level)} ${this.text}`
+    return `${'#'.repeat(this.level)} ${this.text}`
   }
 
   constructor(text: string, level: number, index: number) {
@@ -42,8 +42,6 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   private _count: number = 0;
   // @ts-expect-error: Default Indexer Type Override
-  private _index: number = 0;
-  // @ts-expect-error: Default Indexer Type Override
   private _container: NoteSection|null = null;
   // @ts-expect-error: Default Indexer Type Override
   private _sections: Record<string, NoteSection[]> = {};
@@ -53,6 +51,8 @@ class NoteSection implements Section {
   private _heading: Heading;
   // @ts-expect-error: Default Indexer Type Override
   private _unique: Record<string, NoteSection> = {};
+  // @ts-expect-error: Default Indexer Type Override
+  private _promise: Promise<string>|null = null;
 
   //#region Properties
   
@@ -112,42 +112,58 @@ class NoteSection implements Section {
 
   // @ts-expect-error: Default Indexer Type Override
   get Md()
-  : string {
+  : Promise<string> {
     return this.md;
   }
   
   // @ts-expect-error: Default Indexer Type Override
   get md()
-  : string {
+  : Promise<string> {
     if (this._contents === null) {
-      this._contents = this._find();
+      return this._promise ??= this._find().then(r => {
+        this._contents = r;
+        this._promise = null;
+        return r;
+      });
+    } else {
+      return Promise.resolve(this._contents);
     }
-
-    return this._contents;
   }
 
   // @ts-expect-error: Default Indexer Type Override
   get Html()
-  : HTMLElement {
+  : Promise<HTMLElement> {
     return this.html;
   }
   
   // @ts-expect-error: Default Indexer Type Override
   get html()
-  : HTMLElement {
-    if (this._renderContainer === null) {
-      this._renderContainer = document.createElement("div");
-      //@ts-expect-error: Api should expect null but does not.
-      MarkdownRenderer.renderMarkdown(this._contents, container, this._note.path, null);
-    }
+    : Promise<HTMLElement> {
+    if (this._promise) {
+      return this._promise.then(v => {
+        if (this._renderContainer === null) {
+          this._renderContainer = document.createElement("div");
+          //@ts-expect-error: Api should expect null but does not.
+          MarkdownRenderer.renderMarkdown(this._contents, container, this.root.path, null);
+        }
 
-    return this._renderContainer;
+        return this._renderContainer;
+      });
+    } else {
+      if (this._renderContainer === null) {
+        this._renderContainer = document.createElement("div");
+        //@ts-expect-error: Api should expect null but does not.
+        MarkdownRenderer.renderMarkdown(this._contents, container, this.root.path, null);
+      }
+
+      return Promise.resolve(this._renderContainer);
+    }
   }
 
   // @ts-expect-error: Default Indexer Type Override
   get path()
   : string {
-    return this._root.path + "#" + this._title;
+    return this._root.path + "#" + this.header.text;
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -169,52 +185,41 @@ class NoteSection implements Section {
   }
     
   // @ts-expect-error: Default Indexer Type Override
-  private _find()
-    : string {
-    const fullNoteContents = this.root.loadText();
-    const header = this.header;
+  private async _find()
+    : Promise<string> {
+    const fullNoteContents = (await this.root.loadText()) || "";
+    const headerMd = this.header.Md;
 
     // find the headers that match
-    const results = [...fullNoteContents.matchAll(new RegExp(`^${header}`, "gm"))];
-    if (!results) {
-      throw `Section Header: "${header}", not found in file: ${this._note.path}.`;
+    const headerRegEx = new RegExp(`((?:^${headerMd})|(?:\\n${headerMd}))`, "gm");
+    const matches = fullNoteContents.matchAll(headerRegEx);
+
+    if (!matches) {
+      throw `Section Header: "${headerMd}", not found in file: ${this.root.path}.`;
+    }
+
+    const results = [...matches];
+    if (!results || !results.length) {
+      throw `Section Header: "${headerMd}", not found in file: ${this.root.path}.`;
     }
 
     // find the one at the correct index
-    const result = results.at(this._index);
+    const result = results.at(this.header.index);
     if (!result || !result.index) {
-      throw `Section Header: "${header}", with index: ${this._index}, not found in file: ${this._note.path}.`;
+      throw `Section Header: "${headerMd}", with index: ${this._index}, not found in file: ${this.root.path}.`;
     }
 
     // find the start of this header's content.
-    const start = fullNoteContents.indexOf("\n", result.index + header.text.length) + 1;
-    if (start === 0) {
+    const start = fullNoteContents.indexOf("\\n", result.index + headerMd.length);
+    if (start === -1) {
       return "";
     }
 
     // find the end
-    const match = fullNoteContents.substring(start).match(new RegExp(`(^#{1, ${this.level}} )`, "m"));
+    const match = fullNoteContents.substring(start).match(new RegExp(`(\\n#\{1,${this.header.level}\})`, "gm"));
     const end = (match && match.index) 
-      ? start + match.index - 1
-      : fullNoteContents.length - 1;
-
-    // TODO: remove
-    /*while (true) {
-      currentEnd = fullNoteContents.indexOf(`\n #`, currentEnd) + 3;
-      if (currentEnd === 2) {
-        currentEnd = fullNoteContents.length - 1;
-        break;
-      } else {
-        const hashesEnd = fullNoteContents.indexOf(" ", currentEnd);
-        const headingLevel = hashesEnd - currentEnd + 1;
-        if (headingLevel >= this.level) {
-          currentEnd -= 3;
-          break;
-        } else {
-          currentEnd = fullNoteContents.indexOf("\n", currentEnd);
-        }
-      }
-    }*/
+      ? start + match.index - 2
+      : fullNoteContents.length - 2;
 
     return fullNoteContents.substring(start, end);
   }
@@ -225,7 +230,6 @@ class NoteSection implements Section {
 
   constructor(note: NoteSections, index: number, heading: HeadingCache) {
     this._root = note;
-    this._index = index;
     this._heading = new SectionHeader(
       heading.heading,
       heading.level,
@@ -279,6 +283,9 @@ class NoteSection implements Section {
         return b ? `${b} ${c}` : e;
       });
     }
+
+    // remove special and illegal name characters
+    cleaned = cleaned.replace(new RegExp("(?:(^[\\d ][^{a-zA-Z_\\-}]*)|([^{a-zA-Z0-9_\\-\\\$ }]))", "g"), "");
 
     keys.push(cleaned);
 
@@ -344,6 +351,8 @@ export class NoteSections extends Object implements Sections {
   private _path: string = "";
   // @ts-expect-error: Default Indexer Type Override
   private _count: number = 0;
+  // @ts-expect-error: Default Indexer Type Override
+  private _md: string = null!;
 
   // @ts-expect-error: Default Indexer Type Override for Object Extension
   [key: string]: NoteSection;
@@ -406,13 +415,13 @@ export class NoteSections extends Object implements Sections {
         );
 
         // check if the last one is the parent of this one
-        if (previous && (previous.level < current.level)) {
+        if (previous && (previous.header.level < current.header.level)) {
           parent = previous;
         }
 
         // check if this one has moved out of the current parent header.
-        while (parent && (current.level <= parent.level)) {
-          parent = parent.Container as NoteSection;
+        while (parent && (current.header.level <= parent.header.level)) {
+          parent = parent.Container;
         }
 
         // add to root if there's no parent.
@@ -477,11 +486,15 @@ export class NoteSections extends Object implements Sections {
   }
   
   // @ts-expect-error: Default Indexer Type Override
-  loadText()
-  : string {
-    return PluginContainer
-      .DataviewApi
-      .io
-      .load(this._note.path);
+  async loadText()
+    : Promise<string> {
+    if (this._md !== null) {
+      return this._md;
+    } else {
+      const file = PluginContainer.Instance.api.vault(this.path) as TFile;
+      this._md = await app.vault.cachedRead(file);
+
+      return this._md;
+    }
   }
 }

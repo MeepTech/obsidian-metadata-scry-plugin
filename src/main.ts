@@ -62,6 +62,10 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     if (this.settings.defineObjectPropertyHelperFunctions) {
       this._initObjectPropertyHelperMethods();
     }
+
+    if (this.settings.defineArrayHelperFunctions) {
+      this._initArrayHelperMethods();
+    }
   }
 
   /** 
@@ -134,6 +138,36 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     Object.defineProperty(Object.prototype, 'setProp', {
       value: function (propertyPath: string|Array<string>, value: any) {
         return Metadata.SetDeepProperty(propertyPath, value, this);
+      },
+      enumerable: false
+    });
+  }
+
+  private _initArrayHelperMethods() {
+    /**
+     * Aggregate an array of objects by a value
+     * 
+     * @param {string} key The key to aggegate by. This uses getProp so you can pass in a compound key
+     * 
+     * @returns An object with arrays indexed by the value of the property at the key within the object.
+     */
+    Object.defineProperty(Array.prototype, 'aggregateBy', {
+      value: function (key: string): Record<any, any> {
+        const result: Record<any, any[]> = {};
+
+        for (const i of this) {
+          const k = i
+            ? i.getProp(key, "")
+            : "";
+          
+          if (result[k]) {
+            result[k].push(i);
+          } else {
+            result[k] = [i];
+          }
+        }
+
+        return result;
       },
       enumerable: false
     });
@@ -238,6 +272,7 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     this._deinitGlobalCache();
     this._deinitGlobalPath();
     this._deinitObjectPropertyHelpers();
+    this._deinitArrayHelpers();
     
     MetadataApiPlugin._instance = undefined!;
   }
@@ -296,6 +331,13 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     try {
       // @ts-ignore: Global Scope
       delete Object.prototype["setProp"];
+    } catch { }
+  }
+
+  private _deinitArrayHelpers() {
+    try {
+      // @ts-ignore: Global Scope
+      delete Array.prototype["aggregateBy"];
     } catch { }
   }
 

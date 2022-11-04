@@ -96,6 +96,11 @@ export interface MetadataApiSettings {
   defineObjectPropertyHelperFunctions: boolean;
 
   /**
+   * if array helper functions like aggegateBy should be added to all arrays
+   */
+  defineArrayHelperFunctions: boolean;
+
+  /**
    * if kebab-case properties should be splayed, and how.
    */
   splayKebabCaseProperties: SplayKebabCasePropertiesOption;
@@ -697,23 +702,23 @@ interface SectionInfo {
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
    */
-  get md(): string;
+  get md(): Promise<string>;
 
   /**
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
    */
-  get Md(): string;
+  get Md(): Promise<string>;
 
   /**
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
    */
-  get html(): HTMLElement;
+  get html(): Promise<HTMLElement>;
 
   /**
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
    */
-  get Html(): HTMLElement;
+  get Html(): Promise<HTMLElement>;
 
   /**
    * The path of the note this section is from with the header appended after a #
@@ -795,6 +800,9 @@ interface SectionsNoteData {
  * Information about sections in a note.
  */
 interface SectionsCollection {
+  /**
+   * A section, indexe by one of it's splayed keys.
+   */
   [key: string]: Section
 }
 
