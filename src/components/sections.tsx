@@ -27,7 +27,7 @@ export namespace ReactSectionComponents {
     data,
     mode = SectionRenderMode.md,
     renderer = undefined,
-    enabled = undefined
+    enabled = true
   }: {
     data: Section,
     mode?: SectionRenderMode | undefined,
@@ -41,6 +41,7 @@ export namespace ReactSectionComponents {
       renderedContents?: string | HTMLElement
     ) => boolean)
       | undefined
+      | boolean
   }) => {
     const { React, Markdown } = (app as any).plugins.plugins["obsidian-react-components"];
     const { useState, useEffect } = React;
@@ -106,7 +107,7 @@ export namespace ReactSectionComponents {
     data,
     mode = SectionRenderMode.md,
     renderer = undefined,
-    filter = undefined
+    filter = true
   }: {
       data: Section[],
       mode?: SectionRenderMode | undefined,
@@ -124,6 +125,7 @@ export namespace ReactSectionComponents {
         allRenderedSectionContents?: Record<string, string> | Record<string, HTMLElement>
       ) => boolean)
         | undefined
+        | boolean
   }) => {
     const { React } = (app as any).plugins.plugins["obsidian-react-components"].React;
     const { useState, useEffect } = React;
@@ -166,8 +168,9 @@ export namespace ReactSectionComponents {
           = (s: Section, r: string|HTMLElement) => renderer(s, r, sections, renderedSections);
       }
       if (filter) {
-        childProps.enabled
-          = (s: Section, r: string|HTMLElement) => filter(s, r, sections, renderedSections);
+        childProps.enabled = typeof filter === "function"
+          ? (s: Section, r: string | HTMLElement) => filter(s, r, sections, renderedSections)
+          : filter;
       }
 
       // loop though and render the sections:
