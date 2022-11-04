@@ -3,6 +3,7 @@ import { Metadata } from './meta';
 import { DefaultSettings, MetadataApiSettingTab } from './settings';
 import { PluginContainer, MetadataApi, MetadataApiSettings, MetadataPlugin, StaticMetaApi } from "./api";
 import { ReactSectionComponents } from "./components/sections";
+import { ReactMarkdownComponents } from './components/markdown';
 
 /**
  * Metadata api obsidian.md plugin
@@ -214,10 +215,13 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
       = app.plugins.plugins["obsidian-react-components"]
         ? {
           ...ReactSectionComponents,
+          ...ReactMarkdownComponents,
           Components: {
-            ...ReactSectionComponents.Components
+            ...ReactSectionComponents.Components,
+            ...ReactMarkdownComponents.Components
           },
           SectionComponents: ReactSectionComponents.Components,
+          MarkdownComponents: ReactMarkdownComponents.Components,
           ...apiAndPlugin
         } : apiAndPlugin;
   

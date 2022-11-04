@@ -127,9 +127,8 @@ export namespace ReactSectionComponents {
         | undefined
         | boolean
   }) => {
-    const { React } = (app as any).plugins.plugins["obsidian-react-components"].React;
+    const { React } = (app as any).plugins.plugins["obsidian-react-components"];
     const { useState, useEffect } = React;
-
     
     // validation
     if (!data) {
