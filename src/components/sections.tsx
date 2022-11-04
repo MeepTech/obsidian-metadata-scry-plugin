@@ -2,6 +2,12 @@ import { Section } from "../api";
 
 export namespace Meta {
 
+  export const RenderModes = [
+    "md",
+    "txt",
+    "html"
+  ];
+
   /**
    * Render A note Section fetched from Metadata-Api using react.
    */
@@ -27,6 +33,14 @@ export namespace Meta {
     const { React, Markdown } = (app as any).plugins.plugins["obsidian-react-components"];
     const { useState, useEffect } = React;
     const section = data;
+
+    // validation
+    if (!section) {
+      throw "'data' prop of type Section is required.";
+    }
+    if (!RenderModes.includes(mode)) {
+      throw `Unrecognized mode: ${mode}. Valid modes: ${RenderModes.join(", ")}`;
+    }
     
     // load the section content we want
     const [renderedContent, setRenderedContent] = useState(null);
@@ -101,22 +115,34 @@ export namespace Meta {
   }) => {
     const { React } = (app as any).plugins.plugins["obsidian-react-components"].React;
     const { useState, useEffect } = React;
-    const sections
-      = data
-        //@ts-expect-error: indexBy added to array prototype in main.ts
-        // TODO: wrap indexBy's contents in a static call and call that here instead.
-        .indexBy("id");
 
+    
+    // validation
+    if (!data) {
+      throw "'data' prop of type Section[] is required.";
+    }
+    if (!RenderModes.includes(mode)) {
+      throw `Unrecognized mode: ${mode}. Valid modes: ${RenderModes.join(", ")}`;
+    }
+
+    // hooks to load sections data
     const [renderedSections, setRenderedSections] = useState(null);
     useEffect(async () => {
       // load all sections at once.
-      const renderedItems = {};
+      const renderedItems: Record<string, string> | Record<string, HTMLElement> = {};
       for (const section of data) {
+        //@ts-expect-error: Indexer makes section expect section as child.
         renderedItems[section.id] = await section[mode];
       }
 
       setRenderedSections(renderedItems);
     }, []);
+
+    const sections
+      = data
+        //@ts-expect-error: indexBy added to array prototype in main.ts
+        // TODO: wrap indexBy's contents in a static call and call that here instead.
+        .indexBy("id");
 
     // if we're all loaded
     if (renderedSections !== null) {
@@ -126,11 +152,11 @@ export namespace Meta {
       };
       if (renderer) {
         childProps.renderer
-          = (s, r) => renderer(s, r, sections, renderedSections);
+          = (s: Section, r: string|HTMLElement) => renderer(s, r, sections, renderedSections);
       }
       if (filter) {
         childProps.enabled
-          = (s, r) => filter(s, r, sections, renderedSections);
+          = (s: Section, r: string|HTMLElement) => filter(s, r, sections, renderedSections);
       }
 
       // loop though and render the sections:
