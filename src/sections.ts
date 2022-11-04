@@ -52,7 +52,9 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   private _unique: Record<string, NoteSection> = {};
   // @ts-expect-error: Default Indexer Type Override
-  private _promise: Promise<string>|null = null;
+  private _promise: Promise<string> | null = null;
+  // @ts-expect-error: Default Indexer Type Override
+  private _text : string|null = null;
 
   //#region Properties
   
@@ -144,7 +146,7 @@ class NoteSection implements Section {
         if (this._renderContainer === null) {
           this._renderContainer = document.createElement("div");
           //@ts-expect-error: Api should expect null but does not.
-          MarkdownRenderer.renderMarkdown(this._contents, container, this.root.path, null);
+          MarkdownRenderer.renderMarkdown(this._contents, this._renderContainer, this.root.path, null);
         }
 
         return this._renderContainer;
@@ -153,11 +155,28 @@ class NoteSection implements Section {
       if (this._renderContainer === null) {
         this._renderContainer = document.createElement("div");
         //@ts-expect-error: Api should expect null but does not.
-        MarkdownRenderer.renderMarkdown(this._contents, container, this.root.path, null);
+        MarkdownRenderer.renderMarkdown(this._contents, this._renderContainer, this.root.path, null);
       }
 
       return Promise.resolve(this._renderContainer);
     }
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Txt() : Promise<string> {
+    return this.txt;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get txt(): Promise<string> {
+    if (this._text === null) {
+      return  this.html.then(v => {
+        this._text = v.textContent || "";
+        return this._text;
+      });
+    }
+
+    return Promise.resolve(this._text);
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -210,18 +229,14 @@ class NoteSection implements Section {
     }
 
     // find the start of this header's content.
-    const start = fullNoteContents.indexOf("\\n", result.index + headerMd.length);
+    const start = fullNoteContents.indexOf("\n", result.index + headerMd.length);
     if (start === -1) {
       return "";
     }
 
     // find the end
-    const match = fullNoteContents.substring(start).match(new RegExp(`(\\n#\{1,${this.header.level}\})`, "gm"));
-    const end = (match && match.index) 
-      ? start + match.index - 2
-      : fullNoteContents.length - 2;
-
-    return fullNoteContents.substring(start, end);
+    const match = fullNoteContents.substring(start + 1).match(new RegExp(`(\\n#\{1,${this.header.level}\})`, "m"));
+    return fullNoteContents.substring(start + 1, match?.index ? start + match.index : undefined);
   }
 
   //#endregion

@@ -699,26 +699,42 @@ interface SectionInfo {
   get Header(): Heading;
 
   /**
+   * (Async!) 
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
    */
   get md(): Promise<string>;
 
   /**
+   * (Async!) 
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
    */
   get Md(): Promise<string>;
 
   /**
+   * (Async!) 
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
    */
   get html(): Promise<HTMLElement>;
 
   /**
+   * (Async!) 
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
    */
   get Html(): Promise<HTMLElement>;
+
+  /**
+   * (Async!) 
+   * Get the plain text version of the processed markdown/html.
+   */
+  get Txt(): Promise<string>;
+
+  /**
+   * (Async!) 
+   * Get the plain text version of the processed markdown/html.
+   */
+  get txt(): Promise<string>;
 
   /**
    * The path of the note this section is from with the header appended after a #

@@ -4,110 +4,71 @@
     "type": "split",
     "children": [
       {
-        "id": "1ee0534270a23b4c",
-        "type": "split",
+        "id": "c2d7576ccca87a0d",
+        "type": "tabs",
         "children": [
           {
-            "id": "aaaf780a907eb71d",
-            "type": "tabs",
-            "dimension": 81.48148148148148,
-            "children": [
-              {
-                "id": "e81a8162471be867",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Metadata Api/function Metadata.sections/test.md",
-                    "mode": "source",
-                    "source": true
-                  }
-                }
-              },
-              {
-                "id": "aa7344bffabd3218",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Metadata Api/function Metadata.sections/test.data.md",
-                    "mode": "source",
-                    "source": true
-                  }
-                }
-              },
-              {
-                "id": "d05762551265385c",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Metadata Api/property Sections.all/test.md",
-                    "mode": "source",
-                    "source": false
-                  }
-                }
-              },
-              {
-                "id": "dc5b8b95757bac57",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "_run/Run Tests.md",
-                    "mode": "source",
-                    "source": false
-                  }
-                }
-              },
-              {
-                "id": "c75a4e007a1f0a89",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Metadata Api/function Metadata.sections/test.data.md",
-                    "mode": "source",
-                    "source": false
-                  }
-                }
-              },
-              {
-                "id": "69f04dc7fd4feb59",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Metadata Api/function Metadata.sections/test.md",
-                    "mode": "source",
-                    "source": true
-                  }
-                }
+            "id": "b5a37bc11d705073",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Metadata Api/property Section.rendered/test.data.md",
+                "mode": "preview",
+                "source": true
               }
-            ],
-            "currentTab": 3
+            }
           },
           {
-            "id": "c2d7576ccca87a0d",
-            "type": "tabs",
-            "dimension": 18.51851851851852,
-            "children": [
-              {
-                "id": "a7a30d9ab75da4de",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "Metadata Api/function Metadata.sections/test.data.md",
-                    "mode": "source",
-                    "source": false
-                  }
-                }
+            "id": "37e07fa64c272a7b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "_run/Run Tests.md",
+                "mode": "preview",
+                "source": false
               }
-            ]
+            }
+          },
+          {
+            "id": "d69fa2b74e25c219",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Metadata Api/property Section.rendered/test.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "eec86b9ea171bf99",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "_run/Run Tests.md",
+                "mode": "preview",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "17f2abaff621caae",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "_/_assets/_js/_react_components/Share.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
         ],
-        "direction": "horizontal"
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -173,7 +134,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "_run/Run Tests.md",
+                "file": "_/_assets/_js/_react_components/Share.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -190,7 +151,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "_run/Run Tests.md",
+                "file": "_/_assets/_js/_react_components/Share.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -213,7 +174,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "_run/Run Tests.md"
+                "file": "_/_assets/_js/_react_components/Share.md"
               }
             }
           }
@@ -222,20 +183,19 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
-  "active": "dc5b8b95757bac57",
+  "active": "17f2abaff621caae",
   "lastOpenFiles": [
-    "Metadata Api/property Sections.all/test.md",
-    "Metadata Api/function Metadata.sections/test.md",
-    "Metadata Api/function Metadata.sections/test.data.md",
+    "_run/Run Tests.md",
+    "Metadata Api/property Section.rendered/test.md",
+    "Metadata Api/function Metadata.cache/test.data.md",
+    "Metadata Api/property Section.rendered/test.data.md",
+    "Metadata Api/function Metadata.cache/test.md",
     "Metadata Api/property Sections.all/test.data.md",
-    "Metadata Api/function Sections.named/test.md",
-    "Metadata Api/function Sections.named/Untitled.md",
-    "Metadata Api/function Sections.named/test.data.md",
-    "Metadata Api/function Metadata.get/test.md",
-    "Metadata Api/property Metadata.data/test.md",
-    "Metadata Api/function Metadata.headings/test.md"
+    "Metadata Api/global path/test.md",
+    "Metadata Api/property Sections.all/test.md",
+    "Metadata Api/shared/Untitled.md",
+    "Metadata Api/global path/test.data.md"
   ]
 }

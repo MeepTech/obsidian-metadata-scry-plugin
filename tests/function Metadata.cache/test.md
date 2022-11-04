@@ -23,35 +23,38 @@ not hidden!
 # Get other file's data via string
 ## -Code
 ```jsx
-<p>{meta.cache(meta.path("test.data")).cacheValue}</p>
+<p>{meta.cache(meta.path("./test.data")).cacheValue}</p>
 ```
 
 ## -Result
 ```jsx:
-<p>{meta.cache(meta.path("test.data")).cacheValue}</p>
+<p>{meta.cache(meta.path("./test.data")).cacheValue}</p>
 ```
 
 ## -Expected
 maybe hidden?
 
 ## -Note
-***Try opening the other file first.***
+***Try opening the other files first.***
 
 # Get other file's data via file object
 ## -Code
 ```js
-const file = dv.page(meta.path("test.data"));
+const file = dv.page(meta.path("./test.data", true));
 dv.el("p", meta.cache(file).cacheValue);
 ```
 
 ## -Result
 ```dataviewjs
-const file = dv.page(meta.path("test.data")).file;
+const file = dv.page(meta.path("./test.data", true)).file;
 dv.el("p", meta.cache(file).cacheValue);
 ```
 
 ## -Expected
 maybe hidden?
+
+## -Note
+***Try opening the other files first.***
 
 # No Other Metadata Properties
 ## -Code
@@ -73,3 +76,30 @@ maybe hidden?
 ## -Expected
 undefined
 undefined
+
+# Multiple if folder provided
+## -Code
+```jsx
+const folder = meta.path("./");
+const caches = meta.cache(folder);
+
+<p>
+  {JSON.stringify(caches)}
+</p>
+```
+
+## -Result
+```jsx:
+const folder = meta.path("./");
+const caches = meta.cache(folder);
+
+<p>
+  {JSON.stringify(caches)}
+</p>
+```
+
+## -Expected
+[{"dataValue":"super hidden :O"},{"extraValue":"extra hidden!"},{"cacheValue":"maybe hidden?"},{"cacheValue":"not hidden!"}]
+
+## -Note
+***Try opening the other files first.***

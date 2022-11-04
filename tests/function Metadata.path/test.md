@@ -17,19 +17,34 @@ dv.el("p", meta.path());
 Metadata Api/function Metadata.path/test
 Metadata Api/function Metadata.path/test
 Metadata Api/function Metadata.path/test
-# Same Folder using Default
+
+# Get Current Folder
 ## -Code
 ```js
-dv.el("p", meta.path("test.data"));
+dv.el("p", meta.path("./"));
 ```
 
 ## -Result
 ```dataviewjs
-dv.el("p", meta.path("test.data"));
+dv.el("p", meta.path("./"));
 ```
 
 ## -Expected
-Metadata Api/function Metadata.path/test.data
+Metadata Api/function Metadata.path
+
+# First Result using Default
+## -Code
+```js
+dv.el("p", meta.path("shared.data"));
+```
+
+## -Result
+```dataviewjs
+dv.el("p", meta.path("shared.data"));
+```
+
+## -Expected
+Metadata Api/shared.data
 
 # Same Folder With ./
 ## -Code
