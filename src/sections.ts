@@ -32,29 +32,44 @@ class SectionHeader implements Heading {
  */
 class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
-  private _root: NoteSections;
+  private _root
+    : NoteSections;
   // @ts-expect-error: Default Indexer Type Override
-  private _renderContainer: HTMLElement = null!;
+  private _renderContainer
+    : HTMLElement = null!;
   // @ts-expect-error: Default Indexer Type Override
-  private _contents: string = null!;
+  private _md
+    : string = null!;
   // @ts-expect-error: Default Indexer Type Override
-  private _keys: string[] = [];
+  private _keys
+    : string[] = [];
   // @ts-expect-error: Default Indexer Type Override
-  private _count: number = 0;
+  private _count
+    : number = 0;
   // @ts-expect-error: Default Indexer Type Override
-  private _container: NoteSection|null = null;
+  private _container
+    : NoteSection | null = null;
   // @ts-expect-error: Default Indexer Type Override
-  private _sections: Record<string, NoteSection[]> = {};
+  private _sections
+    : Record<string, NoteSection[]> = {};
   // @ts-expect-error: Default Indexer Type Override
-  private _subtitles: Heading[] = [];
+  private _subtitles
+    : Heading[] = [];
   // @ts-expect-error: Default Indexer Type Override
-  private _heading: Heading;
+  private _heading
+    : Heading;
   // @ts-expect-error: Default Indexer Type Override
-  private _unique: Record<string, NoteSection> = {};
+  private _unique
+    : Record<string, NoteSection> = {};
   // @ts-expect-error: Default Indexer Type Override
-  private _promise: Promise<string> | null = null;
+  private _promise
+    : Promise<string> | null = null;
   // @ts-expect-error: Default Indexer Type Override
-  private _text : string|null = null;
+  private _text
+    : string | null = null;
+  // @ts-expect-error: Default Indexer Type Override
+  private _id
+    : string | null = null;
 
   //#region Properties
   
@@ -121,14 +136,14 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   get md()
   : Promise<string> {
-    if (this._contents === null) {
+    if (this._md === null) {
       return this._promise ??= this._find().then(r => {
-        this._contents = r;
+        this._md = r;
         this._promise = null;
         return r;
       });
     } else {
-      return Promise.resolve(this._contents);
+      return Promise.resolve(this._md);
     }
   }
 
@@ -140,35 +155,31 @@ class NoteSection implements Section {
   
   // @ts-expect-error: Default Indexer Type Override
   get html()
-    : Promise<HTMLElement> {
-    if (this._promise) {
-      return this._promise.then(v => {
+  : Promise<HTMLElement> {
+    if (!this._renderContainer) {
+      return this.md.then(v => {
         if (this._renderContainer === null) {
           this._renderContainer = document.createElement("div");
           //@ts-expect-error: Api should expect null but does not.
-          MarkdownRenderer.renderMarkdown(this._contents, this._renderContainer, this.root.path, null);
+          MarkdownRenderer.renderMarkdown(this._md, this._renderContainer, this.root.path, null);
         }
 
         return this._renderContainer;
       });
-    } else {
-      if (this._renderContainer === null) {
-        this._renderContainer = document.createElement("div");
-        //@ts-expect-error: Api should expect null but does not.
-        MarkdownRenderer.renderMarkdown(this._contents, this._renderContainer, this.root.path, null);
-      }
-
-      return Promise.resolve(this._renderContainer);
     }
+
+    return Promise.resolve(this._renderContainer);
   }
 
   // @ts-expect-error: Default Indexer Type Override
-  get Txt() : Promise<string> {
+  get Txt()
+  : Promise<string> {
     return this.txt;
   }
 
   // @ts-expect-error: Default Indexer Type Override
-  get txt(): Promise<string> {
+  get txt()
+  : Promise<string> {
     if (this._text === null) {
       return  this.html.then(v => {
         this._text = v.textContent || "";
@@ -202,6 +213,18 @@ class NoteSection implements Section {
   : NoteSection[] {
     return this.unique;  
   }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Id()
+  : string {
+    return this._id ??= this.header.index + ":|:" + this.path + ":|:" + this.header.level
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get id()
+  : string {
+    return this.Id;   
+  }
     
   // @ts-expect-error: Default Indexer Type Override
   private async _find()
@@ -224,7 +247,7 @@ class NoteSection implements Section {
 
     // find the one at the correct index
     const result = results.at(this.header.index);
-    if (!result || !result.index) {
+    if (!result || (!result.index && result.index !== 0)) {
       throw `Section Header: "${headerMd}", with index: ${this._index}, not found in file: ${this.root.path}.`;
     }
 
@@ -235,8 +258,11 @@ class NoteSection implements Section {
     }
 
     // find the end
-    const match = fullNoteContents.substring(start + 1).match(new RegExp(`(\\n#\{1,${this.header.level}\})`, "m"));
-    return fullNoteContents.substring(start + 1, match?.index ? start + match.index : undefined);
+    const match = fullNoteContents.substring(start).match(new RegExp(`(\\n#\{1,${this.header.level}\})`, "m"));
+    if (match && (match.index || match.index === 0)) {
+      return fullNoteContents.substring(start + 1, start + match.index);
+    }
+    return fullNoteContents.substring(start + 1);
   }
 
   //#endregion
@@ -264,7 +290,7 @@ class NoteSection implements Section {
     // add to all parents:
     let parent: NoteSection|null = this;
     while (parent) {
-      parent._unique[NoteSections.BuildHeaderKey(child.header)] = child;
+      parent._unique[child.id] = child;
       parent = parent.container;
     }
     
@@ -357,46 +383,62 @@ class NoteSection implements Section {
  */
 export class NoteSections extends Object implements Sections {
   // @ts-expect-error: Default Indexer Type Override
-  private _all: Record<string, NoteSection[]> = {};
+  private _all
+    : Record<string, NoteSection[]> = {};
   // @ts-expect-error: Default Indexer Type Override
-  private _root: Record<string, NoteSection[]> = {};
+  private _root
+    : Record<string, NoteSection[]> = {};
   // @ts-expect-error: Default Indexer Type Override
-  private _unique: Record<string, NoteSection> = {};
+  private _unique
+    : Record<string, NoteSection> = {};
   // @ts-expect-error: Default Indexer Type Override
-  private _path: string = "";
+  private _path
+    : string = "";
   // @ts-expect-error: Default Indexer Type Override
-  private _count: number = 0;
+  private _count
+    : number = 0;
   // @ts-expect-error: Default Indexer Type Override
-  private _md: string = null!;
+  private _md
+    : string = null!;
 
   // @ts-expect-error: Default Indexer Type Override for Object Extension
   [key: string]: NoteSection;
   // @ts-expect-error: Default Indexer Type Override
-  get path(): string { return this._path; }
+  get path()
+    : string { return this._path; }
   // @ts-expect-error: Default Indexer Type Override
-  get Path(): string { return this._path; }
+  get Path()
+    : string { return this._path; }
   // @ts-expect-error: Default Indexer Type Override
-  get count(): number { return this._count; }
+  get count()
+    : number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
-  get Count(): number { return this._count; }
+  get Count()
+    : number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
-  get all(): Record<string, NoteSection[]> { return this._all; }
+  get all()
+    : Record<string, NoteSection[]> { return this._all; }
   // @ts-expect-error: Default Indexer Type Override
-  get All(): Record<string, NoteSection[]> { return this._all; }
+  get All()
+    : Record<string, NoteSection[]> { return this._all; }
   // @ts-expect-error: Default Indexer Type Override
-  get Root(): Record<string, NoteSection[]> { return this._root; }
+  get Root()
+    : Record<string, NoteSection[]> { return this._root; }
   // @ts-expect-error: Default Indexer Type Override
-  get root(): Record<string, NoteSection[]> { return this._root; }
+  get root()
+    : Record<string, NoteSection[]> { return this._root; }
 
   // @ts-expect-error: Default Indexer Type Override
-  get headers(): Heading[] {
+  get headers()
+  : Heading[] {
     return Object
       .values(this._unique)
       .map(u => u.header);
   }
 
   // @ts-expect-error: Default Indexer Type Override
-  get Headers(): Heading[] { return this.headers; }
+  get Headers()
+    : Heading[] { return this.headers; }
 
   // @ts-expect-error: Default Indexer Type Override
   get unique()
@@ -460,7 +502,7 @@ export class NoteSections extends Object implements Sections {
         }
 
         // register all the keys and title
-        this._unique[NoteSections.BuildHeaderKey(current.header)] = current;
+        this._unique[current.id] = current;
         for (const key of current.keys) {
           if (!this._all[key]) {
             this._all[key] = [current];
@@ -474,13 +516,6 @@ export class NoteSections extends Object implements Sections {
         previous = current;
       }
     }
-  }
-
-  /**
-   * Make a uinique header key
-   */
-  static BuildHeaderKey(header: Heading) {
-    return header.index + ":|:" + header.text + ":|:" + header.level;
   }
 
   //#endregion

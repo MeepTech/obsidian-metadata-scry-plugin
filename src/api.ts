@@ -745,6 +745,16 @@ interface SectionInfo {
    * The path of the note this section is from with the header appended after a #
    */
   get Path(): string;
+
+  /**
+   * A unique key/identifier for this section out of all notes and sections.
+   */
+  get Id(): string;
+  
+  /**
+   * A unique key/identifier for this section out of all notes and sections.
+   */
+  get id(): string;
 }
 
 /**

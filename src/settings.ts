@@ -67,7 +67,7 @@ export class MetadataApiSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
     .setName('Add Array Helper Functions.')
-    .setDesc('Adds the functions aggregateby, etc to all arrays for data management.')
+    .setDesc('Adds the functions aggregateby, indexBy, etc to all arrays for data management.')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.defineArrayHelperFunctions)
       .onChange(async (value) => {

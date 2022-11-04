@@ -2,6 +2,7 @@ import { Plugin } from 'obsidian';
 import { Metadata } from './meta';
 import { DefaultSettings, MetadataApiSettingTab } from './settings';
 import { PluginContainer, MetadataApi, MetadataApiSettings, MetadataPlugin } from "./api";
+import { Meta } from "./components/sections";
 
 /**
  * Metadata api obsidian.md plugin
@@ -83,6 +84,12 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     }
   }
 
+  private _checkForAndInitializeReact() {
+    // @ts-expect-error: app.plugin is not mapped.
+    if (app.plugins.plugins["obsidian-react-components"]) {
+      this._initReactComponents();
+    }
+  }
   //#region Object property and Global defenitions.
 
   private _initObjectPropertyHelperMethods() {
@@ -145,6 +152,35 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
 
   private _initArrayHelperMethods() {
     /**
+     * index an array of objects by a shared property with unique values among the
+     * 
+     * @param {string} uniqueKeyPropertyPath The path to the unique key on each object to use as the index of the object in the returned record.
+     * 
+     * @returns An aggregate object with the original objects from the input list indexed by the value of the property at the provided key path.
+     */
+    Object.defineProperty(Array.prototype, 'indexBy', {
+      value: function (uniqueKeyPropertyPath: string): Record<any, any> {
+        const result: Record<any, any> = {};
+
+        for (const i of this) {
+          const key = i.getProp(uniqueKeyPropertyPath, undefined);
+          if (key === undefined) {
+            throw `Aggregation Key not found at path: ${uniqueKeyPropertyPath}.`;
+          }
+          
+          if (result[key]) {
+            throw `Key already exists in aggregate object, can't index another object by it: ${uniqueKeyPropertyPath}.`;
+          } else {
+            result[key] = i;
+          }
+        }
+
+        return result;
+      },
+      enumerable: false
+    });
+
+    /**
      * Aggregate an array of objects by a value
      * 
      * @param {string} key The key to aggegate by. This uses getProp so you can pass in a compound key
@@ -152,7 +188,7 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
      * @returns An object with arrays indexed by the value of the property at the key within the object.
      */
     Object.defineProperty(Array.prototype, 'aggregateBy', {
-      value: function (key: string): Record<any, any> {
+      value: function (key: string): Record<any, any[]> {
         const result: Record<any, any[]> = {};
 
         for (const i of this) {
@@ -260,6 +296,11 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
       });
     } catch { }
   }
+  
+  private _initReactComponents() {
+    Meta.Section
+  }
+
 
   //#endregion
 
@@ -338,6 +379,10 @@ export default class MetadataApiPlugin extends Plugin implements MetadataPlugin 
     try {
       // @ts-ignore: Global Scope
       delete Array.prototype["aggregateBy"];
+    } catch { }
+    try {
+      // @ts-ignore: Global Scope
+      delete Array.prototype["indexBy"];
     } catch { }
   }
 
