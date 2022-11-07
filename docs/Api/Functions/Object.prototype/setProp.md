@@ -2,7 +2,7 @@
 **function, instance**
 Set a deep property in an object, even if it doesn't exist.
 
-**NOTE**: This is a wrapper for [SetDeepProperty](../Metadata/Static%20Object%20Property%20Helpers/SetDeepProperty.md).
+**NOTE**: This is a wrapper for [SetDeepProperty](../MetaScryApi/Static%20Object%20Property%20Helpers/SetDeepProperty.md).
 **NOTE**: This function is unavailable if the [Configuration > Declare Object Property Helper Methods](../../../../Configuration.md) setting is disabled.
 ## *Params*
 - **propertyPath** *(string|array(string))* Array of keys, or dot seperated propery key string.

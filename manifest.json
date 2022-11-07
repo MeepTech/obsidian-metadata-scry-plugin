@@ -1,9 +1,9 @@
 {
-	"id": "metadata-api",
-	"name": "Obsidian Metadata Api Plugin",
+	"id": "meta-scry",
+	"name": "Obsidian Metadata Scrier Api Plugin",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This plugin provides a global js api for accessing and updating frontmatter and other note metadatas.",
+	"description": "This plugin provides a global js api for reading note sections, header info, cache data, accessing and updating frontmatter, and other metadata related functions.",
 	"author": "Meep.Tech",
 	"authorUrl": "http://Meep.Tech",
 	"isDesktopOnly": false

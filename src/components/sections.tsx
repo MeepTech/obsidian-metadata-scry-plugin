@@ -21,7 +21,7 @@ export namespace ReactSectionComponents {
   ];
 
   /**
-   * Render A note Section fetched from Metadata-Api using react.
+   * Render A note Section fetched from Metascry-Api using react.
    */
   export const Section = ({
     data,
@@ -101,7 +101,7 @@ export namespace ReactSectionComponents {
   }
 
   /**
-   * Render Note Sections fetched from Metadata-Api using react.
+   * Render Note Sections fetched from MetaScryApi using react.
    */
   export const Sections = ({
     data,

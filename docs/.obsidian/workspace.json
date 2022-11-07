@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Functions/Metadata/Metadata Fetchers/cache.md",
+                "file": "Api/Functions/MetaScryApi/Metadata Fetchers/cache.md",
                 "mode": "source",
                 "source": false
               }
@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Functions/Metadata/Metadata Fetchers/values.md",
+                "file": "Api/Functions/MetaScryApi/Metadata Fetchers/values.md",
                 "mode": "source",
                 "source": false
               }
@@ -37,7 +37,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Globals/Metadata.md",
+                "file": "Api/Globals/meta.md",
                 "mode": "source",
                 "source": false
               }
@@ -80,18 +80,6 @@
             }
           },
           {
-            "id": "71e0c5cdfe63e643",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Api/Properties/Metadata/Data.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
             "id": "555d23d436bd6131",
             "type": "leaf",
             "state": {
@@ -109,7 +97,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Classes/CurrentMetadata.md",
+                "file": "Api/Classes/CurrentMetaScryApi.md",
                 "mode": "source",
                 "source": false
               }
@@ -121,7 +109,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Classes/Metadata.md",
+                "file": "Api/Classes/MetaScryApi.md",
                 "mode": "source",
                 "source": false
               }
@@ -133,7 +121,79 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/README.md",
+                "file": "Api/Classes/MetaScryPluginApi.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "ead7c461a0cce6c7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Classes/Section.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "fdc8ce631e4185d1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Classes/Sections.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "119f78fae81de2ec",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Classes/Heading.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "61948fdbaf513c54",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Globals/cache.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "c30403006e62dc33",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Api/Globals/Scry and scry.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "77a584469403d5ca",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               }
@@ -145,14 +205,14 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Functions/Metadata/Metadata Fetchers/cache.md",
+                "file": "Api/Functions/MetaScryApi/Metadata Fetchers/cache.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 10
+        "currentTab": 15
       }
     ],
     "direction": "vertical"
@@ -218,7 +278,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/README.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -235,7 +295,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/README.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -258,7 +318,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/README.md"
+                "file": "README.md"
               }
             }
           }
@@ -269,17 +329,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "c994e0a091ff23dc",
+  "active": "77a584469403d5ca",
   "lastOpenFiles": [
-    "Configuration.md",
-    "Api/Globals/Metadata.md",
-    "Api/Globals/Cache.md",
-    "Api/Functions/Metadata/Utility/path.md",
-    "Api/Functions/Metadata/Static Object Property Helpers/TryToGetDeepProperty.md",
-    "Api/Functions/Metadata/Static Object Property Helpers/SetDeepProperty.md",
-    "Api/Functions/Metadata/Static Object Property Helpers/GetDeepProperty.md",
-    "Api/Functions/Metadata/Static Object Property Helpers/ContainsDeepProperty.md",
-    "Api/Functions/Metadata/Metadata Updaters/set.md",
-    "Api/Functions/Metadata/Metadata Updaters/patch.md"
+    "Api/README.md",
+    "Api/Globals/path.md",
+    "Api/Globals/Scry and scry.md",
+    "Api/Globals/meta.md",
+    "Api/Globals/cache.md",
+    "Api/Globals/Untitled.md",
+    "Api/Classes/Heading.md",
+    "Api/Classes/Sections.md",
+    "Api/Classes/Section.md",
+    "Api/Classes/MetaScryPluginApi.md"
   ]
 }

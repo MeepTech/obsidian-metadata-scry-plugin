@@ -1,22 +1,22 @@
 import { TFile } from 'obsidian';
-import { Cache, CurrentApi, Frontmatter, MetaData, MetadataApi, Sections, UpdateOptions } from './api';
+import { Cache, CurrentNoteMetaScryApi, Frontmatter, Metadata, MetaScryApi, Sections, UpdateOptions } from './api';
 
 /**
- * Access to current metadata
+ * Access to current metadata via localized versions of the calls in MetaScryApi
  */
 
-export class CurrentMetadata implements CurrentApi {
-  private _api: MetadataApi;
+export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
+  private _api: MetaScryApi;
 
-  constructor(metaApi: MetadataApi) {
+  constructor(metaApi: MetaScryApi) {
     this._api = metaApi;
   }
 
-  get Data(): MetaData  {
-    return this._api.get() as MetaData;
+  get Data(): Metadata  {
+    return this._api.get() as Metadata;
   }
 
-  get data(): MetaData {
+  get data(): Metadata {
     return this.Data;
   }
 
@@ -75,6 +75,18 @@ export class CurrentMetadata implements CurrentApi {
   }
 
   get matter(): Frontmatter {
+    return this.Matter;
+  }
+
+  get fm(): Frontmatter {
+    return this.Matter;
+  }
+
+  get Frontmatter(): Frontmatter {
+    return this.Matter;
+  }
+  
+  get frontmatter(): Frontmatter {
     return this.Matter;
   }
 

@@ -1,4 +1,4 @@
-import { Sections, Cache, Section, PluginContainer, SplayKebabCasePropertiesOption, Heading } from './api';
+import { Sections, Cache, Section, StaticMetaScryPluginContainer, SplayKebabCasePropertiesOption, Heading } from './api';
 import { HeadingCache, MarkdownView, MarkdownRenderer, TFile, WorkspaceLeaf } from 'obsidian';
 
 /**
@@ -174,8 +174,8 @@ class NoteSection implements Section {
             md,
             this._html,
             this.root.path,
-            // @ts-expect-error: Null is required here, but clashes with documentation.
-            null
+            //// @ts-expect-error: Null is required here, but clashes with documentation.
+            view
           );
           //specialCache["CurrentPath"] = undefined;
         
@@ -347,7 +347,7 @@ class NoteSection implements Section {
 
     keys.push(cleaned);
 
-    if (PluginContainer.Instance.settings.splayFrontmatterWithoutDataview) {
+    if (StaticMetaScryPluginContainer.Instance.settings.splayFrontmatterWithoutDataview) {
       const camel = cleaned.replace(/ /g, "");
       if (!camel) {
         return keys.unique();
@@ -357,8 +357,8 @@ class NoteSection implements Section {
       const lowerCamel = camel[0].toLowerCase() + camel.substring(1);
 
       keys.push(lower, camel, lowerCamel);
-      if (PluginContainer.Instance.settings.splayKebabCaseProperties && cleaned.contains("-")) {
-        if (PluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
+      if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties && cleaned.contains("-")) {
+        if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
           // lower
           keys.push(lower.replace(/-/g, ""));
           // lower camel
@@ -371,10 +371,10 @@ class NoteSection implements Section {
             .split('-')
             .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
-        } else if (PluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
+        } else if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
           // lower
           keys.push(lower.replace(/-/g, ""));
-        } else if (PluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
+        } else if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
           // lower camel
           keys.push(lowerCamel
             .split('-')
@@ -564,7 +564,7 @@ export class NoteSections extends Object implements Sections {
     if (this._md !== null) {
       return Promise.resolve(this._md);
     } else {
-      const file = PluginContainer.Instance.api.vault(this.path) as TFile;
+      const file = StaticMetaScryPluginContainer.Instance.api.vault(this.path) as TFile;
       this._md = await app.vault.cachedRead(file);
       const frontMarker = "---";
       if (this._md.startsWith(frontMarker)) {

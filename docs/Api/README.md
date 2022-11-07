@@ -5,10 +5,10 @@ The api is an object that can be used to retreive, edit, delete, and create fron
 **NOTE**: Most of the properties of this class are accessable in caps or lower camel case so you can adapt to your desired style. This also can help with debugging.
 ## Global Access and Objects
 There are two root global objects accessable in all contexts.
-- The  [Metadata](Globals/Metadata.md) Api object. (Defaults to `meta`)
-- The Current Note's [Cache](Functions/Metadata/Metadata%20Fetchers/cache.md) object. (Defaults to `cache`)
+- The  [meta](Globals/meta.md) Api object. (Defaults to `meta`)
+- The Current Note's [Cache](Functions/MetaScryApi/Metadata%20Fetchers/cache.md) object. (Defaults to `cache`)
 ## Properties
-**NOTE**: These properties of the [Metadata Global Object](Globals/Metadata.md) are all read-only (get).
+**NOTE**: These properties of the [Metadata Global Object](Globals/meta.md) are all read-only (get).
 **NOTE**: The non-static properties are all accessable in caps or lower camel case so you can adapt to your desired style.
 **Ex:**
 ```
@@ -27,15 +27,15 @@ meta.current === meta.Current; //these are aliases
 - [Data](Properties/Metadata/Data.md)
 ## Methods
 **NOTE**: Instance methods will always be lower camel case and Static properties and methods will always in caps camel case.
-- [set](Functions/Metadata/Metadata%20Updaters/set.md) 
-- [patch](Functions/Metadata/Metadata%20Updaters/patch.md)
-- [clear](Functions/Metadata/Metadata%20Updaters/clear.md)
-- [get](Functions/Metadata/Metadata%20Fetchers/get.md)
-	- [frontmatter](Functions/Metadata/Metadata%20Fetchers/frontmatter.md)
-	- [cache](Functions/Metadata/Metadata%20Fetchers/cache.md)
-	- [prototypes](Functions/Metadata/Metadata%20Fetchers/prototypes.md)
-	- [values](Functions/Metadata/Metadata%20Fetchers/values.md)
-- [path](Functions/Metadata/Utility/path.md)
+- [set](Functions/MetaScryApi/Metadata%20Updaters/set.md) 
+- [patch](Functions/MetaScryApi/Metadata%20Updaters/patch.md)
+- [clear](Functions/MetaScryApi/Metadata%20Updaters/clear.md)
+- [get](Functions/MetaScryApi/Metadata%20Fetchers/get.md)
+	- [frontmatter](Functions/MetaScryApi/Metadata%20Fetchers/frontmatter.md)
+	- [cache](Functions/MetaScryApi/Metadata%20Fetchers/cache.md)
+	- [prototypes](Functions/MetaScryApi/Metadata%20Fetchers/prototypes.md)
+	- [values](Functions/MetaScryApi/Metadata%20Fetchers/values.md)
+- [path](Functions/MetaScryApi/Utility/path.md)
 ### Object Property Helper Methods
 This plugin api provides methods to help with accessing 'deep' properies in js objects. This is usefull for accessing metadata that you're not sure exists.
 
@@ -56,9 +56,9 @@ Instance methods added to Object.proptotype that allow quick utility for accessi
 - [setProp](Functions/Object.prototype/setProp.md)
 #### Static Api Methods
 These are methods on the API object that aid in checking and setting dee pproperties on objects.
-- [ContainsDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/ContainsDeepProperty.md)
-- [GetDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/GetDeepProperty.md)
-- [TryToGetDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/TryToGetDeepProperty.md)
-- [SetDeepProperty](Functions/Metadata/Static%20Object%20Property%20Helpers/SetDeepProperty.md)
+- [ContainsDeepProperty](Functions/MetaScryApi/Static%20Object%20Property%20Helpers/ContainsDeepProperty.md)
+- [GetDeepProperty](Functions/MetaScryApi/Static%20Object%20Property%20Helpers/GetDeepProperty.md)
+- [TryToGetDeepProperty](Functions/MetaScryApi/Static%20Object%20Property%20Helpers/TryToGetDeepProperty.md)
+- [SetDeepProperty](Functions/MetaScryApi/Static%20Object%20Property%20Helpers/SetDeepProperty.md)
 ## Examples
 For many more examples please see the [Tests folder](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/tree/master/tests) in the root of the github repository.

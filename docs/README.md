@@ -1,5 +1,5 @@
 # Metadata Api Plugin for Obsidian.md
-- v0.1(alpha)
+- pre-alpha v0.0.0.1
 This is a plugin for [Obsidian](https://obsidian.md) that adds tools to help easily read and update frontmatter and other metadata.
 ## Features
  - Create, Edit, Delete, Update, and Retreive the data of YAML/Frontmatter, Dataview, and other Metadata properties of files quickly and easily from any executable code-block, templater snippet, or custom js class file within your vault.

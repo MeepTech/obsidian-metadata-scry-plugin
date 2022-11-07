@@ -13,15 +13,15 @@ export enum SplayKebabCasePropertiesOption {
 }
 
 /**
- * Static container for the current metadata plugin instance. 
- * Internal use only.
+ * Static container for the current meta-scry plugin instance. 
+ * Internal use only. The name is long so you don't want to use it anyway
  */
-export class PluginContainer {
+export class StaticMetaScryPluginContainer {
 
   /**
-   * The current instance of the metadata api plugin.
+   * The current instance of the Metadata Scry Api Plugin.
    */
-  static Instance: MetadataPlugin;
+  static Instance: MetaScryPluginApi;
 
   /**
    * Access to the Metaedit Api
@@ -53,17 +53,17 @@ export class PluginContainer {
 /**
  * Interface for the plugin itself
  */
-export type MetadataPlugin = {
+export type MetaScryPluginApi = {
   /**
-   * Get the current instance of the Metadata Api object/interface
+   * Get the current instance of the MetaScryApi object.
    */
-  get api(): MetadataApi;
+  get api(): MetaScryApi;
 
   /**
    * The settings for the api.
    * Call saveSettings if you update them.
    */
-  settings: MetadataApiSettings;
+  settings: MetaScryPluginSettings;
 
   /**
    * Call after updating the settings object to re-load the api
@@ -74,7 +74,7 @@ export type MetadataPlugin = {
 /**
  * Interface for the plugin settings
  */
-export interface MetadataApiSettings {
+export interface MetaScryPluginSettings {
   /**
    * The global property key for the 'cache' variable 
    */
@@ -83,12 +83,17 @@ export interface MetadataApiSettings {
   /**
    * The global property key for the 'meta' variable 
    */
-  globalMetadataApiName: string;
+  globalMetaScryExtraName: string;
 
   /**
    * The global property key for the 'path' function 
    */
   globalPathName: string;
+
+  /**
+   * Option to enable or disable the scry and Scry global api variables
+   */
+  defineScryGlobalVariables: boolean;
 
   /**
    * if hasprop, getprop, and setprop should be added to all objects
@@ -136,9 +141,9 @@ export type CachedFileMetadata = CachedMetadata & {
 };
 
 /**
- * A full metadata set returned from meta.get.
+ * A full metadata set returned from MetaScryApi.get
  */
-export type MetaData = {
+export type Metadata = {
   /**
    * The DV file object
    */
@@ -148,11 +153,11 @@ export type MetaData = {
    */
   File?: FileData;
   /**
-   * The metadata api cache
+   * The meta-scry api cache
    */
   cache?: Cache;
   /**
-   * The metadata api cache
+   * The meta-scry api cache
    */
   Cache?: Cache;
 } & Frontmatter;
@@ -179,7 +184,7 @@ export type Frontmatter = {
 
 /**
  * The data in the 'file' object provided by dataview.
- * Sections is added by the current Metadata Api.
+ * Sections is added by the MetaScry Api.
  */
 export type FileData = {
   name: string;
@@ -259,7 +264,7 @@ export interface MetadataSources {
   DataviewInline: boolean;
    
   /**
-   * Cached values from the Metadata.Cache.
+   * Cached values from MetaScryApi.cache
    */
   Cache: boolean;
    
@@ -295,36 +300,63 @@ export type UpdateOptions = {
  * Interface for the Api.
  * Access and edit metadata about a file from multiple sources.
  */
-export interface MetadataApi {
-  /**
-   * Get the plugin that runs this api
-   */
-  get Plugin(): MetadataPlugin;
+export interface MetaScryApi {
 
   /**
    * Get the plugin that runs this api
+   * 
+   * @alias {@link plugin}
+   * @alias {@link StaticMetaScryPluginContainer.Instance}
    */
-  get plugin(): MetadataPlugin;
+  get Plugin(): MetaScryPluginApi;
+
+  /**
+   * Get the plugin that runs this api
+   * 
+   * @alias {@link Plugin}
+   * @alias {@link StaticMetaScryPluginContainer.Instance}
+   */
+  get plugin(): MetaScryPluginApi;
 
   /**
    * Used to fetch various metadata for the current file.
+   * 
+   * @alias {@link current}
    */
-  get Current(): CurrentApi;
+  get Current(): CurrentNoteMetaScryApi;
 
   /**
    * Used to fetch various metadata for the current file.
+   * 
+   * @alias {@link Current}
    */
-  get current(): CurrentApi;
+  get current(): CurrentNoteMetaScryApi;
 
   /**
    * Get all Metadata from the default sources for the current file.
+   * 
+   * @alias {@link data}
+   * @alias {@link CurrentNoteMetaScryApi.data}
+   * @alias {@link CurrentNoteMetaScryApi.data}
+   * @alias {@link CurrentNoteMetaScryApi.Data}
+   * @alias {@link CurrentNoteMetaScryApi.Data}
+   * 
+   * @see {@link get}
    */
-  get Data(): MetaData;
+  get Data(): Metadata;
 
   /**
    * Get all Metadata from the default sources for the current file.
+   * 
+   * @alias {@link Data}
+   * @alias {@link CurrentNoteMetaScryApi.data}
+   * @alias {@link CurrentNoteMetaScryApi.data}
+   * @alias {@link CurrentNoteMetaScryApi.Data}
+   * @alias {@link CurrentNoteMetaScryApi.Data}
+   * 
+   * @see {@link get}
    */
-  get data(): MetaData;
+  get data(): Metadata;
 
   /**
    * Get a file or folder from the vault
@@ -332,8 +364,44 @@ export interface MetadataApi {
    * @param {FileSource} source The file/folder object(with a path property) or the full path string
    * 
    * @returns the found TFile or TFolder
+   * 
+   * @alias {@link folder}
+   * @alias {@link file}
+   * 
+   * @see {@link CurrentNoteMetaScryApi.note}
+   * @see {@link CurrentNoteMetaScryApi.Note}
    */
   vault(source: FileSource): TFile | TFolder | TAbstractFile | null;
+
+  /**
+   * Get a file from the vault (alias for vault())
+   * 
+   * @param {FileSource} source The file object(with a path property) or the full path string
+   * 
+   * @returns the found TFile
+   * 
+   * @alias {@link vault}
+   * 
+   * @see {@link folder}
+   * @see {@link CurrentNoteMetaScryApi.note}
+   * @see {@link CurrentNoteMetaScryApi.Note}
+   */
+  file(source: FileSource): TFile | null;
+
+  /**
+   * Get a folder from the vault
+   * 
+   * @param {FileSource} source The folder object(with a path property) or the full path string
+   * 
+   * @returns the found TFolder
+   * 
+   * @alias {@link vault}
+   * 
+   * @see {@link file}
+   * @see {@link CurrentNoteMetaScryApi.note}
+   * @see {@link CurrentNoteMetaScryApi.Note}
+   */
+  folder(source: FileSource): TFolder | null;
   
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api.
@@ -341,8 +409,59 @@ export interface MetadataApi {
    * @param {FileSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns The cached file metadata object if it exists, or an array of objects if a folder was provided.
+   *
+   * @alias {@link omfc}
+   */
+   obsidianMetadataFileCache(source?: FileSource): CachedFileMetadata | CachedFileMetadata[] | null;
+  
+  /**
+   * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api. 
+   * 
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   *
+   * @returns The cached file metadata object if it exists, or an array of objects if a folder was provided.
+   *
+   * @alias {@link obsidianMetadataFileCache}
    */
   omfc(source?: FileSource): CachedFileMetadata | CachedFileMetadata[] | null;
+
+  /**
+   * Get just the frontmatter for the given file. 
+   *
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * 
+   * @returns Just the frontmatter for the file.
+   * 
+   * @alias {@link fm}
+   * @alias {@link matter}
+   * 
+   * @see {@link CurrentNoteMetaScryApi.fm}
+   * @see {@link CurrentNoteMetaScryApi.matter}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
+   * @see {@link CurrentNoteMetaScryApi.Matter}
+   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
+   * @see {@link get}
+   */
+  frontmatter(source?: FileSource): Frontmatter | Frontmatter[] | null;
+
+  /**
+   * Get just the frontmatter for the given file. 
+   *
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   *
+   * @returns Just the frontmatter for the file.
+   * 
+   * @alias {@link frontmatter}
+   * @alias {@link matter}
+   * 
+   * @see {@link CurrentNoteMetaScryApi.fm}
+   * @see {@link CurrentNoteMetaScryApi.matter}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
+   * @see {@link CurrentNoteMetaScryApi.Matter}
+   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
+   * @see {@link get}
+   */
+  fm(source?: FileSource): Frontmatter | Frontmatter[] | null;
 
   /**
    * Get just the frontmatter for the given file.
@@ -350,8 +469,18 @@ export interface MetadataApi {
    * @param {FileSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns Just the frontmatter for the file.
+   * 
+   * @alias {@link fm}
+   * @alias {@link frontmatter}
+   * 
+   * @see {@link CurrentNoteMetaScryApi.fm}
+   * @see {@link CurrentNoteMetaScryApi.matter}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
+   * @see {@link CurrentNoteMetaScryApi.Matter}
+   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
+   * @see {@link get}
    */
-  frontmatter(source?: FileSource): Frontmatter | Frontmatter[] | null;
+  matter(source?: FileSource): Frontmatter | Frontmatter[] | null;
 
   /**
    * Get just the sections for the given file.
@@ -359,6 +488,10 @@ export interface MetadataApi {
    * @param {FileSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns Just the sections under their headings for the file.
+   * 
+   * @see {@link CurrentNoteMetaScryApi.sections}
+   * @see {@link CurrentNoteMetaScryApi.Sections}
+   * @see {@link get}
    */
   sections(source?: FileSource): Sections | Sections[] | null;
 
@@ -368,15 +501,21 @@ export interface MetadataApi {
    * @param {FileSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
    *
    * @returns Just the dataview(+frontmatter) values for the file.
+   * 
+   * @see {@link get}
    */
   dv(source?: FileSource): DvData | DvData[] | null;
 
   /**
-   * Get just the (metadata-api) cache data for a file.
+   * Get just the (meta-scry) cache data for a file.
    *
    * @param {FileSource} source The file/folder object(with a path property) or the full path string.
    *
    * @returns The cache data only for the requested file
+   * 
+   * @see {@link CurrentNoteMetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.Cache}
+   * @see {@link get}
    */
   cache(source?: FileSource): Cache | Cache[];
 
@@ -405,8 +544,30 @@ export interface MetadataApi {
    * @param {bool|MetadataSources} sources The sources to get metadata from. Defaults to all.
    *
    * @returns The requested metadata
+   * 
+   * @see {@link data}
+   * @see {@link Data}
+   * @see {@link CurrentNoteMetaScryApi.data}
+   * @see {@link CurrentNoteMetaScryApi.data}
+   * @see {@link CurrentNoteMetaScryApi.Data}
+   * @see {@link CurrentNoteMetaScryApi.Data}
+   * @see {@link fm}
+   * @see {@link matter}
+   * @see {@link frontmatter}
+   * @see {@link CurrentNoteMetaScryApi.fm}
+   * @see {@link CurrentNoteMetaScryApi.matter}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
+   * @see {@link CurrentNoteMetaScryApi.Matter}
+   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
+   * @see {@link sections}
+   * @see {@link CurrentNoteMetaScryApi.sections}
+   * @see {@link CurrentNoteMetaScryApi.Sections}
+   * @see {@link cache}
+   * @see {@link CurrentNoteMetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.Cache}
+   * @see {@link dv}
    */
-  get(source?: FileSource, sources?: MetadataSources | boolean): MetaData | MetaData[] | null;
+  get(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
   
   /**
    * Patch individual properties of the frontmatter metadata.
@@ -417,7 +578,9 @@ export interface MetadataApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
    *
-   * @returns The updated Metadata.
+   * @see {@link CurrentNoteMetaScryApi.patch}
+   * @see {@link set}
+   * @see {@link clear}
    */
   patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName?: string | null, options?: UpdateOptions): void;
   
@@ -429,7 +592,9 @@ export interface MetadataApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
    *
-   * @returns The updated Metadata
+   * @see {@link CurrentNoteMetaScryApi.set}
+   * @see {@link clear}
+   * @see {@link patch}
    */
   set(file: FileItem, frontmatterData: any, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
 
@@ -440,6 +605,10 @@ export interface MetadataApi {
    * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
+   *
+   * @see {@link CurrentNoteMetaScryApi.clear}
+   * @see {@link set}
+   * @see {@link patch}
    */
   clear(file?: FileItem, frontmatterProperties?: string | Array<string> | Record<string, any> | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
   
@@ -451,6 +620,8 @@ export interface MetadataApi {
    * @param rootFolder (Optional) The root folder path the relative path is relative too. Defaults to the current note's folder
    *
    * @returns The full file path.
+   * 
+   * @alias {@link global#path}
    */
   path(relativePath?: string | null, extension?: string | boolean, rootFolder?: string | null): string
 }
@@ -458,75 +629,204 @@ export interface MetadataApi {
 /**
  * Interface for the current note within the api
  */
-export interface CurrentApi {
+export interface CurrentNoteMetaScryApi {
 
   /**
    * Get all Metadata from the default sources for the current file.
+   * 
+   * @alias {@link data}
+   * @alias {@link MetaScryApi.data}
+   * 
+   * @see {@link MetaScryApi.get}
    */
-  get Data(): MetaData;
+  get Data(): Metadata;
 
   /**
    * Get all Metadata from the default sources for the current file.
+   *
+   * @alias {@link Data}
+   * @alias {@link MetaScryApi.data}
+   * 
+   * @see {@link MetaScryApi.get}
    */
-  get data(): MetaData;
+  get data(): Metadata;
   
   /**
    * The current note focused by the workspace.
+   * 
+   * @alias {@link note}
+   *
+   * @see {@link MetaScryApi.file}
+   * @see {@link MetaScryApi.vault}
+   * @see {@link MetaScryApi.folder}
    */
   get Note(): TFile;
   
   /**
    * The current note focused by the workspace.
+   * 
+   * @alias {@link Note}
+   * 
+   * @see {@link MetaScryApi.file}
+   * @see {@link MetaScryApi.vault}
+   * @see {@link MetaScryApi.folder}
    */
   get note(): TFile;
 
   /**
-   * The current path of the current note
+   * The current path of the current note without the extension
+   * 
+   * @alias {@link path}
+   * 
+   * @see {@link pathex}
+   * @see {@link PathEx}
+   * @see {@link MetaScryApi.path}
    */
   get Path(): string;
   
   /**
-   * The current path of the current note
+   * The current path of the current note without the extension
+   * 
+   * @alias {@link Path}
+   * 
+   * @see {@link pathex}
+   * @see {@link PathEx}
+   * @see {@link MetaScryApi.path}
    */
   get path(): string;
 
   /**
    * The current path of the current note with it's extension
+   * 
+   * @alias {@link pathex}
+   * 
+   * @see {@link path}
+   * @see {@link Path}
+   * @see {@link MetaScryApi.path}
    */
   get PathEx(): string;
   
   /**
    * The current path of the current note with it's extension
+   * 
+   * @alias {@link PathEx}
+   * 
+   * @see {@link path}
+   * @see {@link Path}
+   * @see {@link MetaScryApi.path}
    */
   get pathex(): string;
 
   /**
    * Get just the frontmatter of the current file
+   * 
+   * @alias {@link fm}
+   * @alias {@link matter}
+   * @alias {@link frontmatter}
+   * @alias {@link Frontmatter}
+   * 
+   * @see {@link MetaScryApi.fm}
+   * @see {@link MetaScryApi.matter}
+   * @see {@link MetaScryApi.frontmatter}
+   * @see {@link MetaScryApi.get}
    */
   get Matter(): Frontmatter;
   
   /**
    * Get just the frontmatter of the current file
+   * 
+   * @alias {@link fm}
+   * @alias {@link matter}
+   * @alias {@link frontmatter}
+   * @alias {@link Matter}
+   * 
+   * @see {@link MetaScryApi.fm}
+   * @see {@link MetaScryApi.matter}
+   * @see {@link MetaScryApi.frontmatter}
+   * @see {@link MetaScryApi.get}
    */
   get matter(): Frontmatter;
+  
+  /**
+   * Get just the frontmatter of the current file
+   * 
+   * @alias {@link Matter}
+   * @alias {@link matter}
+   * @alias {@link frontmatter}
+   * @alias {@link Frontmatter}
+   * 
+   * @see {@link MetaScryApi.fm}
+   * @see {@link MetaScryApi.matter}
+   * @see {@link MetaScryApi.frontmatter}
+   * @see {@link MetaScryApi.get}
+   */
+  get fm(): Frontmatter;
+
+  /**
+   * Get just the frontmatter of the current file
+   * 
+   * @alias {@link fm}
+   * @alias {@link matter}
+   * @alias {@link frontmatter}
+   * @alias {@link Matter}
+   * 
+   * @see {@link MetaScryApi.fm}
+   * @see {@link MetaScryApi.matter}
+   * @see {@link MetaScryApi.frontmatter}
+   * @see {@link MetaScryApi.get}
+   */
+  get Frontmatter(): Frontmatter;
+  
+  /**
+   * Get just the frontmatter of the current file
+   * 
+   * @alias {@link fm}
+   * @alias {@link matter}
+   * @alias {@link Matter}
+   * @alias {@link Frontmatter}
+   * 
+   * @see {@link MetaScryApi.fm}
+   * @see {@link MetaScryApi.matter}
+   * @see {@link MetaScryApi.frontmatter}
+   * @see {@link MetaScryApi.get}
+   */
+  get frontmatter(): Frontmatter;
 
   /**
    * Access the cached vales for the current file only.
+   * 
+   * @alias {@link cache}
+   * @alias {@link global#cache}
+   * 
+   * @see {@link MetaScryApi.cache}
    */
   get Cache(): Cache;
 
   /**
    * Access the cached vales for the current file only.
+   * 
+   * @alias {@link Cache}
+   * @alias {@link global#cache}
+   * 
+   * @see {@link MetaScryApi.cache}
    */
   get cache(): Cache;
 
   /**
    * Access the sections for the current file only.
+   * 
+   * @alias {@link sections}
+   * 
+   * @see {@link MetaScryApi.sections}
    */
   get Sections(): Sections;
   
   /**
    * Access the sections for the current file only.
+   * 
+   * @alias {@link Sections}
+   * 
+   * @see {@link MetaScryApi.sections}
    */
   get sections(): Sections;
 
@@ -538,7 +838,9 @@ export interface CurrentApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
    *
-   * @returns The updated Metadata.
+   * @see {@link MetaScryApi.patch}
+   * @see {@link set}
+   * @see {@link clear}
    */
   patch(frontmatterData: any, propertyName?: string | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
   
@@ -549,7 +851,9 @@ export interface CurrentApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
    *
-   * @returns The updated Metadata
+   * @see {@link MetaScryApi.set}
+   * @see {@link patch}
+   * @see {@link clear}
    */
   set(frontmatterData: any, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
   
@@ -560,6 +864,10 @@ export interface CurrentApi {
    * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
+   *
+   * @see {@link MetaScryApi.clear}
+   * @see {@link set}
+   * @see {@link patch}
    */
   clear(frontmatterProperties?: string | Array<string> | object | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
 }
@@ -567,12 +875,12 @@ export interface CurrentApi {
 /**
  * Static Api accessed through "Metadata" global calls
  */
-export type StaticMetaApi = {
+export interface StaticMetaScryApi {
   [key: string | number | symbol]: any;
   Components?: Record<string, any>;
   SectionComponents?: Record<string, any>;
-  Api: MetadataApi;
-  Plugin: MetadataPlugin
+  Api: MetaScryApi;
+  Plugin: MetaScryPluginApi
 }
 
 //#endregion
@@ -628,84 +936,270 @@ export interface Heading {
 interface SectionInfo {
 
   /**
+   * The path of the note this section is from with the header appended after a #
+   * 
+   * @alias {@link Path}
+   * 
+   * @see {@link keys}
+   * @see {@link id}
+   * @see {@link Keys}
+   * @see {@link Id}
+   */
+  get path(): string;
+  
+  /**
+   * The path of the note this section is from with the header appended after a #
+   *
+   * @alias {@link path}
+   * 
+   * @see {@link keys}
+   * @see {@link id}
+   * @see {@link Keys}
+   * @see {@link Id}
+   */
+  get Path(): string;
+
+  /**
+   * A unique key/identifier for this section out of all notes and sections.
+   * 
+   * @alias {@link id}
+   * 
+   * @see {@link subtitles}
+   * @see {@link Subtitles}
+   * @see {@link Heading.text}
+   * @see {@link Heading.md}
+   * @see {@link header}
+   * @see {@link Header}
+   * @see {@link keys}
+   * @see {@link Keys}
+   * @see {@link path}
+   * @see {@link Path}
+   */
+  get Id(): string;
+  
+  /**
+   * A unique key/identifier for this section out of all notes and sections.
+   * 
+   * @alias {@link Id}
+   * 
+   * @see {@link subtitles}
+   * @see {@link Subtitles}
+   * @see {@link Heading.text}
+   * @see {@link Heading.md}
+   * @see {@link header}
+   * @see {@link Header}
+   * @see {@link keys}
+   * @see {@link Keys}
+   * @see {@link path}
+   * @see {@link Path}
+   */
+  get id(): string;
+
+  /**
    * The keys that can be used to identify and access this section.
+   *
+   * @alias {@link keys}
+   * 
+   * @see {@link subtitles}
+   * @see {@link Subtitles}
+   * @see {@link Heading.text}
+   * @see {@link Heading.md}
+   * @see {@link header}
+   * @see {@link Header}
+   * @see {@link Id}
+   * @see {@link id}
    */
   get Keys(): string[];
 
   /**
    * The keys that can be used to identify and access this section.
+   *
+   * @alias {@link keys}
+   * 
+   * @see {@link subtitles}
+   * @see {@link Subtitles}
+   * @see {@link Heading.text}
+   * @see {@link Heading.md}
+   * @see {@link header}
+   * @see {@link Header}
+   * @see {@link Id}
+   * @see {@link id}
    */
   get keys(): string[];
 
   /**
    * The number of sub-sections directly within this section.
+   *
+   * @alias {@link count}
+   *
+   * @see {@link subtitles}
+   * @see {@link sections}
+   * @see {@link unique}
+   * @see {@link Subtitles}
+   * @see {@link Sections}
+   * @see {@link Unique}
    */
   get Count(): number;
 
   /**
    * The number of sub-sections directly within this section.
+   *
+   * @alias {@link Count}
+   *
+   * @see {@link subtitles}
+   * @see {@link sections}
+   * @see {@link unique}
+   * @see {@link Subtitles}
+   * @see {@link Sections}
+   * @see {@link Unique}
    */
   get count(): number;
 
   /**
    * The section that contains this one, if there is one. If not this is a root section.
+   * 
+   * @alias {@link container}
+   * 
+   * @see {@link root}
+   * @see {@link Root}
    */
   get Container(): Section | null;
   
   /**
    * The section that contains this one, if there is one. If not this is a root section.
+   *
+   * @alias {@link Container}
+   * 
+   * @see {@link root}
+   * @see {@link Root}
    */
   get container(): Section | null;
 
   /**
    * The sub-sections directly under this section.
+   *
+   * @alias {@link sections}
+   *
+   * @see {@link subtitles}
+   * @see {@link unique}
+   * @see {@link Subtitles}
+   * @see {@link Unique}
    */
   get Sections(): Record<string, Section[]>;
 
   /**
    * The sub-sections directly under this section.
+   *
+   * @alias {@link Sections}
+   *
+   * @see {@link subtitles}
+   * @see {@link unique}
+   * @see {@link Subtitles}
+   * @see {@link Unique}
    */
   get sections(): Record<string, Section[]>;
 
   /**
    * The unique sub-titles/headings directly under this section heading (not sub-sub headings)
+   *
+   * @alias {@link Subtitles}
+   *
+   * @see {@link sections}
+   * @see {@link unique}
+   * @see {@link Sections}
+   * @see {@link Unique}
    */
   get subtitles(): Heading[];
 
   /**
    * The unique sub-titles/headings directly under this section heading (not sub-sub headings)
+   * 
+   * @alias {@link subtitles}
+   *
+   * @see {@link sections}
+   * @see {@link unique}
+   * @see {@link Sections}
+   * @see {@link Unique}
    */
   get Subtitles(): Heading[];
 
   /**
    * Get all the unique sub-sections in this section.
+   * 
+   * @alias {@link Unique}
+   *
+   * @see {@link sections}
+   * @see {@link Subtitles}
+   * @see {@link Sections}
+   * @see {@link subtitles}
    */
   get unique(): Section[];
 
   /**
    * Get all the unique sub-sections in this section.
+   * 
+   * @alias {@link unique}
+   *
+   * @see {@link sections}
+   * @see {@link Subtitles}
+   * @see {@link Sections}
+   * @see {@link subtitles}
    */
   get Unique(): Section[];
 
   /**
    * The Sections object used to build the sections in the file this section is from.
    * Contains info about the note/file.
+   * 
+   * @alias {@link root}
+   * 
+   * @see {@link Container}
+   * @see {@link container}
    */
   get Root(): Sections;
 
   /**
    * The Sections object used to build the sections in the file this section is from.
    * Contains info about the note/file.
+   * 
+   * @alias {@link Root}
+   * 
+   * @see {@link Container}
+   * @see {@link container}
    */
   get root(): Sections;
 
   /**
-   * The direct code of the header, with the #s
+   * The heading of this section
+   * 
+   * @alias {@link Header}
+   * 
+   * @see {@link Heading.text}
+   * @see {@link Heading.md}
+   * @see {@link keys}
+   * @see {@link subtitles}
+   * @see {@link Subtitles}
+   * @see {@link Count}
+   * @see {@link count}
+   * @see {@link path}
+   * @see {@link Path}
    */
   get header(): Heading;
   
   /**
-   * The direct code of the header, with the #s
+   * The heading of this section
+   * 
+   * @alias {@link header}
+   * 
+   * @see {@link Heading.text}
+   * @see {@link Heading.md}
+   * @see {@link keys}
+   * @see {@link subtitles}
+   * @see {@link Subtitles}
+   * @see {@link Count}
+   * @see {@link count}
+   * @see {@link path}
+   * @see {@link Path}
    */
   get Header(): Heading;
 
@@ -713,6 +1207,14 @@ interface SectionInfo {
    * (Async!) 
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
+   * @async
+   * 
+   * @alias {@link Md}
+   * 
+   * @see {@link Html}
+   * @see {@link html}
+   * @see {@link txt}
+   * @see {@link Txt}
    */
   get md(): Promise<string>;
 
@@ -720,52 +1222,72 @@ interface SectionInfo {
    * (Async!) 
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
+   * @async
+   * 
+   * @alias {@link md}
+   * 
+   * @see {@link Html}
+   * @see {@link html}
+   * @see {@link txt}
+   * @see {@link Txt}
    */
   get Md(): Promise<string>;
 
   /**
    * (Async!) 
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
+   * @async
+   * 
+   * @alias {@link Html}
+   * 
+   * @see {@link Md}
+   * @see {@link md}
+   * @see {@link txt}
+   * @see {@link Txt}
    */
   get html(): Promise<HTMLElement>;
 
   /**
    * (Async!) 
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
+   * @async
+   * 
+   * @alias {@link html}
+   * 
+   * @see {@link Md}
+   * @see {@link md}
+   * @see {@link txt}
+   * @see {@link Txt}
    */
   get Html(): Promise<HTMLElement>;
 
   /**
    * (Async!) 
    * Get the plain text version of the processed markdown/html.
+   * @async
+   * 
+   * @alias {@link txt}
+   * 
+   * @see {@link Md}
+   * @see {@link md}
+   * @see {@link Html}
+   * @see {@link html}
    */
   get Txt(): Promise<string>;
 
   /**
    * (Async!) 
    * Get the plain text version of the processed markdown/html.
+   * @async
+   * 
+   * @alias {@link Txt}
+   * 
+   * @see {@link Md}
+   * @see {@link md}
+   * @see {@link Html}
+   * @see {@link html}
    */
   get txt(): Promise<string>;
-
-  /**
-   * The path of the note this section is from with the header appended after a #
-   */
-  get path(): string;
-  
-  /**
-   * The path of the note this section is from with the header appended after a #
-   */
-  get Path(): string;
-
-  /**
-   * A unique key/identifier for this section out of all notes and sections.
-   */
-  get Id(): string;
-  
-  /**
-   * A unique key/identifier for this section out of all notes and sections.
-   */
-  get id(): string;
 }
 
 /**

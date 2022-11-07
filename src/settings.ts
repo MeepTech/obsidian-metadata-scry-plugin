@@ -1,10 +1,11 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { MetadataApiSettings, MetadataPlugin, SplayKebabCasePropertiesOption } from './api';
+import { MetaScryPluginSettings, MetaScryPluginApi, SplayKebabCasePropertiesOption } from './api';
 
-export const DefaultSettings: MetadataApiSettings = {
+export const DefaultSettings: MetaScryPluginSettings = {
   globalCacheName: 'cache',
-  globalMetadataApiName: 'meta',
+  globalMetaScryExtraName: 'meta',
   globalPathName: "path",
+  defineScryGlobalVariables: true,
   defineObjectPropertyHelperFunctions: true,
   defineArrayHelperFunctions: true,
   splayKebabCaseProperties: SplayKebabCasePropertiesOption.LowerAndCamelCase,
@@ -16,10 +17,10 @@ export const DefaultSettings: MetadataApiSettings = {
 /**
  * Settings for the plugin
  */
-export class MetadataApiSettingTab extends PluginSettingTab {
-  plugin: MetadataPlugin;
+export class MetadataScrierPluginSettingTab extends PluginSettingTab {
+  plugin: MetaScryPluginApi;
 
-  constructor(app: App, plugin: MetadataPlugin) {
+  constructor(app: App, plugin: MetaScryPluginApi) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -32,19 +33,19 @@ export class MetadataApiSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', { text: 'Medatata Api Settings' });
 
     new Setting(containerEl)
-      .setName('Metadata Api Variable Name')
-      .setDesc('The variable name to use for the Metadata Api global scope variable registered by this plugin')
+      .setName('MetaScryApi Custom Global Variable Name')
+      .setDesc('The variable name to use for the MetaScryApi in a global scope.  If left empty; the variable will not be registered. (Mirror for "scry" global variable, just with a custom name if you want)')
       .addText(text => text
         .setPlaceholder('meta')
-        .setValue(this.plugin.settings.globalMetadataApiName)
+        .setValue(this.plugin.settings.globalMetaScryExtraName)
         .onChange(async (value) => {
-          this.plugin.settings.globalMetadataApiName = value;
+          this.plugin.settings.globalMetaScryExtraName = value;
           await this.plugin.saveSettings();
         }));
 
     new Setting(containerEl)
       .setName('Global Cache Variable Name')
-      .setDesc('The variable name to use for the cache global scope variable registered by this plugin')
+      .setDesc('The variable name to use for the cache global scope variable registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
         .setPlaceholder('cache')
         .setValue(this.plugin.settings.globalCacheName)
@@ -55,7 +56,7 @@ export class MetadataApiSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Global Path Variable Name')
-      .setDesc('The name to use for the path global helper function registered by this plugin')
+      .setDesc('The name to use for the path global helper function registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
         .setPlaceholder('path')
         .setValue(this.plugin.settings.globalPathName)
@@ -64,6 +65,15 @@ export class MetadataApiSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     
+    new Setting(containerEl)
+    .setName('Add Global Scry and scry variables.')
+    .setDesc('Adds the scry variable to access MetaScryApi globally and the Scry variable to access MetaScryPluginApi and built in components globally')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.defineScryGlobalVariables)
+      .onChange(async (value) => {
+        this.plugin.settings.defineScryGlobalVariables = value;
+        await this.plugin.saveSettings();
+      }));
 
     new Setting(containerEl)
     .setName('Add Array Helper Functions.')
@@ -75,7 +85,6 @@ export class MetadataApiSettingTab extends PluginSettingTab {
         await this.plugin.saveSettings();
       }));
   
-
     new Setting(containerEl)
       .setName('Add Object Property Helper Functions.')
       .setDesc('Adds the function hasProp, getProp, and setProp to all objects for deep property access.')

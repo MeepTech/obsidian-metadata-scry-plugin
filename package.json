@@ -9,6 +9,14 @@
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [
+		"MetaScry",
+		"Scrier",
+		"Sections",
+		"Headings",
+		"Cache",
+		"CodeBlocks",
+		"Code",
+		"JSX",
 		"Metadata",
 		"Obsidian",
 		"Api",
@@ -19,6 +27,7 @@
 		"Scripting",
 		"DB",
 		"Data",
+		"Update",
 		"Frontmatter",
 		"Sections",
 		"Headers",
@@ -26,7 +35,7 @@
 		"Edit",
 		"Metaedit"
 	],
-	"author": "",
+	"author": "meep.tech",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^16.11.6",

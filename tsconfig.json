@@ -15,9 +15,13 @@
       "DOM",
       "ES5",
       "ES6",
-      "ES7"
+      "ES7",
+      "scripthost",
+      "es2015",
+      "DOM.Iterable",
+      "ESNext"
     ],
-    "jsx": "react-jsx",
+    "jsx": "react",
   },
   "include": [
     "**/*.ts",

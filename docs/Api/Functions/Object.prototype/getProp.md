@@ -2,7 +2,7 @@
 **function, instance**
 Get a deep property from an object, or return null.
 
-**NOTE**: This is a wrapper for [GetDeepProperty](../Metadata/Static%20Object%20Property%20Helpers/GetDeepProperty.md).
+**NOTE**: This is a wrapper for [GetDeepProperty](../MetaScryApi/Static%20Object%20Property%20Helpers/GetDeepProperty.md).
 **NOTE**: This function is unavailable if the [Configuration > Declare Object Property Helper Methods](../../../../Configuration.md) setting is disabled.
 ## *Params*
 - **propertyPath** *(string|array(string))* Array of keys, or dot seperated propery key string.

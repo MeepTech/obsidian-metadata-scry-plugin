@@ -2,7 +2,7 @@
 **function, instance**
 Check if an object has a deep property. Returns true if it does. Optional callback available as well for on true and on false.
 
-**NOTE**: This is a wrapper for [TryToGetDeepProperty](../Metadata/Static%20Object%20Property%20Helpers/TryToGetDeepProperty.md) and [ContainsDeepProperty](../Metadata/Static%20Object%20Property%20Helpers/ContainsDeepProperty.md).
+**NOTE**: This is a wrapper for [TryToGetDeepProperty](../MetaScryApi/Static%20Object%20Property%20Helpers/TryToGetDeepProperty.md) and [ContainsDeepProperty](../MetaScryApi/Static%20Object%20Property%20Helpers/ContainsDeepProperty.md).
 **NOTE**: This function is unavailable if the [Configuration > Declare Object Property Helper Methods](../../../../Configuration.md) setting is disabled.
 ## *Params*
 - **propertyPath** *(string|array(string))* Array of keys, or dot seperated propery key string.

@@ -1,21 +1,21 @@
 import { TAbstractFile, TFile, TFolder } from 'obsidian';
-import { CurrentMetadata } from "./current";
+import { CurrentNoteScrier } from "./current";
 import { NoteSections } from './sections';
-import { PluginContainer, CachedFileMetadata, CurrentApi, DvData, FileSource, Frontmatter, MetaData, MetadataApi, MetadataPlugin, MetadataSources, Sections, SplayKebabCasePropertiesOption, FileItem, UpdateOptions } from './api';
+import { StaticMetaScryPluginContainer, CachedFileMetadata, CurrentNoteMetaScryApi, DvData, FileSource, Frontmatter, Metadata, MetaScryApi, MetaScryPluginApi, MetadataSources, Sections, SplayKebabCasePropertiesOption, FileItem, UpdateOptions } from './api';
 //TODO: test: import dv = require("../../dataview/main.js");
 
 /**
  * Access and edit metadata about a file from multiple sources.
  */
-export class Metadata implements MetadataApi {
+export class MetadataScrier implements MetaScryApi {
   private static _caches: any = {};
-  private _plugin: MetadataPlugin;
+  private _plugin: MetaScryPluginApi;
   private _kebabPropSplayer: (base: any, topLevelPropertiesToIgnore: Array<string> | null) => object;
   private _lowerCaseSplayer: (base: any) => object;
 
   //#region Initalization
   
-  constructor(plugin: MetadataPlugin) {
+  constructor(plugin: MetaScryPluginApi) {
     this._plugin = plugin;
     this._initializeKebabPropSplayer();
     this._initializePropLowercaseSplayer();
@@ -25,11 +25,11 @@ export class Metadata implements MetadataApi {
     this._kebabPropSplayer = (() => {
       switch (this.plugin.settings.splayKebabCaseProperties) {
         case SplayKebabCasePropertiesOption.Lowercase:
-          return (base, topLevelPropertiesToIgnore) => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowercase, topLevelPropertiesToIgnore);
+          return (base, topLevelPropertiesToIgnore) => MetadataScrier._recurseOnAllObjectProperties(base, MetadataScrier._splayKebabToLowercase, topLevelPropertiesToIgnore);
         case SplayKebabCasePropertiesOption.CamelCase:
-          return (base, topLevelPropertiesToIgnore) => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerCamelcase, topLevelPropertiesToIgnore);
+          return (base, topLevelPropertiesToIgnore) => MetadataScrier._recurseOnAllObjectProperties(base, MetadataScrier._splayKebabToLowerCamelcase, topLevelPropertiesToIgnore);
         case SplayKebabCasePropertiesOption.LowerAndCamelCase:
-          return (base, topLevelPropertiesToIgnore) => Metadata._recurseOnAllObjectProperties(base, Metadata._splayKebabToLowerAndLowerCamelcase, topLevelPropertiesToIgnore);
+          return (base, topLevelPropertiesToIgnore) => MetadataScrier._recurseOnAllObjectProperties(base, MetadataScrier._splayKebabToLowerAndLowerCamelcase, topLevelPropertiesToIgnore);
         case SplayKebabCasePropertiesOption.Disabled:
         default:
           return base => base;
@@ -39,7 +39,7 @@ export class Metadata implements MetadataApi {
 
   private _initializePropLowercaseSplayer() {
     this._lowerCaseSplayer = this.plugin.settings.splayFrontmatterWithoutDataview
-      ? base => Metadata._recurseOnAllObjectProperties(base, Metadata._splayToLowerCase)
+      ? base => MetadataScrier._recurseOnAllObjectProperties(base, MetadataScrier._splayToLowerCase)
       : base => base;
   }
 
@@ -107,10 +107,10 @@ export class Metadata implements MetadataApi {
   //#region Static Api Access
 
   /**
-   * The instance of the Metadata class
+   * The instance of the Api via the Metascrier class
    */
-  static get Api(): MetadataApi {
-    return PluginContainer.Instance.api;
+  static get Api(): MetaScryApi {
+    return StaticMetaScryPluginContainer.Instance.api;
   }
 
   /**
@@ -167,33 +167,33 @@ export class Metadata implements MetadataApi {
     };
   }
 
-  get Plugin(): MetadataPlugin {
+  get Plugin(): MetaScryPluginApi {
     // @ts-expect-error: app.plugin is not mapped.
-    return this._plugin ??= app.plugins.plugins["metadata-api"];
+    return this._plugin ??= app.plugins.plugins["meta-scry"];
   }
 
-  get plugin(): MetadataPlugin {
+  get plugin(): MetaScryPluginApi {
     // @ts-expect-error: app.plugin is not mapped.
-    return this._plugin ??= app.plugins.plugins["metadata-api"];
+    return this._plugin ??= app.plugins.plugins["meta-scry"];
   }
   
   //#endregion
 
   //#region Current File Properties
 
-  get Current(): CurrentApi {
+  get Current(): CurrentNoteMetaScryApi {
     return this.current;
   }
 
-  get current(): CurrentApi {
-    return new CurrentMetadata(this);
+  get current(): CurrentNoteMetaScryApi {
+    return new CurrentNoteScrier(this);
   }
 
-  get Data(): MetaData {
+  get Data(): Metadata {
     return this.Current.Data;
   }
 
-  get data(): MetaData {
+  get data(): Metadata {
     return this.Current.Data;
   }
 
@@ -206,10 +206,14 @@ export class Metadata implements MetadataApi {
       return file;
     }
 
-    const path = (Metadata.ParseFilePathFromSource(file) || this.Current.Path);
+    const path = (MetadataScrier.ParseFilePathFromSource(file) || this.Current.Path);
     return app.vault.getAbstractFileByPath(path)
       ?? app.vault.getAbstractFileByPath(path + ".md");
   }
+  file = (file: FileSource = null): TFile | null =>
+    this.vault(file) as TFile;
+  folder = (file: FileSource = null): TFolder| null =>
+    this.vault(file) as TFolder;
 
   omfc(file: FileSource = null): CachedFileMetadata | CachedFileMetadata[] | null {
     const fileObject = this.vault(file);
@@ -231,7 +235,9 @@ export class Metadata implements MetadataApi {
     
     return result;
   }
-
+  obsidianMetadataFileCache = (file: FileSource = null): CachedFileMetadata | CachedFileMetadata[] | null =>
+    this.omfc(file);
+  
   frontmatter(file: FileSource = null): Frontmatter | Frontmatter[] | null {
     const fileCache = this.omfc(file);
 
@@ -243,6 +249,10 @@ export class Metadata implements MetadataApi {
         : null;
     }
   }
+  fm = (file: FileSource = null): Frontmatter | Frontmatter[] | null =>
+    this.frontmatter(file)
+  matter = (file: FileSource = null): Frontmatter | Frontmatter[] | null =>
+    this.frontmatter(file)
 
   sections(file: FileSource = null): Sections | Sections[] | null {
     const fileCache = this.omfc(file);
@@ -257,58 +267,62 @@ export class Metadata implements MetadataApi {
   }
 
   dv(file: FileSource = null): DvData | DvData[] | null {
-    const paths = Metadata
+    const paths = MetadataScrier
       .DataviewApi
-      .pagePaths(file ? Metadata.ParseFilePathFromSource(file) : this.Current.Path);
+      .pagePaths(file ? MetadataScrier.ParseFilePathFromSource(file) : this.Current.Path);
 
     if (paths.length > 1) {
       return paths.map((p: string) => this.dv(p));
     } else if (!paths.length) {
       return null;
     } else {
-      const result = Metadata
+      const result = MetadataScrier
         .DataviewApi
         .page(paths[0]);
     
       return this._kebabPropSplayer(result, ["file"]) as DvData;
     }
   }
+  dvMatter = (file: FileSource = null): DvData | DvData[] | null =>
+    this.dv(file);
+  dataviewFrontmatter = (file: FileSource = null): DvData | DvData[] | null =>
+    this.dv(file);
 
   cache(file: FileSource = null): Cache | Cache[] {
     const fileObject = this.vault(file);
     if (fileObject === null) {
-      const key = Metadata.ParseFilePathFromSource(file);
+      const key = MetadataScrier.ParseFilePathFromSource(file);
       if (key !== null && key !== undefined) {
-        Metadata._caches[key] = Metadata._caches[key] || {};
+        MetadataScrier._caches[key] = MetadataScrier._caches[key] || {};
 
-        return Metadata._caches[key];
+        return MetadataScrier._caches[key];
       }
       
       throw "Invalid Key for File";
     } else if (fileObject instanceof TFolder) {
       return fileObject.children.map(f => this.cache(f) as (Cache | Cache[])).flat();
     } else {
-      Metadata._caches[fileObject.path] = Metadata._caches[fileObject.path] || {};
+      MetadataScrier._caches[fileObject.path] = MetadataScrier._caches[fileObject.path] || {};
 
-      return Metadata._caches[fileObject.path];
+      return MetadataScrier._caches[fileObject.path];
     }
   }
 
   prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null {
-    return this.frontmatter(Metadata.BuildPrototypeFileFullPath(prototypePath));
+    return this.frontmatter(MetadataScrier.BuildPrototypeFileFullPath(prototypePath));
   }
 
   values(dataPath: string): Frontmatter | Frontmatter[] | null {
-    return this.frontmatter(Metadata.BuildDataFileFullPath(dataPath));
+    return this.frontmatter(MetadataScrier.BuildDataFileFullPath(dataPath));
   }
 
-  get(file: FileSource = null, sources: MetadataSources | boolean = Metadata.DefaultSources): MetaData | MetaData[] | null {
+  get(file: FileSource = null, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null {
     if (file instanceof TFolder) {
       return file.children.map(c => this.get(c, sources)).flat();
     }
 
     const fileName = file
-      ? (Metadata.ParseFilePathFromSource(file)
+      ? (MetadataScrier.ParseFilePathFromSource(file)
         ?? this.current.path)
       : this.Current.Path;
 
@@ -332,7 +346,7 @@ export class Metadata implements MetadataApi {
     let values: any = {};
 
     if (sources === true) {
-      values = this._kebabPropSplayer(Metadata
+      values = this._kebabPropSplayer(MetadataScrier
         .DataviewApi
         .page(fileName), ["file"]) || {};
     } else {
@@ -342,7 +356,7 @@ export class Metadata implements MetadataApi {
 
       // if we need dv sources
       if (sources.DataviewInline || sources.FileInfo) {
-        values = this._kebabPropSplayer(Metadata
+        values = this._kebabPropSplayer(MetadataScrier
           .DataviewApi
           .page(fileName), ["file"]) || {};
 
@@ -411,8 +425,8 @@ export class Metadata implements MetadataApi {
       return
     }
 
-    const { update } = Metadata.MetaeditApi;
-    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
+    const { update } = MetadataScrier.MetaeditApi;
+    const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
 
     if (propertyName != null) {
       update(propertyName, frontmatterData, fileName);
@@ -429,8 +443,8 @@ export class Metadata implements MetadataApi {
       return;
     }
 
-    const { update } = Metadata.MetaeditApi;
-    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
+    const { update } = MetadataScrier.MetaeditApi;
+    const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
 
     this.clear(fileName);
     Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileName));
@@ -444,7 +458,7 @@ export class Metadata implements MetadataApi {
       return;
     }
 
-    const fileName = Metadata._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
+    const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
     let propsToClear = [];
 
     if (typeof frontmatterProperties === "string") {
@@ -600,7 +614,7 @@ export class Metadata implements MetadataApi {
   //#region Filename Utilities
 
   path(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null) : string {
-    return Metadata._addExtension(Metadata._findPath(relativePath, extension, rootFolder), extension);
+    return MetadataScrier._addExtension(MetadataScrier._findPath(relativePath, extension, rootFolder), extension);
   }
 
   /**
@@ -613,7 +627,7 @@ export class Metadata implements MetadataApi {
    * @returns The full file path.
    */
   static Path(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null): string {
-    return (Metadata.Api.path(relativePath, extension, rootFolder));
+    return (MetadataScrier.Api.path(relativePath, extension, rootFolder));
   }
 
   /**
@@ -642,7 +656,7 @@ export class Metadata implements MetadataApi {
    */
   static BuildDataFileFullPath(dataPath: string) {
     // @ts-expect-error: app.plugin is not mapped.
-    return app.plugins.plugins["metadata-api"].settings.dataFilesPath + dataPath;
+    return app.plugins.plugins["meta-scry"].settings.dataFilesPath + dataPath;
   }
 
   /**
@@ -654,40 +668,40 @@ export class Metadata implements MetadataApi {
    */
   static BuildPrototypeFileFullPath(prototypePath: string) {
     // @ts-expect-error: app.plugin is not mapped.
-    return app.plugins.plugins["metadata-api"].settings.prototypesPath + prototypePath;
+    return app.plugins.plugins["meta-scry"].settings.prototypesPath + prototypePath;
   }
 
   private static _parseFileNameFromDataFileFileOrPrototype(toValuesFile: string | boolean, file: FileSource, prototype: string | boolean) {
     return toValuesFile
       ? file
-        ? Metadata.BuildDataFileFullPath(Metadata.ParseFilePathFromSource(file)!)
+        ? MetadataScrier.BuildDataFileFullPath(MetadataScrier.ParseFilePathFromSource(file)!)
         : (typeof toValuesFile === "string"
-          ? Metadata.BuildDataFileFullPath(toValuesFile)
-          : Metadata.BuildDataFileFullPath(Metadata.Api.Current.Path))
+          ? MetadataScrier.BuildDataFileFullPath(toValuesFile)
+          : MetadataScrier.BuildDataFileFullPath(MetadataScrier.Api.Current.Path))
       : prototype
         ? file
-          ? Metadata.BuildPrototypeFileFullPath(Metadata.ParseFilePathFromSource(file)!)
+          ? MetadataScrier.BuildPrototypeFileFullPath(MetadataScrier.ParseFilePathFromSource(file)!)
           : (typeof prototype === "string"
-            ? Metadata.BuildPrototypeFileFullPath(prototype)
-            : Metadata.BuildPrototypeFileFullPath(Metadata.Api.Current.Path))
-        : Metadata.ParseFilePathFromSource(file) || Metadata.Api.Current.Path;
+            ? MetadataScrier.BuildPrototypeFileFullPath(prototype)
+            : MetadataScrier.BuildPrototypeFileFullPath(MetadataScrier.Api.Current.Path))
+        : MetadataScrier.ParseFilePathFromSource(file) || MetadataScrier.Api.Current.Path;
   }
   
   private static _findPath(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null) : string {
     if (!relativePath) {
-      return Metadata.Api.current.path
+      return MetadataScrier.Api.current.path
     }
     
     let currentFolder: TFolder = rootFolder
       ? (app.vault.getAbstractFileByPath(rootFolder) as TFolder)
-      : Metadata.Api.Current.Note.parent;
+      : MetadataScrier.Api.Current.Note.parent;
     
     if (!currentFolder) {
       throw `Root Folder Not Found: ${currentFolder}.`;
     }
 
     if (relativePath.startsWith("?")) {
-      const foundFile = app.metadataCache.getFirstLinkpathDest(Metadata._addExtension(relativePath.substring(1), extension), currentFolder.path);
+      const foundFile = app.metadataCache.getFirstLinkpathDest(MetadataScrier._addExtension(relativePath.substring(1), extension), currentFolder.path);
       if (foundFile) {
         return foundFile.path.substring(0, foundFile.path.length - foundFile.extension.length - 1);
       }
@@ -707,7 +721,7 @@ export class Metadata implements MetadataApi {
         }
       }
     } else {
-      const foundFile = app.metadataCache.getFirstLinkpathDest(Metadata._addExtension(relativePath, extension), currentFolder.path);
+      const foundFile = app.metadataCache.getFirstLinkpathDest(MetadataScrier._addExtension(relativePath, extension), currentFolder.path);
       if (foundFile) {
         return foundFile.path.substring(0, foundFile.path.length - foundFile.extension.length - 1);
       }

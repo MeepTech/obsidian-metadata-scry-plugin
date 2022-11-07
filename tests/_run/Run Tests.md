@@ -1,7 +1,7 @@
 ```dataviewjs
 const pages = meta
     // by file:
-    .sections(path("../"))
+    .sections(path("../Metadata Api"))
     // filter out empty files
     .filter(f => f.count > 0)
     // get all the unique items from each file
