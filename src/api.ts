@@ -499,12 +499,13 @@ export interface MetaScryApi {
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
    *
    * @param {FileSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
+   * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
    *
    * @returns Just the dataview(+frontmatter) values for the file.
    * 
    * @see {@link get}
    */
-  dv(source?: FileSource): DvData | DvData[] | null;
+  dv(source?: FileSource, useSourceQuery?: boolean): DvData | DvData[] | null;
 
   /**
    * Get just the (meta-scry) cache data for a file.

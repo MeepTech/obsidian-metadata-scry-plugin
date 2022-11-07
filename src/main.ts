@@ -4,11 +4,16 @@ import { DefaultSettings, MetadataScrierPluginSettingTab } from './settings';
 import { StaticMetaScryPluginContainer as StaticMetaScryPluginApiContainer, MetaScryApi, MetaScryPluginSettings, MetaScryPluginApi as MetaScryPluginApi, StaticMetaScryApi } from "./api";
 import { ReactSectionComponents } from "./components/sections";
 import { ReactMarkdownComponents } from './components/markdown';
+import { MetadataScrierPluginKey } from "./constants";
 
 /**
  * Metadata Scrier Api Obsidian.md Plugin
  */
 export default class MetadataScrierPlugin extends Plugin implements MetaScryPluginApi {
+  static get Key() {
+    return MetadataScrierPluginKey;
+  }
+
   private static _instance: MetaScryApi;
   settings: MetaScryPluginSettings;
   
@@ -68,9 +73,9 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     // @ts-expect-error: app.plugin is not mapped.
     if (!app.plugins.plugins.dataview || !app.plugins.plugins.metaedit) {
       // @ts-expect-error: app.plugin is not mapped.
-      const error = `Cannot initialize plugin: meta-scry. Dependency plugin is missing: ${!app.plugins.plugins.dataview ? "Dataview" : "Metaedit"}. (The meta-scry plugin has been automatically disabled.)`;
+      const error = `Cannot initialize plugin: ${MetadataScrierPluginKey}. Dependency plugin is missing: ${!app.plugins.plugins.dataview ? "Dataview" : "Metaedit"}. (The ${MetadataScrierPluginKey} plugin has been automatically disabled.)`;
       // @ts-expect-error: app.plugin is not mapped.
-      app.plugins.disablePlugin("meta-scry");
+      app.plugins.disablePlugin(MetadataScrierPluginKey);
       alert(error);
       throw error;
     }

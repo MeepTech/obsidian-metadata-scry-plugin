@@ -1,0 +1,13 @@
+export const MetadataScrierPluginKey = "meta-scry";
+export const DefaultMarkdownFileExtension = "md";
+export const ExtensionFilePathSeperatorCharacter = ".";
+export const ParentFolderPathSelector = "..";
+export const CurrentFolderPathSelector = ".";
+export const FolderPathSeperatorCharacter = "/";
+export const KebabCaseWordSeperatorCharacter = "-";
+export const FileMetadataPropertyLowercaseKey = "file";
+export const FileMetadataPropertyUppercaseKey = "File";
+export const CacheMetadataPropertyLowercaseKey = "cache";
+export const CacheMetadataPropertyCapitalizedKey = "cache";
+export const SectionsMetadataPropertyLowercaseKey = "sections";
+export const SectionsMetadataPropertyCapitalizedKey = "Sections";
