@@ -378,7 +378,7 @@ export interface MetadataApi {
    *
    * @returns The cache data only for the requested file
    */
-  cache(source?: FileSource): Cache | Cache[] | null;
+  cache(source?: FileSource): Cache | Cache[];
 
   /**
    * Get the desired prototypes

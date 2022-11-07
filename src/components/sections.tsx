@@ -180,7 +180,7 @@ export namespace ReactSectionComponents {
     }
 
     // else: loading...
-    return <i>{"Loading"}</i>;
+    return <i>{"...Loading"}</i>;
   }
 
   /**

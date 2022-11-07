@@ -274,7 +274,7 @@ export class Metadata implements MetadataApi {
     }
   }
 
-  cache(file: FileSource = null): Cache | Cache[] | null {
+  cache(file: FileSource = null): Cache | Cache[] {
     const fileObject = this.vault(file);
     if (fileObject === null) {
       const key = Metadata.ParseFilePathFromSource(file);
@@ -283,7 +283,8 @@ export class Metadata implements MetadataApi {
 
         return Metadata._caches[key];
       }
-      return null;
+      
+      throw "Invalid Key for File";
     } else if (fileObject instanceof TFolder) {
       return fileObject.children.map(f => this.cache(f) as (Cache | Cache[])).flat();
     } else {

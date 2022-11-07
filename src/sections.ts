@@ -1,5 +1,5 @@
-import { Sections, Section, PluginContainer, SplayKebabCasePropertiesOption, Heading } from './api';
-import { HeadingCache, MarkdownRenderer, TFile } from 'obsidian';
+import { Sections, Cache, Section, PluginContainer, SplayKebabCasePropertiesOption, Heading } from './api';
+import { HeadingCache, MarkdownView, MarkdownRenderer, TFile, WorkspaceLeaf } from 'obsidian';
 
 /**
  * Implementation of Heading
@@ -35,7 +35,7 @@ class NoteSection implements Section {
   private _root
     : NoteSections;
   // @ts-expect-error: Default Indexer Type Override
-  private _renderContainer
+  private _html
     : HTMLElement = null!;
   // @ts-expect-error: Default Indexer Type Override
   private _md
@@ -47,7 +47,7 @@ class NoteSection implements Section {
   private _count
     : number = 0;
   // @ts-expect-error: Default Indexer Type Override
-  private _container
+  private _parentTitle
     : NoteSection | null = null;
   // @ts-expect-error: Default Indexer Type Override
   private _sections
@@ -61,9 +61,6 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   private _unique
     : Record<string, NoteSection> = {};
-  // @ts-expect-error: Default Indexer Type Override
-  private _promise
-    : Promise<string> | null = null;
   // @ts-expect-error: Default Indexer Type Override
   private _text
     : string | null = null;
@@ -88,10 +85,10 @@ class NoteSection implements Section {
     : number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override
   get Container()
-    : NoteSection | null { return this._container; }
+    : NoteSection | null { return this._parentTitle; }
   // @ts-expect-error: Default Indexer Type Override
   get container()
-    : NoteSection | null { return this._container; }
+    : NoteSection | null { return this._parentTitle; }
   // @ts-expect-error: Default Indexer Type Override
   get Sections()
     : Record<string, NoteSection[]> { return this._sections; }
@@ -135,16 +132,14 @@ class NoteSection implements Section {
   
   // @ts-expect-error: Default Indexer Type Override
   get md()
-  : Promise<string> {
-    if (this._md === null) {
-      return this._promise ??= this._find().then(r => {
-        this._md = r;
-        this._promise = null;
-        return r;
-      });
-    } else {
-      return Promise.resolve(this._md);
-    }
+    : Promise<string> {
+    return (async () => {
+      if (this._md === null) {
+        this._md = await this._find();
+      }
+
+        return this._md;
+    })();
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -155,20 +150,42 @@ class NoteSection implements Section {
   
   // @ts-expect-error: Default Indexer Type Override
   get html()
-  : Promise<HTMLElement> {
-    if (!this._renderContainer) {
-      return this.md.then(v => {
-        if (this._renderContainer === null) {
-          this._renderContainer = document.createElement("div");
-          //@ts-expect-error: Api should expect null but does not.
-          MarkdownRenderer.renderMarkdown(this._md, this._renderContainer, this.root.path, null);
+    : Promise<HTMLElement> {
+    return (async () => {
+      if (this._html === null) {
+        const md = await this.md;
+        this._html = document.createElement("div");
+
+        const renderLeaf: WorkspaceLeaf = app.workspace
+          // @ts-expect-error: Function missing from api
+          .createLeafInTabGroup();
+        const view = new MarkdownView(renderLeaf);
+ 
+        let localMd = this._md;
+        if (this.root.getMatter()) {
+          localMd = "---" + this.root.getMatter() + "---\n\n" + localMd;
         }
+ 
+        view.data = localMd;
+        try {
+          //const specialCache = PluginContainer.Instance.api.cache("_zpec:a|") as Cache;
+          //specialCache["CurrentPath"] = this.root.path;
+          await MarkdownRenderer.renderMarkdown(
+            md,
+            this._html,
+            this.root.path,
+            // @ts-expect-error: Null is required here, but clashes with documentation.
+            null
+          );
+          //specialCache["CurrentPath"] = undefined;
+        
+        } finally {
+          renderLeaf.detach();
+        }
+      }
 
-        return this._renderContainer;
-      });
-    }
-
-    return Promise.resolve(this._renderContainer);
+      return this._html;
+    })();
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -179,15 +196,15 @@ class NoteSection implements Section {
 
   // @ts-expect-error: Default Indexer Type Override
   get txt()
-  : Promise<string> {
-    if (this._text === null) {
-      return  this.html.then(v => {
-        this._text = v.textContent || "";
-        return this._text;
-      });
-    }
+    : Promise<string> {
+    return (async () => {
+      if (this._text === null) {
+        const html = await this.html;
+        this._text = html.textContent || "";
+      }
 
-    return Promise.resolve(this._text);
+      return this._text;
+    })();
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -305,7 +322,7 @@ class NoteSection implements Section {
       } else {
         this._sections[key] = [child];
       }
-      child._container = this;
+      child._parentTitle = this;
     }
 
     this._count += 1;
@@ -400,6 +417,12 @@ export class NoteSections extends Object implements Sections {
   // @ts-expect-error: Default Indexer Type Override
   private _md
     : string = null!;
+  // @ts-expect-error: Default Indexer Type Override
+  private _fm
+    : string = "";
+  // @ts-expect-error: Default Indexer Type Override
+  private _html
+    : HTMLElement = null!;
 
   // @ts-expect-error: Default Indexer Type Override for Object Extension
   [key: string]: NoteSection;
@@ -539,12 +562,39 @@ export class NoteSections extends Object implements Sections {
   async loadText()
     : Promise<string> {
     if (this._md !== null) {
-      return this._md;
+      return Promise.resolve(this._md);
     } else {
       const file = PluginContainer.Instance.api.vault(this.path) as TFile;
       this._md = await app.vault.cachedRead(file);
+      const frontMarker = "---";
+      if (this._md.startsWith(frontMarker)) {
+        var startPosition = this._md.search(frontMarker) + frontMarker.length;
+        var endPosition = this._md.slice(startPosition).search(frontMarker) + startPosition;
+        this._fm = this._md.slice(startPosition, endPosition);
+      }
 
-      return this._md;
+      return Promise.resolve(this._md);
     }
+  }
+  
+  // @ts-expect-error: Default Indexer Type Override
+  async loadHtml()
+    : Promise<HTMLElement> {
+    if (this._html !== null) {
+      return Promise.resolve(this._html);
+    } else {
+      return this.loadText().then(v => {
+        this._html = document.createElement("div");
+        //@ts-expect-error: Api should expect null but does not.
+        MarkdownRenderer.renderMarkdown(this._md, this._html, this.root.path, null);
+
+        return this._html;
+      });
+    }
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  public getMatter(): string {
+    return this._fm;
   }
 }

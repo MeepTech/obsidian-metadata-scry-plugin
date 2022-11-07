@@ -21,11 +21,26 @@ export class CurrentMetadata implements CurrentApi {
   }
 
   get Note(): TFile {
+    const specialCache = this._api.cache("_zpec:a|") as Cache;
+    if (typeof specialCache["CurrentPath"] === "string") {
+      const current = this._api.vault(
+        // @ts-expect-error: Special var variable for extra scope.
+        ScopedCurrentPath
+      ) as TFile;
+      
+      if (!current) {
+        throw "No Current File";
+      }
+      
+      return current;
+    }
+
     const current = app.workspace.getActiveFile();
+
     if (!current) {
       throw "No Current File";
     }
-
+    
     return current;
   }
 
@@ -78,6 +93,7 @@ export class CurrentMetadata implements CurrentApi {
   get sections(): Sections {
     return this.Sections;
   }
+
   patch(frontmatterData: any, propertyName: string | null = null, options: UpdateOptions = {toValuesFile: false, prototype: false}): any | object {
     return this._api.patch(this.path, frontmatterData, propertyName, options);
   }

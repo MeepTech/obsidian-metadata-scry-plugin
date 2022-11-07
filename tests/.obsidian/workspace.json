@@ -1,88 +1,39 @@
 {
   "main": {
-    "id": "35afe6aa9ad6ab7c",
+    "id": "0b98efad1ee9a61f",
     "type": "split",
     "children": [
       {
-        "id": "c2d7576ccca87a0d",
+        "id": "2ce7f71a578ad805",
         "type": "tabs",
         "children": [
           {
-            "id": "b5a37bc11d705073",
+            "id": "1423f4acc1c63618",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Metadata Api/property Section.rendered/test.data.md",
+                "file": "Metadata Api/component InlineMd/test.md",
                 "mode": "preview",
                 "source": true
               }
             }
-          },
-          {
-            "id": "37e07fa64c272a7b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "_run/Run Tests.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "d69fa2b74e25c219",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Metadata Api/property Section.rendered/test.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "eec86b9ea171bf99",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "_run/Run Tests.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "17f2abaff621caae",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "_/_assets/_js/_react_components/Share.md",
-                "mode": "source",
-                "source": false
-              }
-            }
           }
-        ],
-        "currentTab": 4
+        ]
       }
     ],
     "direction": "vertical"
   },
   "left": {
-    "id": "768d5d58485e8819",
+    "id": "b2af2e315c0a298b",
     "type": "split",
     "children": [
       {
-        "id": "a9da68c3e49f2ea1",
+        "id": "2c50e1d8b9359a09",
         "type": "tabs",
         "children": [
           {
-            "id": "bfcdbf9b21fb4572",
+            "id": "26f09dd954d4138f",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -92,7 +43,7 @@
             }
           },
           {
-            "id": "4d93b9ae4cc2fa6c",
+            "id": "d712f7956a0eab7b",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -107,7 +58,7 @@
             }
           },
           {
-            "id": "c1f7a935d48fc909",
+            "id": "389a599e055e706d",
             "type": "leaf",
             "state": {
               "type": "starred",
@@ -121,20 +72,20 @@
     "width": 300
   },
   "right": {
-    "id": "0ba7355401d04981",
+    "id": "5d7ba67c2ce715df",
     "type": "split",
     "children": [
       {
-        "id": "8972daad822b8412",
+        "id": "a5925b28ef7211fc",
         "type": "tabs",
         "children": [
           {
-            "id": "29c09a1c2a8f3e11",
+            "id": "07e72e2369c2854d",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "_/_assets/_js/_react_components/Share.md",
+                "file": "Metadata Api/component InlineMd/test.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -146,19 +97,19 @@
             }
           },
           {
-            "id": "5e5631ae6574635a",
+            "id": "255874dd7b3cfb72",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "_/_assets/_js/_react_components/Share.md",
+                "file": "Metadata Api/component InlineMd/test.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
             }
           },
           {
-            "id": "ef2d6b3c7fbedad7",
+            "id": "73cb4ac744833f52",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -169,33 +120,26 @@
             }
           },
           {
-            "id": "5456a7d437c0a74b",
+            "id": "9f3cbc456fa15106",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "_/_assets/_js/_react_components/Share.md"
+                "file": "Metadata Api/component InlineMd/test.md"
               }
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 300,
+    "collapsed": true
   },
-  "active": "17f2abaff621caae",
+  "active": "1423f4acc1c63618",
   "lastOpenFiles": [
     "_run/Run Tests.md",
-    "Metadata Api/property Section.rendered/test.md",
-    "Metadata Api/function Metadata.cache/test.data.md",
-    "Metadata Api/property Section.rendered/test.data.md",
-    "Metadata Api/function Metadata.cache/test.md",
-    "Metadata Api/property Sections.all/test.data.md",
-    "Metadata Api/global path/test.md",
-    "Metadata Api/property Sections.all/test.md",
-    "Metadata Api/shared/Untitled.md",
-    "Metadata Api/global path/test.data.md"
+    "Metadata Api/component InlineMd/test.md",
+    "Metadata Api/component Section/test.md"
   ]
 }
