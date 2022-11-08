@@ -1,3 +1,4 @@
+import { DataviewApi, getAPI } from "obsidian-dataview";
 import {
   MetaScryPluginApi,
   MetaScryPluginSettings,
@@ -32,14 +33,9 @@ import {
    * Access to the Dataview Api
    * (Read access and Data display)
    */
-  static get DataviewApi() : any {
-    // TODO: can we set these to their specific types?
-    return (app as any)
-      .plugins
-      .plugins
-      .dataview
-      .api;
-  }
+   static get DataviewApi(): DataviewApi {
+     return getAPI() as DataviewApi;
+   }
 }
 
 export const DefaultSettings: MetaScryPluginSettings = {

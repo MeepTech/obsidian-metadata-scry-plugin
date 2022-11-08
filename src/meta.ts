@@ -3,6 +3,8 @@ import {
   TFile,
   TFolder
 } from 'obsidian';
+import { DataArray, DataviewApi, getAPI } from "obsidian-dataview";
+
 import {
   CachedFileMetadata,
   CurrentNoteMetaScryApi,
@@ -40,7 +42,6 @@ import {
 } from './constants';
 import { CurrentNoteScrier } from "./current";
 import { NoteSections } from './sections';
-//TODO: test: import dv = require("../../dataview/main.js");
 
 /**
  * Access and edit metadata about a file from multiple sources.
@@ -165,27 +166,18 @@ export class MetadataScrier implements MetaScryApi {
   /**
    * Access to the Dataview Api
    * (Read access and Data display)
-   * // TODO: can we set these to their specific types?
    */
-  static get DataviewApi(): any {
-    return (app as any)
-      .plugins
-      .plugins
-      .dataview
-      .api;
+  static get DataviewApi(): DataviewApi {
+    return StaticMetaScryPluginContainer.DataviewApi;
   }
 
   /**
    * Access to the Metaedit Api
    * (Write access)
-   * // TODO: can we set these to their specific types?
+   * // TODO: can we set this to their specific types?
    */
   static get MetaeditApi(): any {
-    return (app as any)
-      .plugins
-      .plugins
-      .metaedit
-      .api;
+    return StaticMetaScryPluginContainer.MetaeditApi
   }
 
   /**
@@ -326,8 +318,8 @@ export class MetadataScrier implements MetaScryApi {
     }
   }
 
-  dv(file: FileSource = null, useSourceQuery: boolean = false): DvData | DvData[] | null {
-    const providedPath = file ? MetadataScrier.ParseFilePathFromSource(file) : this.Current.Path;
+  dv(source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null {
+    const providedPath: string = source ? MetadataScrier.ParseFilePathFromSource(source) as string : this.Current.Path;
     const paths = MetadataScrier
       .DataviewApi
       .pagePaths(useSourceQuery ? providedPath : (`"` + providedPath + '"'));
@@ -344,15 +336,15 @@ export class MetadataScrier implements MetaScryApi {
       return this._kebabPropSplayer(result, [FileMetadataPropertyLowercaseKey, FileMetadataPropertyUppercaseKey]) as DvData;
     }
   }
-  dvMatter = (file: FileSource = null): DvData | DvData[] | null =>
-    this.dv(file);
-  dataviewFrontmatter = (file: FileSource = null): DvData | DvData[] | null =>
-    this.dv(file);
+  dvMatter = (source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
+    this.dv(source, useSourceQuery);
+  dataviewFrontmatter = (source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
+    this.dv(source, useSourceQuery);
 
-  cache(file: FileSource = null): Cache | Cache[] {
-    const fileObject = this.vault(file);
+  cache(source: FileSource = null): Cache | Cache[] {
+    const fileObject = this.vault(source);
     if (fileObject === null) {
-      const key = MetadataScrier.ParseFilePathFromSource(file);
+      const key = MetadataScrier.ParseFilePathFromSource(source);
       if (key !== null && key !== undefined) {
         MetadataScrier._caches[key] = MetadataScrier._caches[key] || {};
 
@@ -368,6 +360,8 @@ export class MetadataScrier implements MetaScryApi {
       return MetadataScrier._caches[fileObject.path];
     }
   }
+  temp = (source: FileSource = null): Cache | Cache[] =>
+    this.cache(source);
 
   prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null {
     return this.frontmatter(MetadataScrier.BuildPrototypeFileFullPath(prototypePath));
@@ -446,7 +440,7 @@ export class MetadataScrier implements MetaScryApi {
       }
     }
 
-    // add/remove file metadata?
+    // add/remove file metadata field(from dv)?
     if (sources === "true" || (sources as MetadataSources).FileInfo) {
       values[FileMetadataPropertyLowercaseKey] = values.file;
       values[FileMetadataPropertyUppercaseKey] = values.file;
@@ -468,12 +462,18 @@ export class MetadataScrier implements MetaScryApi {
         values[FileMetadataPropertyLowercaseKey] = {};
         values[FileMetadataPropertyUppercaseKey] = {};
       }
-      values.file[SectionsMetadataPropertyCapitalizedKey] = this.sections(fileName);
-      values.file[SectionsMetadataPropertyLowercaseKey] = this.sections(fileName);
+
+      const sections = this.sections(fileName);
+      values[FileMetadataPropertyLowercaseKey][SectionsMetadataPropertyCapitalizedKey] = sections;
+      values[FileMetadataPropertyUppercaseKey][SectionsMetadataPropertyLowercaseKey] = sections;
+      values[FileMetadataPropertyLowercaseKey][SectionsMetadataPropertyCapitalizedKey] = sections;
+      values[FileMetadataPropertyUppercaseKey][SectionsMetadataPropertyLowercaseKey] = sections;
     }
 
     return values;
   }
+  from = (file: FileSource = null, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null =>
+    this.get(file, sources);
 
   //#endregion
 
@@ -702,7 +702,7 @@ export class MetadataScrier implements MetaScryApi {
   static ParseFilePathFromSource(file: FileSource): string | null {
     let fileName = file || null;
     if (IsObject(file) && file !== null) {
-      fileName = (file as FileData | TAbstractFile).path;
+      fileName = (file as FileData | TAbstractFile).path!;
     }
 
     //@ts-expect-error: Accounted For.

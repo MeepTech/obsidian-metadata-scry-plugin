@@ -6,7 +6,8 @@ import {
   Metadata,
   MetaScryApi,
   Sections,
-  FrontmatterUpdateOptions
+  FrontmatterUpdateOptions,
+  DvData
 } from './api';
 import { IsString } from './constants';
 
@@ -90,6 +91,10 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     return this.Matter;
   }
 
+  get Fm(): Frontmatter {
+    return this.Matter;
+  }
+
   get Frontmatter(): Frontmatter {
     return this.Matter;
   }
@@ -112,6 +117,14 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
 
   get sections(): Sections {
     return this.Sections;
+  }
+
+  get dv(): DvData {
+    return this._api.dv() as DvData;
+  }
+
+  get Dv(): DvData {
+    return this.dv;
   }
 
   patch(frontmatterData: any, propertyName: string | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): any | object {

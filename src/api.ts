@@ -5,6 +5,7 @@ import {
   TFile,
   TFolder
 } from "obsidian";
+import { DataArray, Link, PageMetadata, SMarkdownPage } from "obsidian-dataview";
 
 //#region Plugin
 
@@ -220,29 +221,6 @@ export type Frontmatter = {
  * Sections is added by the MetaScry Api.
  */
 export type FileData = {
-  // these fields are compiled by dataview:
-  name: string;
-  folder: string;
-  path: string;
-  ext: string;
-  link: DataLink;
-  size: number;
-  ctime: Date;
-  cday: Date;
-  mtime: Date;
-  mday: Date;
-  tags: string[];
-  etags: string[];
-  inlinks: DataLink[];
-  outlinks: DataLink[];
-  aliases: string[];
-  tasks: DataTask[];
-  lists: DataTask[];
-  frontmatter?: Frontmatter;
-  starred?: boolean;
-  day?: Date;
-  // the other fields come from meta-scry:
-
   /**
    * Sections under headings in the given file. You can load the content with md, html, and txt
    * 
@@ -256,27 +234,7 @@ export type FileData = {
    * @alias {@link sections}
    */
   Sections?: Sections;
-}
-
-/**
- * An obsidian link.
- * Conmpiled by dataview
- */
-interface DataLink {
-  /**
-   * The path the link points to
-   */
-  path: string;
-  // TODO: finish
-}
-
-/**
- * A md task or list item. 
- * Conmpiled by dataview.
- */
-interface DataTask {
-  // TODO: fill in
-}
+} & Partial<SMarkdownPage["file"]>;
 
 /**
  * A full metadata set returned from meta.get.
@@ -299,14 +257,14 @@ export type DvData = {
  * 
  * Either a 'file/folder' object with a '.path' property, or the path itself as a string.
  */
-export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | DataLink | null
+export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | Link | null
 
 /**
  * Something we can get a specific file's path from.
  * 
  * Either a 'file' object with a '.path' property, or the path itself as a string.
  */
- export type FileItem = string | TFile | FileData | DataLink | null
+ export type FileItem = string | TFile | FileData | Link | null
 
 /**
  * Passed into any update functions to modify what they do.
@@ -574,9 +532,48 @@ export interface MetaScryApi {
    *
    * @returns Just the dataview(+frontmatter) values for the file.
    * 
+   * @alias {@link dvMatter}
+   * @alias {@link dataviewFrontmatter}
+   * 
    * @see {@link get}
+   * @see {@link CurrentNoteMetaScryApi.dv}
+   * @see {@link CurrentNoteMetaScryApi.Dv}
    */
-  dv(source?: FileSource, useSourceQuery?: boolean): DvData | DvData[] | null;
+  dv(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
+
+  /**
+   * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
+   *
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
+   * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
+   *
+   * @returns Just the dataview(+frontmatter) values for the file.
+   * 
+   * @alias {@link dv}
+   * @alias {@link dataviewFrontmatter}
+   * 
+   * @see {@link get}
+   * @see {@link CurrentNoteMetaScryApi.dv}
+   * @see {@link CurrentNoteMetaScryApi.Dv}
+   */
+  dvMatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
+
+  /**
+   * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
+   *
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
+   * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
+   *
+   * @returns Just the dataview(+frontmatter) values for the file.
+   * 
+   * @alias {@link dvMatter}
+   * @alias {@link dv}
+   * 
+   * @see {@link get}
+   * @see {@link CurrentNoteMetaScryApi.dv}
+   * @see {@link CurrentNoteMetaScryApi.Dv}
+   */
+  dataviewFrontmatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
 
   /**
    * Get just the (meta-scry) cache data for a file.
@@ -585,11 +582,28 @@ export interface MetaScryApi {
    *
    * @returns The cache data only for the requested file
    * 
+   * @alias {@link temp}
+   * 
    * @see {@link CurrentNoteMetaScryApi.cache}
    * @see {@link CurrentNoteMetaScryApi.Cache}
    * @see {@link get}
    */
   cache(source?: FileSource): Cache | Cache[];
+  
+  /**
+   * Get just the (meta-scry) cache data for a file.
+   *
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string.
+   *
+   * @returns The cache data only for the requested file
+   * 
+   * @alias {@link cache}
+   * 
+   * @see {@link CurrentNoteMetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.Cache}
+   * @see {@link get}
+   */
+   temp(source?: FileSource): Cache | Cache[];
 
   /**
    * Get the desired prototypes
@@ -617,6 +631,8 @@ export interface MetaScryApi {
    *
    * @returns The requested metadata
    * 
+   * @alias {@link from}
+   * 
    * @see {@link data}
    * @see {@link Data}
    * @see {@link CurrentNoteMetaScryApi.data}
@@ -638,8 +654,50 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.cache}
    * @see {@link CurrentNoteMetaScryApi.Cache}
    * @see {@link dv}
+   * @see {@link dataviewFrontmatter}
+   * @see {@link dvMatter}
+   * @see {@link CurrentNoteMetaScryApi.Dv}
+   * @see {@link CurrentNoteMetaScryApi.dv}
    */
   get(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
+  
+  /**
+   * Get the Metadata for a given file using the supplied sources.
+   *
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string.
+   * @param {bool|MetadataSources} sources The sources to get metadata from. Defaults to all.
+   *
+   * @returns The requested metadata
+   * 
+   * @alias {@link get}
+   * 
+   * @see {@link data}
+   * @see {@link Data}
+   * @see {@link CurrentNoteMetaScryApi.data}
+   * @see {@link CurrentNoteMetaScryApi.data}
+   * @see {@link CurrentNoteMetaScryApi.Data}
+   * @see {@link CurrentNoteMetaScryApi.Data}
+   * @see {@link fm}
+   * @see {@link matter}
+   * @see {@link frontmatter}
+   * @see {@link CurrentNoteMetaScryApi.fm}
+   * @see {@link CurrentNoteMetaScryApi.matter}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
+   * @see {@link CurrentNoteMetaScryApi.Matter}
+   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
+   * @see {@link sections}
+   * @see {@link CurrentNoteMetaScryApi.sections}
+   * @see {@link CurrentNoteMetaScryApi.Sections}
+   * @see {@link cache}
+   * @see {@link CurrentNoteMetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.Cache}
+   * @see {@link dv}
+   * @see {@link dataviewFrontmatter}
+   * @see {@link dvMatter}
+   * @see {@link CurrentNoteMetaScryApi.Dv}
+   * @see {@link CurrentNoteMetaScryApi.dv}
+   */
+   from(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
   
   /**
    * Patch individual properties of the frontmatter metadata.
