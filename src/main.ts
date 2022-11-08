@@ -1,21 +1,38 @@
 import { Plugin } from 'obsidian';
+import {
+  MetaScryApi,
+  MetaScryPluginSettings,
+  MetaScryPluginApi,
+  StaticMetaScryApi
+} from "./api";
+import {
+  AggregateByArrayHelperFunctionKey,
+  DefaultSettings,
+  GetPropObjectHelperFunctionKey,
+  HasPropObjectHelperFunctionKey,
+  IndexByArrayHelperFunctionKey,
+  IsFunction,
+  MetadataScrierPluginKey,
+  ScryGlobalPropertyCapitalizedKey,
+  ScryGlobalPropertyLowercaseKey,
+  SetPropObjectHelperFunctionKey,
+  StaticMetaScryPluginContainer
+} from "./constants";
 import { MetadataScrier } from './meta';
-import { DefaultSettings, MetadataScrierPluginSettingTab } from './settings';
-import { StaticMetaScryPluginContainer as StaticMetaScryPluginApiContainer, MetaScryApi, MetaScryPluginSettings, MetaScryPluginApi as MetaScryPluginApi, StaticMetaScryApi } from "./api";
+import { MetadataScrierPluginSettingTab } from './settings';
 import { ReactSectionComponents } from "./components/sections";
 import { ReactMarkdownComponents } from './components/markdown';
-import { MetadataScrierPluginKey } from "./constants";
 
 /**
  * Metadata Scrier Api Obsidian.md Plugin
  */
 export default class MetadataScrierPlugin extends Plugin implements MetaScryPluginApi {
+  private static _instance: MetaScryApi;
+  private _settings: MetaScryPluginSettings;
+
   static get Key() {
     return MetadataScrierPluginKey;
   }
-
-  private static _instance: MetaScryApi;
-  settings: MetaScryPluginSettings;
   
   //#region Api Access
 
@@ -28,6 +45,10 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   get api(): MetaScryApi {
     return MetadataScrierPlugin._instance;
+  }
+
+  get settings(): MetaScryPluginSettings {
+    return this._settings;
   }
 
   //#endregion
@@ -47,19 +68,26 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   }
   
 	async loadSettings() {
-		this.settings = Object.assign({}, DefaultSettings, await this.loadData());
+		this._settings = Object.assign({}, DefaultSettings, await this.loadData());
   }
   
-	async saveSettings() {
+	async updateSettings(newSettings: MetaScryPluginSettings) {
     // reset the api when settings are updated.
     this._deinitApi();
-    await this.saveData(this.settings);
+
+    // save settings
+    await this.saveData({
+      ...this.settings,
+      newSettings
+    });
+
+    // reinit
     this._initApi();
   }
   
   private _initApi() {
     this._verifyDependencies();
-    StaticMetaScryPluginApiContainer.Instance = this;
+    StaticMetaScryPluginContainer.Instance = this;
     MetadataScrierPlugin._instance = new MetadataScrier(this);
 
     this._initGlobals();
@@ -72,8 +100,17 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _verifyDependencies() {
     // @ts-expect-error: app.plugin is not mapped.
     if (!app.plugins.plugins.dataview || !app.plugins.plugins.metaedit) {
-      // @ts-expect-error: app.plugin is not mapped.
-      const error = `Cannot initialize plugin: ${MetadataScrierPluginKey}. Dependency plugin is missing: ${!app.plugins.plugins.dataview ? "Dataview" : "Metaedit"}. (The ${MetadataScrierPluginKey} plugin has been automatically disabled.)`;
+      const error =
+        `Cannot initialize plugin: ${MetadataScrierPluginKey}. ` +
+        ` Dependency plugins are missing: ` +
+        // @ts-expect-error: app.plugin is not mapped.
+        (!app.plugins.plugins.dataview
+          // @ts-expect-error: app.plugin is not mapped.
+          ? (!app.plugins.plugins.metaedit
+            ? "Dataview and Metaedit"
+            : "Dataview")
+          : "Metaedit") +
+        `. (The ${ MetadataScrierPluginKey } plugin has been automatically disabled.)`;
       // @ts-expect-error: app.plugin is not mapped.
       app.plugins.disablePlugin(MetadataScrierPluginKey);
       alert(error);
@@ -103,7 +140,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo (Optional) A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
        * @returns true if the property exists, false if not.
        */
-      Object.defineProperty(Object.prototype, 'hasProp', {
+      Object.defineProperty(Object.prototype, HasPropObjectHelperFunctionKey, {
         value: function (path: string | Array<string>, thenDo: any) {
           if (thenDo) {
             return MetadataScrier.TryToGetDeepProperty(path, thenDo, this);
@@ -121,11 +158,11 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        *
        * @returns The found deep property, or undefined if not found.
        */
-      Object.defineProperty(Object.prototype, 'getProp', {
+      Object.defineProperty(Object.prototype, GetPropObjectHelperFunctionKey, {
         value: function (path: string | Array<string>, defaultValue: any) {
           const value = MetadataScrier.GetDeepProperty(path, this);
           if (defaultValue !== undefined && (value === undefined)) {
-            if (typeof defaultValue === "function") {
+            if (IsFunction(defaultValue)) {
               return defaultValue();
             } else {
               return defaultValue;
@@ -145,7 +182,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        *
        * @returns The found deep property, or undefined if not found.
        */
-      Object.defineProperty(Object.prototype, 'setProp', {
+      Object.defineProperty(Object.prototype, SetPropObjectHelperFunctionKey, {
         value: function (propertyPath: string | Array<string>, value: any) {
           return MetadataScrier.SetDeepProperty(propertyPath, value, this);
         },
@@ -164,7 +201,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        * 
        * @returns An aggregate object with the original objects from the input list indexed by the value of the property at the provided key path.
        */
-      Object.defineProperty(Array.prototype, 'indexBy', {
+      Object.defineProperty(Array.prototype, IndexByArrayHelperFunctionKey, {
         value: function (uniqueKeyPropertyPath: string): Record<any, any> {
           const result: Record<any, any> = {};
 
@@ -193,7 +230,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        * 
        * @returns An object with arrays indexed by the value of the property at the key within the object.
        */
-      Object.defineProperty(Array.prototype, 'aggregateBy', {
+      Object.defineProperty(Array.prototype, AggregateByArrayHelperFunctionKey, {
         value: function (key: string): Record<any, any[]> {
           const result: Record<any, any[]> = {};
 
@@ -273,7 +310,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         /**
          * Global access to the StaticMetadataScryPluginApi on desktop.
          */
-        Object.defineProperty(global, "Scry", {
+        Object.defineProperty(global, ScryGlobalPropertyCapitalizedKey, {
           get() {
             return staticApi;
           }
@@ -283,7 +320,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         /**
          * Global access to the StaticMetadataScryPluginApi on mobile.
          */
-        Object.defineProperty(window, "Scry", {
+        Object.defineProperty(window, ScryGlobalPropertyCapitalizedKey, {
           get() {
             return staticApi;
           }
@@ -294,7 +331,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         /**
          * Global access to the MetaScryApi on desktop.
          */
-        Object.defineProperty(global, "scry", {
+        Object.defineProperty(global, ScryGlobalPropertyLowercaseKey, {
           get() {
             return MetadataScrier.Api;
           }
@@ -304,7 +341,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         /**
          * Global access to the MetaScryApi on mobile.
          */
-        Object.defineProperty(window, "scry", {
+        Object.defineProperty(window, ScryGlobalPropertyLowercaseKey, {
           get() {
             return MetadataScrier.Api;
           }
@@ -416,19 +453,19 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     if (this.settings.defineScryGlobalVariables) {
       try {
         // @ts-ignore: Global Scope
-        delete global["Scry"];
+        delete global[ScryGlobalPropertyCapitalizedKey];
       } catch { }
       try {
         // @ts-ignore: Global Scope
-        delete window["Scry"];
+        delete window[ScryGlobalPropertyCapitalizedKey];
       } catch { }
       try {
         // @ts-ignore: Global Scope
-        delete global["scry"];
+        delete global[ScryGlobalPropertyLowercaseKey];
       } catch { }
       try {
         // @ts-ignore: Global Scope
-        delete window["scry"];
+        delete window[ScryGlobalPropertyLowercaseKey];
       } catch { }
     }
 
@@ -448,15 +485,15 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     if (this.settings.defineObjectPropertyHelperFunctions) {
       try {
         // @ts-ignore: Global Scope
-        delete Object.prototype["hasProp"];
+        delete Object.prototype[HasPropObjectHelperFunctionKey];
       } catch { }
       try {
         // @ts-ignore: Global Scope
-        delete Object.prototype["getProp"];
+        delete Object.prototype[GetPropObjectHelperFunctionKey];
       } catch { }
       try {
         // @ts-ignore: Global Scope
-        delete Object.prototype["setProp"];
+        delete Object.prototype[SetPropObjectHelperFunctionKey];
       } catch { }
     }
   }
@@ -465,11 +502,11 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     if (this.settings.defineArrayHelperFunctions) {
       try {
         // @ts-ignore: Global Scope
-        delete Array.prototype["aggregateBy"];
+        delete Array.prototype[AggregateByArrayHelperFunctionKey];
       } catch { }
       try {
         // @ts-ignore: Global Scope
-        delete Array.prototype["indexBy"];
+        delete Array.prototype[IndexByArrayHelperFunctionKey];
       } catch { }
     }
   }

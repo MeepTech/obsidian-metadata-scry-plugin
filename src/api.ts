@@ -1,4 +1,10 @@
-import { CachedMetadata, Plugin, TAbstractFile, TFile, TFolder } from "obsidian";
+import {
+  CachedMetadata,
+  Plugin,
+  TAbstractFile,
+  TFile,
+  TFolder
+} from "obsidian";
 
 //#region Plugin
 
@@ -6,48 +12,22 @@ import { CachedMetadata, Plugin, TAbstractFile, TFile, TFolder } from "obsidian"
  * Enum for the kebab splay settings options
  */
 export enum SplayKebabCasePropertiesOption {
+  /**
+   * Only use original keys
+   */
   Disabled = 0,
+  /**
+   * Splits into only lower camel case
+   */
   Lowercase = 1,
+  /**
+   * Splits only into upper camel case
+   */
   CamelCase = 2,
+  /**
+   * Split into loweCamel and Upper/UntouchedCamelCase
+   */
   LowerAndCamelCase = 3
-}
-
-/**
- * Static container for the current meta-scry plugin instance. 
- * Internal use only. The name is long so you don't want to use it anyway
- */
-export class StaticMetaScryPluginContainer {
-
-  /**
-   * The current instance of the Metadata Scry Api Plugin.
-   */
-  static Instance: MetaScryPluginApi;
-
-  /**
-   * Access to the Metaedit Api
-   * (Write access)
-   * // TODO: can we set these to their specific types?
-   */
-  static get MetaeditApi() : any {
-    return (app as any)
-    .plugins
-    .plugins
-    .metaedit
-    .api;
-  }
-  
-  /**
-   * Access to the Dataview Api
-   * (Read access and Data display)
-   * // TODO: can we set these to their specific types?
-   */
-  static get DataviewApi() : any {
-    return (app as any)
-      .plugins
-      .plugins
-      .dataview
-      .api;
-  }
 }
 
 /**
@@ -61,14 +41,14 @@ export type MetaScryPluginApi = {
 
   /**
    * The settings for the api.
-   * Call saveSettings if you update them.
+   * Call saveSettings if you want to update this
    */
-  settings: MetaScryPluginSettings;
+  get settings(): MetaScryPluginSettings;
 
   /**
    * Call after updating the settings object to re-load the api
    */
-  saveSettings(): void;
+  updateSettings(newSettings: MetaScryPluginSettings): void;
 } & Plugin;
 
 /**
@@ -205,7 +185,13 @@ export type FileData = {
   tasks: DataTask[];
   lists: DataTask[];
   frontmatter?: Frontmatter;
+  /**
+   * Sections under headings in the given file. You can load the content with md, html, and txt
+   */
   sections?: Sections;
+  /**
+   * Sections under headings in the given file. You can load the content with md, html, and txt
+   */
   Sections?: Sections;
   starred?: boolean;
   day?: Date;
@@ -1216,6 +1202,8 @@ interface SectionInfo {
    * @see {@link html}
    * @see {@link txt}
    * @see {@link Txt}
+   * @see {@link Text}
+   * @see {@link text}
    */
   get md(): Promise<string>;
 
@@ -1231,6 +1219,8 @@ interface SectionInfo {
    * @see {@link html}
    * @see {@link txt}
    * @see {@link Txt}
+   * @see {@link text}
+   * @see {@link Text}
    */
   get Md(): Promise<string>;
 
@@ -1245,6 +1235,8 @@ interface SectionInfo {
    * @see {@link md}
    * @see {@link txt}
    * @see {@link Txt}
+   * @see {@link text}
+   * @see {@link Text}
    */
   get html(): Promise<HTMLElement>;
 
@@ -1259,6 +1251,8 @@ interface SectionInfo {
    * @see {@link md}
    * @see {@link txt}
    * @see {@link Txt}
+   * @see {@link text}
+   * @see {@link Text}
    */
   get Html(): Promise<HTMLElement>;
 
@@ -1268,6 +1262,8 @@ interface SectionInfo {
    * @async
    * 
    * @alias {@link txt}
+   * @alias {@link text}
+   * @alias {@link Text}
    * 
    * @see {@link Md}
    * @see {@link md}
@@ -1282,6 +1278,8 @@ interface SectionInfo {
    * @async
    * 
    * @alias {@link Txt}
+   * @alias {@link text}
+   * @alias {@link Text}
    * 
    * @see {@link Md}
    * @see {@link md}
@@ -1289,6 +1287,38 @@ interface SectionInfo {
    * @see {@link html}
    */
   get txt(): Promise<string>;
+
+  /**
+   * (Async!) 
+   * Get the plain text version of the processed markdown/html.
+   * @async
+   * 
+   * @alias {@link text}
+   * @alias {@link txt}
+   * @alias {@link Txt}
+   * 
+   * @see {@link Md}
+   * @see {@link md}
+   * @see {@link Html}
+   * @see {@link html}
+   */
+  get Text(): Promise<string>;
+
+  /**
+   * (Async!) 
+   * Get the plain text version of the processed markdown/html.
+   * @async
+   * 
+   * @alias {@link Text}
+   * @alias {@link txt}
+   * @alias {@link Txt}
+   * 
+   * @see {@link Md}
+   * @see {@link md}
+   * @see {@link Html}
+   * @see {@link html}
+   */
+  get text(): Promise<string>;
 }
 
 /**

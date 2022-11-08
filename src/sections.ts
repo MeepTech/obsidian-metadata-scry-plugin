@@ -1,13 +1,44 @@
-import { Sections, Cache, Section, StaticMetaScryPluginContainer, SplayKebabCasePropertiesOption, Heading } from './api';
-import { HeadingCache, MarkdownView, MarkdownRenderer, TFile, WorkspaceLeaf } from 'obsidian';
+import {
+  HeadingCache,
+  MarkdownRenderer,
+  TFile
+} from 'obsidian';
+import {
+  Sections,
+  Section,
+  SplayKebabCasePropertiesOption,
+  Heading
+} from './api';
+import {
+  DataviewInlineRegex,
+  FrontmatterMarkdownSurroundingTag,
+  HeadingLevelMarkerCharachter,
+  KebabCaseDashesRegex,
+  KebabCaseWordSeperatorCharacter,
+  MarkdownWikiLinkRegex,
+  PropertyNameIllegalCharachtersRegex,
+  SectionIdPartDelimiter,
+  SectionLinkSeperatorCharachter,
+  SpacesRegex,
+  StaticMetaScryPluginContainer
+} from './constants';
+
 
 /**
  * Implementation of Heading
  */
 class SectionHeader implements Heading {
+  //#region Fields
+
+  //#region Internal
+
   private _text: string;
   private _index: number;
   private _level: number;
+
+  //#endregion
+
+  //#region Properties
 
   get text(): string { return this._text; }
   get Text(): string { return this._text; }
@@ -17,20 +48,30 @@ class SectionHeader implements Heading {
   get level(): number { return this._level; }
   get md(): string { return this.Md; }
   get Md(): string {
-    return `${'#'.repeat(this.level)} ${this.text}`
+    return `${HeadingLevelMarkerCharachter.repeat(this.level)} ${this.text}`
   }
+
+  //#endregion
+
+  //#region Initialization
 
   constructor(text: string, level: number, index: number) {
     this._text = text;
     this._level = level;
     this._index = index;
   }
+
+  //#endregion
 }
 
 /**
  * Implementation of Section
  */
 class NoteSection implements Section {
+  //#region Fields
+
+  //#region Internal
+
   // @ts-expect-error: Default Indexer Type Override
   private _root
     : NoteSections;
@@ -67,6 +108,8 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   private _id
     : string | null = null;
+  
+  //#endregion
 
   //#region Properties
   
@@ -107,6 +150,8 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   get Subtitles()
     : Heading[] { return this._subtitles; }
+
+  //#endregion
 
   //#endregion
 
@@ -156,17 +201,21 @@ class NoteSection implements Section {
         const md = await this.md;
         this._html = document.createElement("div");
 
-        const renderLeaf: WorkspaceLeaf = app.workspace
+        /*const renderLeaf: WorkspaceLeaf = app.workspace
           // @ts-expect-error: Function missing from api
           .createLeafInTabGroup();
-        const view = new MarkdownView(renderLeaf);
+        const view = new MarkdownView(renderLeaf);*/
  
         let localMd = this._md;
         if (this.root.getMatter()) {
-          localMd = "---" + this.root.getMatter() + "---\n\n" + localMd;
+          localMd = FrontmatterMarkdownSurroundingTag
+            + this.root.getMatter()
+            + `${FrontmatterMarkdownSurroundingTag}\n`
+            + `\n`
+            + localMd;
         }
  
-        view.data = localMd;
+        //view.data = localMd;
         try {
           //const specialCache = PluginContainer.Instance.api.cache("_zpec:a|") as Cache;
           //specialCache["CurrentPath"] = this.root.path;
@@ -174,18 +223,30 @@ class NoteSection implements Section {
             md,
             this._html,
             this.root.path,
-            //// @ts-expect-error: Null is required here, but clashes with documentation.
-            view
+            // @ts-expect-error: Null is required here, but clashes with documentation.
+            null//view
           );
           //specialCache["CurrentPath"] = undefined;
         
         } finally {
-          renderLeaf.detach();
+          //renderLeaf.detach();
         }
       }
 
       return this._html;
     })();
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get Text()
+  : Promise<string> {
+    return this.txt;
+  }
+
+  // @ts-expect-error: Default Indexer Type Override
+  get text()
+  : Promise<string> {
+    return this.txt;
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -210,7 +271,9 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   get path()
   : string {
-    return this._root.path + "#" + this.header.text;
+    return this._root.path
+      + SectionLinkSeperatorCharachter
+      + this.header.text;
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -234,7 +297,11 @@ class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   get Id()
   : string {
-    return this._id ??= this.header.index + ":|:" + this.path + ":|:" + this.header.level
+    return this._id ??= this.header.index
+      + SectionIdPartDelimiter
+      + this.path
+      + SectionIdPartDelimiter
+      + this.header.level
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -275,10 +342,14 @@ class NoteSection implements Section {
     }
 
     // find the end
-    const match = fullNoteContents.substring(start).match(new RegExp(`(\\n#\{1,${this.header.level}\})`, "m"));
+    // TODO: cache all 6 regex header levels to make this quicker.
+    const match = fullNoteContents
+      .substring(start)
+      .match(new RegExp(`(\\n${HeadingLevelMarkerCharachter}\{1,${this.header.level}\})`, "m"));
     if (match && (match.index || match.index === 0)) {
       return fullNoteContents.substring(start + 1, start + match.index);
     }
+
     return fullNoteContents.substring(start + 1);
   }
 
@@ -334,21 +405,21 @@ class NoteSection implements Section {
     // clean the key of dataview values and wikilinks
     let cleaned = text;
     if (cleaned.contains("[")) {
-      cleaned = cleaned.replace(new RegExp("\\[\\[(?:(?:([^\\]]*)\\|([^\\]]*))|([^\\]]*))\\]\\]", "g"), "$2$3");
+      cleaned = cleaned.replace(MarkdownWikiLinkRegex, "$2$3");
     }
     if (cleaned.contains("::")) {
-      cleaned = cleaned.replace(new RegExp("\\[(?:(?:([^\\[:\\|]*)::([^\\]]*)))\\]|\\((?:(?:([^\\[:\\|]*)::([^\\]]*)))\\)", "g"), function (a, b, c, d, e, f) {
+      cleaned = cleaned.replace(DataviewInlineRegex, function (_a, b, c, _d, e, _f) {
         return b ? `${b} ${c}` : e;
       });
     }
 
     // remove special and illegal name characters
-    cleaned = cleaned.replace(new RegExp("(?:(^[\\d ][^{a-zA-Z_\\-}]*)|([^{a-zA-Z0-9_\\-\\\$ }]))", "g"), "");
+    cleaned = cleaned.replace(PropertyNameIllegalCharachtersRegex, "");
 
     keys.push(cleaned);
 
     if (StaticMetaScryPluginContainer.Instance.settings.splayFrontmatterWithoutDataview) {
-      const camel = cleaned.replace(/ /g, "");
+      const camel = cleaned.replace(SpacesRegex, "");
       if (!camel) {
         return keys.unique();
       }
@@ -357,32 +428,32 @@ class NoteSection implements Section {
       const lowerCamel = camel[0].toLowerCase() + camel.substring(1);
 
       keys.push(lower, camel, lowerCamel);
-      if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties && cleaned.contains("-")) {
+      if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties && cleaned.contains(KebabCaseWordSeperatorCharacter)) {
         if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
           // lower
-          keys.push(lower.replace(/-/g, ""));
+          keys.push(lower.replace(KebabCaseDashesRegex, ""));
           // lower camel
           keys.push(lowerCamel
-            .split('-')
+            .split(KebabCaseWordSeperatorCharacter)
             .map((part, i) => (i !== 0 && part) ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
           // upper/default camel
           keys.push(camel
-            .split('-')
+            .split(KebabCaseWordSeperatorCharacter)
             .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
         } else if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
           // lower
-          keys.push(lower.replace(/-/g, ""));
+          keys.push(lower.replace(KebabCaseDashesRegex, ""));
         } else if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
           // lower camel
           keys.push(lowerCamel
-            .split('-')
+            .split(KebabCaseWordSeperatorCharacter)
             .map((part, i) => (i !== 0 && part) ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
           // upper/default camel
           keys.push(camel
-            .split('-')
+            .split(KebabCaseWordSeperatorCharacter)
             .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
         }
@@ -399,6 +470,10 @@ class NoteSection implements Section {
  * Implementation of Sections
  */
 export class NoteSections extends Object implements Sections {
+  //#region Fields
+
+  //#region Internal
+
   // @ts-expect-error: Default Indexer Type Override
   private _all
     : Record<string, NoteSection[]> = {};
@@ -423,6 +498,10 @@ export class NoteSections extends Object implements Sections {
   // @ts-expect-error: Default Indexer Type Override
   private _html
     : HTMLElement = null!;
+  
+  //#endregion
+
+  //#region  Properties
 
   // @ts-expect-error: Default Indexer Type Override for Object Extension
   [key: string]: NoteSection;
@@ -474,6 +553,10 @@ export class NoteSections extends Object implements Sections {
   : NoteSection[] {
     return this.unique;  
   }
+
+  //#endregion
+
+  //#endregion
 
   //#region Initialization
 
@@ -566,7 +649,7 @@ export class NoteSections extends Object implements Sections {
     } else {
       const file = StaticMetaScryPluginContainer.Instance.api.vault(this.path) as TFile;
       this._md = await app.vault.cachedRead(file);
-      const frontMarker = "---";
+      const frontMarker = FrontmatterMarkdownSurroundingTag;
       if (this._md.startsWith(frontMarker)) {
         var startPosition = this._md.search(frontMarker) + frontMarker.length;
         var endPosition = this._md.slice(startPosition).search(frontMarker) + startPosition;
@@ -583,7 +666,7 @@ export class NoteSections extends Object implements Sections {
     if (this._html !== null) {
       return Promise.resolve(this._html);
     } else {
-      return this.loadText().then(v => {
+      return this.loadText().then(_v => {
         this._html = document.createElement("div");
         //@ts-expect-error: Api should expect null but does not.
         MarkdownRenderer.renderMarkdown(this._md, this._html, this.root.path, null);

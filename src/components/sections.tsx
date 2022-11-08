@@ -1,4 +1,7 @@
+import { IsFunction, ReactComponentsPluginKey } from "src/constants";
 import { Section } from "../api";
+
+const ComponentLoadingText = "...Loading";
 
 export namespace ReactSectionComponents {
 
@@ -43,7 +46,7 @@ export namespace ReactSectionComponents {
       | undefined
       | boolean
   }) => {
-    const { React, Markdown } = (app as any).plugins.plugins["obsidian-react-components"];
+    const { React, Markdown } = (app as any).plugins.plugins[ReactComponentsPluginKey];
     const { useState, useEffect } = React;
     const section = data;
 
@@ -52,7 +55,7 @@ export namespace ReactSectionComponents {
       throw "'data' prop of type Section is required.";
     }
     if (!SectionRenderModes.includes(mode)) {
-      throw `Unrecognized mode: ${mode}. Valid modes: ${SectionRenderModes.join(", ")}`;
+      throw `Unrecognized/invalid mode for Sections React component: ${mode}. Valid modes: ${SectionRenderModes.join(", ")}`;
     }
     
     // load the section content we want
@@ -65,7 +68,7 @@ export namespace ReactSectionComponents {
     // wait for content to render/load
     if (renderedContent !== null) {
       // is-enabled check using the loaded content
-      if ((typeof enabled === "function" && enabled(section, renderedContent)) || enabled) {
+      if ((IsFunction(enabled) && (enabled as Function)(section, renderedContent)) || enabled) {
         // custom renderer option
         if (renderer) {
           return renderer(section, renderedContent);
@@ -97,7 +100,7 @@ export namespace ReactSectionComponents {
     }
     
     // else: loading...
-    return <i>{"...Loading"}</i>;
+    return <i>{ComponentLoadingText}</i>;
   }
 
   /**
@@ -167,8 +170,8 @@ export namespace ReactSectionComponents {
           = (s: Section, r: string|HTMLElement) => renderer(s, r, sections, renderedSections);
       }
       if (filter) {
-        childProps.enabled = typeof filter === "function"
-          ? (s: Section, r: string | HTMLElement) => filter(s, r, sections, renderedSections)
+        childProps.enabled = IsFunction(filter)
+          ? (s: Section, r: string | HTMLElement) => (filter as Function)(s, r, sections, renderedSections)
           : filter;
       }
 
@@ -180,7 +183,7 @@ export namespace ReactSectionComponents {
     }
 
     // else: loading...
-    return <i>{"...Loading"}</i>;
+    return <i>{ComponentLoadingText}</i>;
   }
 
   /**

@@ -1,8 +1,9 @@
-import { TAbstractFile, TFile, TFolder } from 'obsidian';
-import { CurrentNoteScrier } from "./current";
-import { NoteSections } from './sections';
 import {
-  StaticMetaScryPluginContainer,
+  TAbstractFile,
+  TFile,
+  TFolder
+} from 'obsidian';
+import {
   CachedFileMetadata,
   CurrentNoteMetaScryApi,
   DvData,
@@ -15,7 +16,8 @@ import {
   Sections,
   SplayKebabCasePropertiesOption,
   FileItem,
-  UpdateOptions
+  UpdateOptions,
+  FileData
 } from './api';
 import {
   KebabCaseWordSeperatorCharacter,
@@ -29,8 +31,15 @@ import {
   SectionsMetadataPropertyCapitalizedKey,
   SectionsMetadataPropertyLowercaseKey,
   ParentFolderPathSelector,
-  CurrentFolderPathSelector
+  CurrentFolderPathSelector,
+  IsObject,
+  IsArray,
+  IsString,
+  IsFunction,
+  StaticMetaScryPluginContainer
 } from './constants';
+import { CurrentNoteScrier } from "./current";
+import { NoteSections } from './sections';
 //TODO: test: import dv = require("../../dataview/main.js");
 
 /**
@@ -82,9 +91,9 @@ export class MetadataScrier implements MetaScryApi {
     fn: (key: string, value: any, data: any | object) => any | object,
     topLevelPropertiesToIgnore: Array<string> | null = null
   ): any {
-    if (value && typeof value === "object") {
-      if (Array.isArray(value)) {
-        return value.map(i => this._recurseOnAllObjectProperties(i, fn));
+    if (value && IsObject(value)) {
+      if (IsArray(value)) {
+        return value.map((i: any) => this._recurseOnAllObjectProperties(i, fn));
       } else {
         const data: any = {};
         for (const key of Object.keys(value)) {
@@ -442,9 +451,9 @@ export class MetadataScrier implements MetaScryApi {
       values[CacheMetadataPropertyCapitalizedKey] = foundCache;
     }
 
-    // add sections?
+    // add sections?`
     if (sources === true || sources.Sections) {
-      if (typeof sources === "object" && !sources.FileInfo) {
+      if (IsObject(sources) && !(sources as MetadataSources).FileInfo) {
         values[FileMetadataPropertyLowercaseKey] = {};
         values[FileMetadataPropertyUppercaseKey] = {};
       }
@@ -503,9 +512,9 @@ export class MetadataScrier implements MetaScryApi {
     const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
     let propsToClear = [];
 
-    if (typeof frontmatterProperties === "string") {
+    if (IsString(frontmatterProperties)) {
       propsToClear.push(frontmatterProperties);
-    } else if (typeof frontmatterProperties === 'object') {
+    } else if (IsObject(frontmatterProperties)) {
       if (frontmatterProperties === null) {
         propsToClear = Object.keys(this.frontmatter(fileName) as Frontmatter);
       } else if (Array.isArray(frontmatterProperties)) {
@@ -533,14 +542,14 @@ export class MetadataScrier implements MetaScryApi {
    * @returns true if the property exists, false if not.
    */
   static ContainsDeepProperty(propertyPath: string | Array<string>, onObject: any): boolean {
-    const keys = (typeof (propertyPath) == "string")
-      ? propertyPath
+    const keys = (IsString(propertyPath))
+      ? (propertyPath as string)
         .split('.')
       : propertyPath;
 
     let parent = onObject;
     for (const currentKey of keys) {
-      if (typeof parent !== "object") {
+      if (!IsObject(parent)) {
         return false;
       }
 
@@ -564,14 +573,14 @@ export class MetadataScrier implements MetaScryApi {
    * @returns if the property exists.
    */
   static TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean {
-    const keys = (typeof (propertyPath) === "string")
-      ? propertyPath
+    const keys = (IsString(propertyPath))
+      ? (propertyPath as string)
         .split('.')
       : propertyPath;
 
     let parent = fromObject;
     for (const currentKey of keys) {
-      if (typeof parent !== "object" || !parent.hasOwnProperty(currentKey)) {
+      if (!IsObject(parent) || !parent.hasOwnProperty(currentKey)) {
         if (thenDo && thenDo.onFalse) {
           thenDo.onFalse();
         }
@@ -600,10 +609,10 @@ export class MetadataScrier implements MetaScryApi {
    * @returns The found deep property, or null if not found.
    */
   static GetDeepProperty(propertyPath: string | Array<string>, fromObject: any): any | null {
-    return (typeof (propertyPath) === "string"
-      ? propertyPath
+    return (IsString(propertyPath)
+      ? (propertyPath as string)
         .split('.')
-      : propertyPath)
+      : (propertyPath as string[]))
       .reduce((t, p) => t?.[p], fromObject);
   }
 
@@ -617,15 +626,15 @@ export class MetadataScrier implements MetaScryApi {
    * @returns The found deep property, or null if not found.
    */
   static SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void {
-    const keys = (typeof (propertyPath) === "string")
-      ? propertyPath
+    const keys = (IsString(propertyPath))
+      ? (propertyPath as string)
         .split('.')
       : propertyPath;
 
     let parent = onObject;
     let currentKey;
     for (currentKey of keys) {
-      if (typeof parent !== "object") {
+      if (IsObject(parent)) {
         throw `Property: ${currentKey}, in Path: ${propertyPath}, is not an object. Child property values cannot be set!`;
       }
 
@@ -644,7 +653,7 @@ export class MetadataScrier implements MetaScryApi {
       throw "No Final Key Provided!?";
     }
 
-    if (typeof value === "function") {
+    if (IsFunction(value)) {
       parent[currentKey] = value(parent[currentKey]);
     } else {
       parent[currentKey] = value;
@@ -681,8 +690,8 @@ export class MetadataScrier implements MetaScryApi {
    */
   static ParseFilePathFromSource(file: FileSource): string | null {
     let fileName = file || null;
-    if (typeof file === "object" && file !== null) {
-      fileName = file.path;
+    if (IsObject(file) && file !== null) {
+      fileName = (file as FileData | TAbstractFile).path;
     }
 
     //@ts-expect-error: Accounted For.
@@ -717,14 +726,14 @@ export class MetadataScrier implements MetaScryApi {
     return toValuesFile
       ? file
         ? MetadataScrier.BuildDataFileFullPath(MetadataScrier.ParseFilePathFromSource(file)!)
-        : (typeof toValuesFile === "string"
-          ? MetadataScrier.BuildDataFileFullPath(toValuesFile)
+        : (IsString(toValuesFile)
+          ? MetadataScrier.BuildDataFileFullPath(toValuesFile as string)
           : MetadataScrier.BuildDataFileFullPath(MetadataScrier.Api.Current.Path))
       : prototype
         ? file
           ? MetadataScrier.BuildPrototypeFileFullPath(MetadataScrier.ParseFilePathFromSource(file)!)
-          : (typeof prototype === "string"
-            ? MetadataScrier.BuildPrototypeFileFullPath(prototype)
+          : (IsString(prototype)
+            ? MetadataScrier.BuildPrototypeFileFullPath(prototype as string)
             : MetadataScrier.BuildPrototypeFileFullPath(MetadataScrier.Api.Current.Path))
         : MetadataScrier.ParseFilePathFromSource(file) || MetadataScrier.Api.Current.Path;
   }
@@ -778,7 +787,7 @@ export class MetadataScrier implements MetaScryApi {
 
   private static _addExtension(path: string, extension: string | boolean): string {
     if (extension) {
-      if (typeof extension !== "string") {
+      if (!IsString(extension)) {
         return path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension;
       } else {
         return path + ExtensionFilePathSeperatorCharacter + extension;

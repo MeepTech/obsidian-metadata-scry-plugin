@@ -1,5 +1,14 @@
 import { TFile } from 'obsidian';
-import { Cache, CurrentNoteMetaScryApi, Frontmatter, Metadata, MetaScryApi, Sections, UpdateOptions } from './api';
+import {
+  Cache,
+  CurrentNoteMetaScryApi,
+  Frontmatter,
+  Metadata,
+  MetaScryApi,
+  Sections,
+  UpdateOptions
+} from './api';
+import { IsString } from './constants';
 
 /**
  * Access to current metadata via localized versions of the calls in MetaScryApi
@@ -22,10 +31,9 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
 
   get Note(): TFile {
     const specialCache = this._api.cache("_zpec:a|") as Cache;
-    if (typeof specialCache["CurrentPath"] === "string") {
+    if (IsString(specialCache["CurrentPath"])) {
       const current = this._api.vault(
-        // @ts-expect-error: Special var variable for extra scope.
-        ScopedCurrentPath
+        specialCache["CurrentPath"]
       ) as TFile;
       
       if (!current) {

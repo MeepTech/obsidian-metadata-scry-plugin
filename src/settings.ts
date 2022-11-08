@@ -1,18 +1,13 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
-import { MetaScryPluginSettings, MetaScryPluginApi, SplayKebabCasePropertiesOption } from './api';
-
-export const DefaultSettings: MetaScryPluginSettings = {
-  globalCacheName: 'cache',
-  globalMetaScryExtraName: 'meta',
-  globalPathName: "path",
-  defineScryGlobalVariables: true,
-  defineObjectPropertyHelperFunctions: true,
-  defineArrayHelperFunctions: true,
-  splayKebabCaseProperties: SplayKebabCasePropertiesOption.LowerAndCamelCase,
-  splayFrontmatterWithoutDataview: true,
-  prototypesPath: "_/_assets/_data/_prototypes",
-  valuesPath: "_/_assets/_data/_values"
-}
+import {
+  App,
+  PluginSettingTab,
+  Setting
+} from 'obsidian';
+import {
+  MetaScryPluginApi,
+  SplayKebabCasePropertiesOption
+} from './api';
+import { DefaultSettings } from './constants';
 
 /**
  * Settings for the plugin
@@ -36,22 +31,26 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setName('MetaScryApi Custom Global Variable Name')
       .setDesc('The variable name to use for the MetaScryApi in a global scope.  If left empty; the variable will not be registered. (Mirror for "scry" global variable, just with a custom name if you want)')
       .addText(text => text
-        .setPlaceholder('meta')
+        .setPlaceholder(DefaultSettings.globalMetaScryExtraName)
         .setValue(this.plugin.settings.globalMetaScryExtraName)
         .onChange(async (value) => {
-          this.plugin.settings.globalMetaScryExtraName = value;
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            globalMetaScryExtraName: value
+          });
         }));
 
     new Setting(containerEl)
       .setName('Global Cache Variable Name')
       .setDesc('The variable name to use for the cache global scope variable registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
-        .setPlaceholder('cache')
+        .setPlaceholder(DefaultSettings.globalCacheName)
         .setValue(this.plugin.settings.globalCacheName)
         .onChange(async (value) => {
-          this.plugin.settings.globalCacheName = value;
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            globalCacheName: value
+          });
         }));
 
     new Setting(containerEl)
@@ -59,10 +58,12 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setDesc('The name to use for the path global helper function registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
         .setPlaceholder('path')
-        .setValue(this.plugin.settings.globalPathName)
+        .setValue(DefaultSettings.globalPathName)
         .onChange(async (value) => {
-          this.plugin.settings.globalPathName = value;
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            globalPathName: value
+          });
         }));
     
     new Setting(containerEl)
@@ -71,8 +72,10 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.defineScryGlobalVariables)
       .onChange(async (value) => {
-        this.plugin.settings.defineScryGlobalVariables = value;
-        await this.plugin.saveSettings();
+        await this.plugin.updateSettings({
+          ...this.plugin.settings,
+          defineScryGlobalVariables: value
+        });
       }));
 
     new Setting(containerEl)
@@ -81,8 +84,10 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.defineArrayHelperFunctions)
       .onChange(async (value) => {
-        this.plugin.settings.defineArrayHelperFunctions = value;
-        await this.plugin.saveSettings();
+        await this.plugin.updateSettings({
+          ...this.plugin.settings,
+          defineArrayHelperFunctions: value
+        });
       }));
   
     new Setting(containerEl)
@@ -91,8 +96,10 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.defineObjectPropertyHelperFunctions)
         .onChange(async (value) => {
-          this.plugin.settings.defineObjectPropertyHelperFunctions = value;
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            defineObjectPropertyHelperFunctions: value
+          });
         }));
 
     new Setting(containerEl)
@@ -104,8 +111,10 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
           Object.entries(SplayKebabCasePropertiesOption).map(([key, value]) => [key.toString(), value.toString()]))
         )
         .onChange(async (value) => {
-          this.plugin.settings.splayKebabCaseProperties = (<any>SplayKebabCasePropertiesOption)[parseInt(value)];
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            splayKebabCaseProperties: (<any>SplayKebabCasePropertiesOption)[parseInt(value)]
+          });
         }));
 
     new Setting(containerEl)
@@ -114,30 +123,36 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.splayFrontmatterWithoutDataview)
         .onChange(async (value) => {
-          this.plugin.settings.splayFrontmatterWithoutDataview = value;
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            splayFrontmatterWithoutDataview: value
+          });
         }));
 
     new Setting(containerEl)
       .setName('Prototypes File Path')
       .setDesc('The path to prototype data storage')
       .addText(text => text
-        .setPlaceholder('_/_assets/_data/_prototypes')
+        .setPlaceholder(DefaultSettings.prototypesPath)
         .setValue(this.plugin.settings.prototypesPath)
         .onChange(async (value) => {
-          this.plugin.settings.prototypesPath = value;
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            prototypesPath: value
+          });
         }));
 
     new Setting(containerEl)
       .setName('Data Storage Values Path')
       .setDesc('The path to the value data storage')
       .addText(text => text
-        .setPlaceholder("_/_assets/_data/_values")
+        .setPlaceholder(DefaultSettings.valuesPath)
         .setValue(this.plugin.settings.valuesPath)
         .onChange(async (value) => {
-          this.plugin.settings.valuesPath = value;
-          await this.plugin.saveSettings();
+          await this.plugin.updateSettings({
+            ...this.plugin.settings,
+            valuesPath: value
+          });
         }));
   }
 }
