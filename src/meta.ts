@@ -421,15 +421,6 @@ export class MetadataScrier implements MetaScryApi {
           .DataviewApi
           .page(fileName), [FileMetadataPropertyLowercaseKey, FileMetadataPropertyUppercaseKey]) || {};
 
-        // remove file metadata?
-        if (!sources.FileInfo) {
-          delete values[FileMetadataPropertyUppercaseKey];
-          delete values[FileMetadataPropertyLowercaseKey];
-        } else {
-          values[FileMetadataPropertyLowercaseKey] = values.file;
-          values[FileMetadataPropertyUppercaseKey] = values.file;
-        }
-
         // remove dv inline?
         let frontmatter: Frontmatter = null!;
         if (!sources.DataviewInline) {
@@ -453,6 +444,15 @@ export class MetadataScrier implements MetaScryApi {
       else if (sources.Frontmatter) {
         values = this.frontmatter(fileName);
       }
+    }
+
+    // add/remove file metadata?
+    if (sources === "true" || (sources as MetadataSources).FileInfo) {
+      values[FileMetadataPropertyLowercaseKey] = values.file;
+      values[FileMetadataPropertyUppercaseKey] = values.file;
+    } else {
+      delete values[FileMetadataPropertyUppercaseKey];
+      delete values[FileMetadataPropertyLowercaseKey];
     }
 
     // add cache?
