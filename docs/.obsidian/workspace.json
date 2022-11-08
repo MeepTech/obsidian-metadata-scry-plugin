@@ -186,33 +186,9 @@
                 "source": false
               }
             }
-          },
-          {
-            "id": "77a584469403d5ca",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "README.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "5c760ab74d46427e",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Api/Functions/MetaScryApi/Metadata Fetchers/cache.md",
-                "mode": "source",
-                "source": false
-              }
-            }
           }
         ],
-        "currentTab": 15
+        "currentTab": 14
       }
     ],
     "direction": "vertical"
@@ -278,7 +254,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "README.md",
+                "file": "Api/Globals/Scry and scry.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -295,7 +271,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "README.md",
+                "file": "Api/Globals/Scry and scry.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -318,7 +294,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README.md"
+                "file": "Api/Globals/Scry and scry.md"
               }
             }
           }
@@ -329,17 +305,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "77a584469403d5ca",
+  "active": "c30403006e62dc33",
   "lastOpenFiles": [
+    "Api/Functions/MetaScryApi/Metadata Fetchers/cache.md",
+    "Api/Globals/Scry and scry.md",
+    "README.md",
     "Api/README.md",
     "Api/Globals/path.md",
-    "Api/Globals/Scry and scry.md",
     "Api/Globals/meta.md",
     "Api/Globals/cache.md",
     "Api/Globals/Untitled.md",
     "Api/Classes/Heading.md",
-    "Api/Classes/Sections.md",
-    "Api/Classes/Section.md",
-    "Api/Classes/MetaScryPluginApi.md"
+    "Api/Classes/Sections.md"
   ]
 }

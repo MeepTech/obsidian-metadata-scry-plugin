@@ -237,27 +237,27 @@ export interface MetadataSources {
   /**
    * The 'file' field containing metadata about the file itself
    */
-  FileInfo: boolean;
+  FileInfo?: boolean;
    
   /**
    * The Frontmatter (YAML at the top of a note)
    */
-  Frontmatter: boolean;
+  Frontmatter?: boolean;
    
   /**
    * Inline Dataview data fields
    */
-  DataviewInline: boolean;
+  DataviewInline?: boolean;
    
   /**
    * Cached values from MetaScryApi.cache
    */
-  Cache: boolean;
+  Cache?: boolean;
    
   /**
    * Sections from the note itself
    */
-  Sections: boolean;
+  Sections?: boolean;
 }
 
 /**
@@ -343,6 +343,27 @@ export interface MetaScryApi {
    * @see {@link get}
    */
   get data(): Metadata;
+
+  /**
+   * Default sources for the MetaScryApi.get function
+   *
+   * @alias {@link MetadataScrier.DefaultSources}
+   * 
+   * @see {@link sources}
+   * @see {@link get}
+   */
+  get defaultSources(): MetadataSources;
+
+  /**
+   * Helper to get the default MetaScryApi.get sources with any desired overrides
+   * 
+   * @param {MetadataSources} overrides (Optional) any properties you want to override from the Default Sources, in one object. Defaults to all default sources if nothing is provided.
+   * 
+   * @see {@link MetadataScrier.DefaultSources}
+   * @see {@link sources}
+   * @see {@link get}
+   */
+  sources(overrides?: MetadataSources): MetadataSources;
 
   /**
    * Get a file or folder from the vault

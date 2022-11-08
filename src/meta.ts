@@ -216,6 +216,17 @@ export class MetadataScrier implements MetaScryApi {
     };
   }
 
+  sources(overrides: MetadataSources = {}) {
+    return {
+      ...MetadataScrier.DefaultSources,
+      ...overrides
+    } as MetadataSources;
+  }
+
+  get defaultSources() : MetadataSources {
+    return this.sources();
+  } 
+
   get Plugin(): MetaScryPluginApi {
     // @ts-expect-error: app.plugin is not mapped.
     return this._plugin ??= app.plugins.plugins[MetadataScrierPluginKey];

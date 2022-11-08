@@ -295,6 +295,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         // @ts-expect-error: app.plugin is not mapped.
         = app.plugins.plugins["obsidian-react-components"]
           ? {
+            ...apiAndPlugin,
             ...ReactSectionComponents,
             ...ReactMarkdownComponents,
             Components: {
@@ -303,7 +304,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
             },
             SectionComponents: ReactSectionComponents.Components,
             MarkdownComponents: ReactMarkdownComponents.Components,
-            ...apiAndPlugin
+            DefaultSources: MetadataScrier.DefaultSources
           } : apiAndPlugin;
 
       try {
