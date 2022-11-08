@@ -16,7 +16,7 @@ import {
   Sections,
   SplayKebabCasePropertiesOption,
   FileItem,
-  UpdateOptions,
+  FrontmatterUpdateOptions,
   FileData
 } from './api';
 import {
@@ -479,7 +479,7 @@ export class MetadataScrier implements MetaScryApi {
 
   //#region Metadata Modifiers
 
-  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName: string | null = null, options: UpdateOptions = {toValuesFile: false, prototype: false}): void {
+  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName: string | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): void {
     if (options.prototype && options.toValuesFile) {
       this.patch(file, frontmatterData, propertyName, { ...options, prototype: false });
       this.patch(file, frontmatterData, propertyName, { ...options, toValuesFile: false });
@@ -497,7 +497,7 @@ export class MetadataScrier implements MetaScryApi {
     }
   }
 
-  set(file: FileItem, frontmatterData: any, options: UpdateOptions = {toValuesFile: false, prototype: false}): void {
+  set(file: FileItem, frontmatterData: any, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): void {
     if (options.prototype && options.toValuesFile) {
       this.set(file, frontmatterData, { ...options, prototype: false });
       this.set(file, frontmatterData, { ...options, toValuesFile: false });
@@ -512,7 +512,7 @@ export class MetadataScrier implements MetaScryApi {
     Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileName));
   }
 
-  clear(file: FileItem = null, frontmatterProperties: string | Array<string> | Record<string, any> | null = null, options: UpdateOptions = {toValuesFile: false, prototype: false}) : void {
+  clear(file: FileItem = null, frontmatterProperties: string | Array<string> | Record<string, any> | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}) : void {
     if (options.prototype && options.toValuesFile) {
       this.set(file, frontmatterProperties, { ...options, prototype: false });
       this.set(file, frontmatterProperties, { ...options, toValuesFile: false });

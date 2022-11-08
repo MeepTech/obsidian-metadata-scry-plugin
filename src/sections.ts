@@ -42,6 +42,8 @@ class SectionHeader implements Heading {
 
   get text(): string { return this._text; }
   get Text(): string { return this._text; }
+  get Txt(): string { return this._text; }
+  get txt(): string { return this._text; }
   get index(): number { return this._index; }
   get Index(): number { return this._index; }
   get Level(): number { return this._level; }

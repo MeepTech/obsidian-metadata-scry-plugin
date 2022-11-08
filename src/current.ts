@@ -6,7 +6,7 @@ import {
   Metadata,
   MetaScryApi,
   Sections,
-  UpdateOptions
+  FrontmatterUpdateOptions
 } from './api';
 import { IsString } from './constants';
 
@@ -114,15 +114,15 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     return this.Sections;
   }
 
-  patch(frontmatterData: any, propertyName: string | null = null, options: UpdateOptions = {toValuesFile: false, prototype: false}): any | object {
+  patch(frontmatterData: any, propertyName: string | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): any | object {
     return this._api.patch(this.path, frontmatterData, propertyName, options);
   }
 
-  set(frontmatterData: any, options: UpdateOptions = {toValuesFile: false, prototype: false}): any | object {
+  set(frontmatterData: any, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): any | object {
     return this._api.set(this.path, frontmatterData, options);
   }
 
-  clear(frontmatterProperties: string | Array<string> | object | null = null, options: UpdateOptions = {toValuesFile: false, prototype: false}) {
+  clear(frontmatterProperties: string | Array<string> | object | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}) {
     return this._api.clear(this.path, frontmatterProperties, options);
   }
 }

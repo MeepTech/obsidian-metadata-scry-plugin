@@ -29,10 +29,6 @@ import { ReactMarkdownComponents } from './components/markdown';
 export default class MetadataScrierPlugin extends Plugin implements MetaScryPluginApi {
   private static _instance: MetaScryApi;
   private _settings: MetaScryPluginSettings;
-
-  static get Key() {
-    return MetadataScrierPluginKey;
-  }
   
   //#region Api Access
 
@@ -43,8 +39,22 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     return MetadataScrierPlugin._instance;
   }
 
+  /**
+   * The key for this plugin.
+   * 
+   * @alias {@link MetadataScrierPluginKey}
+   * @alias {@link MetaScryPluginApi.key}
+   */
+  static get Key() : string {
+    return MetadataScrierPluginKey;
+  }
+
   get api(): MetaScryApi {
     return MetadataScrierPlugin._instance;
+  }
+
+  get key() :string {
+    return MetadataScrierPluginKey;
   }
 
   get settings(): MetaScryPluginSettings {

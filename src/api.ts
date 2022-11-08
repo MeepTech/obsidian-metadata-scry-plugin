@@ -36,8 +36,20 @@ export enum SplayKebabCasePropertiesOption {
 export type MetaScryPluginApi = {
   /**
    * Get the current instance of the MetaScryApi object.
+   * 
+   * @alias {@link MetadataScrier.Api}
+   * @alias {@link MetadataScrierPlugin.Instance}
+   * @alias {@link global#scry}
    */
   get api(): MetaScryApi;
+
+  /**
+   * The key for this plugin.
+   * 
+   * @alias {@link MetadataScrierPluginKey}
+   * @alias {@link MetadataScrierPlugin.Key}
+   */
+  get key(): string;
 
   /**
    * The settings for the api.
@@ -125,19 +137,60 @@ export type CachedFileMetadata = CachedMetadata & {
  */
 export type Metadata = {
   /**
-   * The DV file object
+   * The 'file' metadata object. This contains things about the file/note itself, such as the date it was made and edited, and it's path. 
+   * This info isn't written in the note anywhere.
+   * This is compiled by Dataview
+   *
+   * @alias {@link Metadata.File}
+   * 
+   * @see {@link MetaScryApi.get}
+   * @see {@link MetaScryApi.dv}
+   * @see {@link MetaScryApi.file}
+   * @see {@link MetaScryApi.vault}
+   * @see {@link CurrentNoteMetaScryApi.note}
+   * @see {@link CurrentNoteMetaScryApi.Note}
    */
   file?: FileData;
+
   /**
-   * The DV file object
+   * The 'file' metadata object. This contains things about the file/note itself, such as the date it was made and edited, and it's path. 
+   * This info isn't written in the note anywhere.
+   * This is compiled by Dataview
+   *
+   * @alias {@link Metadata.file}
+   * 
+   * @see {@link MetaScryApi.get}
+   * @see {@link MetaScryApi.dv}
+   * @see {@link MetaScryApi.file}
+   * @see {@link MetaScryApi.vault}
+   * @see {@link CurrentNoteMetaScryApi.note}
+   * @see {@link CurrentNoteMetaScryApi.Note}
    */
   File?: FileData;
+
   /**
-   * The meta-scry api cache
+   * The meta-scry api cache object for the file
+   *
+   * @alias {@link Metadata.Cache}
+   * @alias {@link global#cache}
+   * 
+   * @see {@link MetaScryApi.get}
+   * @see {@link MetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.Cache}
    */
   cache?: Cache;
+
   /**
-   * The meta-scry api cache
+   * The meta-scry api cache object for the file
+   *
+   * @alias {@link Metadata.cache}
+   * @alias {@link global#cache}
+   * 
+   * @see {@link MetaScryApi.get}
+   * @see {@link MetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.cache}
+   * @see {@link CurrentNoteMetaScryApi.Cache}
    */
   Cache?: Cache;
 } & Frontmatter;
@@ -167,6 +220,7 @@ export type Frontmatter = {
  * Sections is added by the MetaScry Api.
  */
 export type FileData = {
+  // these fields are compiled by dataview:
   name: string;
   folder: string;
   path: string;
@@ -185,16 +239,23 @@ export type FileData = {
   tasks: DataTask[];
   lists: DataTask[];
   frontmatter?: Frontmatter;
-  /**
-   * Sections under headings in the given file. You can load the content with md, html, and txt
-   */
-  sections?: Sections;
-  /**
-   * Sections under headings in the given file. You can load the content with md, html, and txt
-   */
-  Sections?: Sections;
   starred?: boolean;
   day?: Date;
+  // the other fields come from meta-scry:
+
+  /**
+   * Sections under headings in the given file. You can load the content with md, html, and txt
+   * 
+   * @alias {@link sections}
+   */
+  sections?: Sections;
+
+  /**
+   * Sections under headings in the given file. You can load the content with md, html, and txt
+   *
+   * @alias {@link sections}
+   */
+  Sections?: Sections;
 }
 
 /**
@@ -206,6 +267,7 @@ interface DataLink {
    * The path the link points to
    */
   path: string;
+  // TODO: finish
 }
 
 /**
@@ -213,7 +275,7 @@ interface DataLink {
  * Conmpiled by dataview.
  */
 interface DataTask {
-
+  // TODO: fill in
 }
 
 /**
@@ -222,6 +284,8 @@ interface DataTask {
 export type DvData = {
   /**
    * The dv file object
+   * 
+   * @see {@link Metadata.File}
    */
   file: FileData;
 } & Frontmatter;
@@ -229,6 +293,28 @@ export type DvData = {
 //#endregion
 
 //#region Apis
+
+/**
+ * Something we can get a file or folder's path from.
+ * 
+ * Either a 'file/folder' object with a '.path' property, or the path itself as a string.
+ */
+export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | DataLink | null
+
+/**
+ * Something we can get a specific file's path from.
+ * 
+ * Either a 'file' object with a '.path' property, or the path itself as a string.
+ */
+ export type FileItem = string | TFile | FileData | DataLink | null
+
+/**
+ * Passed into any update functions to modify what they do.
+ */
+export interface FrontmatterUpdateOptions {
+  toValuesFile?: boolean | string;
+  prototype?: string | boolean;
+};
 
 /**
  * The sources to pull Metadata values from for a file.
@@ -259,28 +345,6 @@ export interface MetadataSources {
    */
   Sections?: boolean;
 }
-
-/**
- * Something we can get a file or folder's path from.
- * 
- * Either a 'file/folder' object with a '.path' property, or the path itself as a string.
- */
-export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | DataLink | null
-
-/**
- * Something we can get a specific file's path from.
- * 
- * Either a 'file' object with a '.path' property, or the path itself as a string.
- */
- export type FileItem = string | TFile | FileData | DataLink | null
-
-/**
- * Passed into any update functions to modify what they do.
- */
-export type UpdateOptions = {
-  toValuesFile?: boolean | string;
-  prototype?: string | boolean;
-};
 
 /**
  * Interface for the Api.
@@ -590,7 +654,7 @@ export interface MetaScryApi {
    * @see {@link set}
    * @see {@link clear}
    */
-  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName?: string | null, options?: UpdateOptions): void;
+  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName?: string | null, options?: FrontmatterUpdateOptions): void;
   
   /**
    * Replace the existing frontmatter of a file with entirely new data, clearing out all old data in the process.
@@ -899,41 +963,107 @@ export interface Heading {
 
   /**
    * The text of the heading/section title. (without the #s)
+   * 
+   * @alias {@link text}
+   * @alias {@link txt}
+   * @alias {@link Txt}
    */
   get Text(): string;
 
   /**
    * The text of the heading/section title. (without the #s)
+   * 
+   * @alias {@link Text}
+   * @alias {@link txt}
+   * @alias {@link Txt}
    */
   get text(): string;
 
   /**
+   * The text of the heading/section title. (without the #s)
+   * 
+   * @alias {@link txt}
+   * @alias {@link text}
+   * @alias {@link Text}
+   * 
+   * @see {@link md}
+   * @see {@link Md}
+   */
+  get Txt(): string;
+
+  /**
+   * The text of the heading/section title. (without the #s)
+   * 
+   * @alias {@link txt}
+   * @alias {@link text}
+   * @alias {@link Text}
+   * 
+   * @see {@link md}
+   * @see {@link Md}
+   */
+  get txt(): string;
+
+  /**
    * The index of the heading (if there's another heading with the same name this gets incremeneted.)
+   *
+   * @alias {@link Index}
+   * 
+   * @see {@link level}
+   * @see {@link Level}
    */
   get index(): number;
 
   /**
    * The index of the heading (if there's another heading with the same name this gets incremeneted.)
+   *
+   * @alias {@link index}
+   * 
+   * @see {@link level}
+   * @see {@link Level}
    */
   get Index(): number;
 
   /**
    * The depth/level of the heading/The number of #s in the header.
+   * 
+   * @alias {@link level}
+   * 
+   * @see {@link index}
+   * @see {@link Index}
    */
   get Level(): number;
 
   /**
    * The depth/level of the heading/The number of #s in the header.
+   * 
+   * @alias {@link Level}
+   * 
+   * @see {@link index}
+   * @see {@link Index}
    */
   get level(): number;
 
   /**
    * The plain-text markdown of the section's header Pre-processed, with the ##s
+   * 
+   * @alias {@link Md}
+   * 
+   * @see {@link txt}
+   * @see {@link Txt}
+   * @see {@link text}
+   * @see {@link Text}
    */
   get md(): string;
 
   /**  
    * The plain-text markdown of the section's header Pre-processed, with the ##s
+   * 
+   * @alias {@link md}
+   * 
+   * @see {@link txt}
+   * @see {@link Txt}
+   * @see {@link text}
+   * @see {@link Text}
    */
   get Md(): string;
 }
@@ -1358,52 +1488,178 @@ interface SectionChildren {
 interface SectionsNoteData {
   /**
    * The path to the note for these sections
+   * 
+   * @alias {@link Path}
    */
   get path(): string;
+
   /**
    * The path to the note for these sections
+   * 
+   * @alias {@link path}
    */
   get Path(): string;
+
   /**
    * The number of total sections, and sub sections.
+   * 
+   * @alias {@link Count}
+   * 
+   * @see {@link all}
+   * @see {@link All}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link root}
+   * @see {@link Root}
    */
   get count(): number;
+
   /**
    * The number of total sections, and sub sections.
+   * 
+   * @alias {@link count}
+   * 
+   * @see {@link all}
+   * @see {@link All}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link root}
+   * @see {@link Root}
    */
   get Count(): number;
+
   /**
    * All sections and sub-sections in the file, indexed by name. values are in arrays in case of duplicate headings
+   * 
+   * @alias {@link All}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link root}
+   * @see {@link Root}
    */
   get all(): Record<string, Section[]>;
+
   /**
    * All sections and sub-sections in the file, indexed by name. values are in arrays in case of duplicate headings
+   * 
+   * @alias {@link all}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link root}
+   * @see {@link Root}
    */
   get All(): Record<string, Section[]>;
+
   /**
    * All highest level/root sections (not sub-sections) in the file, indexed by name. values are in arrays in case of duplicate headings
+   * 
+   * @alias {@link Root}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link all}
+   * @see {@link All}
    */
   get root(): Record<string, Section[]>;
+
   /**
    * All highest level/root sections (not sub-sections) in the file, indexed by name. values are in arrays in case of duplicate headings
+   *
+   * @alias {@link Root}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link all}
+   * @see {@link All}
    */
   get Root(): Record<string, Section[]>;
+
   /**
    * The unique headers and sub-headers in this file
+   
+   * @alias {@link headers}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link root}
+   * @see {@link Root}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link all}
+   * @see {@link All}
    */
   get Headers(): Heading[];
+
   /**
    * The unique headers and sub-headers in this file
+   
+   * @alias {@link Headers}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link root}
+   * @see {@link Root}
+   * @see {@link unique}
+   * @see {@link Unique}
+   * @see {@link all}
+   * @see {@link All}
    */
   get headers(): Heading[];
+
   /**
    * Get all the unique sections in this note.
+   
+   * @alias {@link Unique}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link root}
+   * @see {@link Root}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link all}
+   * @see {@link All}
    */
   get unique(): Section[];
+
   /**
    * Get all the unique sections in this note.
+   *
+   * @alias {@link Unique}
+   * 
+   * @see {@link count}
+   * @see {@link Count}
+   * @see {@link root}
+   * @see {@link Root}
+   * @see {@link headers}
+   * @see {@link Headers}
+   * @see {@link all}
+   * @see {@link All}
    */
   get Unique(): Section[];
+
   named(name: string): Section[];
 }
 
