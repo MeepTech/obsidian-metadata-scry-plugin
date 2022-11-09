@@ -7,10 +7,15 @@ import {
   updateOrInsertFieldInTFile,
   deleteFieldInTFile
 } from "@opd-libs/opd-metadata-lib/lib/API";
+import {Internal as OpdMetadataEditLibrary} from "@opd-libs/opd-metadata-lib/lib/Internal";
 import {
+  FileSource,
   MetadataEditApi,
-  MetaScryPluginApi
+  MetaScryPluginApi,
+  ContextlessMetadataEditApiMethods
 } from "./api";
+import { ParseFilePathFromSource } from "./utilities";
+import { TFile } from "obsidian";
 
 /**
  * Static container for the current meta-scry plugin instance.
@@ -31,21 +36,31 @@ export class InternalStaticMetadataScrierPluginContainer {
    * (Write access)
    */
   static get MetadataEditApi(): MetadataEditApi {
-    const plugin = (app as any)
-      .plugins
-      .plugins["opd-settings-lib-test-plugin"];
+    const plugin = InternalStaticMetadataScrierPluginContainer.Instance;
 
     return {
-      plugin,
-      Plugin: plugin,
-      getFieldFromTFile: (x, y, z) => getFieldFromTFile(x, y, plugin, z),
-      doesFieldExistInTFile: (x, y, z) => doesFieldExistInTFile(x, y, plugin, z),
-      insertFieldInTFile: (x, y, z, a) => insertFieldInTFile(x, y, z, plugin, a),
-      updateFieldInTFile: (x, y, z, a) => updateFieldInTFile(x, y, z, plugin, a),
-      updateOrInsertFieldInTFile: (x, y, z, a) => updateOrInsertFieldInTFile(x, y, z, plugin, a),
-      deleteFieldInTFile: (x, y, z) => deleteFieldInTFile(x, y, plugin, z)
+      ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApi,
+      setAllFrontmatter: (key, source) =>
+        OpdMetadataEditLibrary.updateFrontmatter(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin),
+      getFieldFromTFile: (key, source, inline) =>
+        getFieldFromTFile(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
+      doesFieldExistInTFile: (key, source, inline) =>
+        doesFieldExistInTFile(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
+      insertFieldInTFile: (key, value, source, inline) =>
+        insertFieldInTFile(key, value, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
+      updateFieldInTFile: (key, value, source, inline) =>
+        updateFieldInTFile(key, value, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
+      updateOrInsertFieldInTFile: (key, value, source, inline) =>
+        updateOrInsertFieldInTFile(key, value, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
+      deleteFieldInTFile: (key, source, inline) =>
+        deleteFieldInTFile(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline)
     };
   }
+
+  static _parseSource = (source: FileSource | undefined): TFile =>
+    InternalStaticMetadataScrierPluginContainer.Instance.Api.file(typeof source === "object"
+      ? ParseFilePathFromSource(source) || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex
+      : source || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex) as TFile;
 
   /**
    * Access to the Dataview Api
@@ -53,5 +68,23 @@ export class InternalStaticMetadataScrierPluginContainer {
    */
   static get DataviewApi(): DataviewApi {
     return getAPI() as DataviewApi;
+  }
+
+  /**
+   * The base methods for MetadataEditApi and CurrentNoteMetadataEditApi
+   */
+  static get BaseMetadataEditApi() : ContextlessMetadataEditApiMethods {
+    return {
+      getMetadataFromFileCache: OpdMetadataEditLibrary.getMetadataFromFileCache,
+      getMetadataFromFileContent: OpdMetadataEditLibrary.getMetaDataFromFileContent,
+      getMetadataFromYaml: OpdMetadataEditLibrary.getMetaDataFromYAML,
+      removeFrontmatterFromFileContent: OpdMetadataEditLibrary.removeFrontmatter,
+      hasField: OpdMetadataEditLibrary.hasField,
+      getField: OpdMetadataEditLibrary.getField,
+      deleteField: OpdMetadataEditLibrary.deleteField,
+      updateField: OpdMetadataEditLibrary.updateField,
+      insertField: OpdMetadataEditLibrary.insertField,
+      updateOrInsertField: OpdMetadataEditLibrary.updateOrInsertField
+    }
   }
 }

@@ -13,16 +13,16 @@ import {
   GetPropObjectHelperFunctionKey,
   HasPropObjectHelperFunctionKey,
   IndexByArrayHelperFunctionKey,
-  IsFunction,
   MetadataScrierPluginKey,
   ScryGlobalPropertyCapitalizedKey,
   ScryGlobalPropertyLowercaseKey,
   SetPropObjectHelperFunctionKey} from "./constants";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
-import { MetadataScrier } from './meta';
+import { MetadataScrier } from './scrier';
 import { MetadataScrierPluginSettingTab } from './settings';
 import { ReactSectionComponents } from "./components/sections";
 import { ReactMarkdownComponents } from './components/markdown';
+import { IsFunction } from './utilities';
 
 /**
  * Metadata Scrier Api Obsidian.md Plugin
@@ -49,6 +49,10 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
    */
   static get Key(): string {
     return MetadataScrierPluginKey;
+  }
+
+  get Api(): MetaScryApi {
+    return MetadataScrierPlugin._instance;
   }
 
   get api(): MetaScryApi {

@@ -7,6 +7,9 @@ import {
   DataArray,
   DataviewApi
 } from "obsidian-dataview";
+import {
+  parsePath
+} from "@opd-libs/opd-metadata-lib/lib/Utils"
 
 import {
   CachedFileMetadata,
@@ -22,7 +25,6 @@ import {
   SplayKebabCasePropertiesOption,
   FileItem,
   FrontmatterUpdateOptions,
-  FileData,
   MetadataEditApi,
   AppWithPlugins
 } from './api';
@@ -39,17 +41,21 @@ import {
   SectionsMetadataPropertyLowercaseKey,
   ParentFolderPathSelector,
   CurrentFolderPathSelector,
-  IsObject,
-  IsArray,
-  IsString,
-  IsFunction,
   FrontmatterMarkdownSurroundingTag,
-  OdpMetadataEditLibPluginKey,
   CopyToHtmlPluginKey
 } from './constants';
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { CurrentNoteScrier } from "./current";
 import { NoteSections } from './sections';
+import {
+  BuildDataValueFileFullPath,
+  BuildPrototypeFileFullPath,
+  IsArray,
+  IsFunction,
+  IsObject,
+  IsString,
+  ParseFilePathFromSource
+} from './utilities';
 
 /**
  * Access and edit metadata about a file from multiple sources.
@@ -280,7 +286,7 @@ export class MetadataScrier implements MetaScryApi {
       return file;
     }
 
-    const path = (MetadataScrier.ParseFilePathFromSource(file) || this.Current.Path);
+    const path = (ParseFilePathFromSource(file) || this.Current.Path);
     return app.vault.getAbstractFileByPath(path)
       ?? app.vault.getAbstractFileByPath(path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension);
   }
@@ -301,7 +307,7 @@ export class MetadataScrier implements MetaScryApi {
   async html(source: FileSource = this.current.path): Promise<HTMLElement> {
     return await (app as AppWithPlugins).plugins.plugins[CopyToHtmlPluginKey]!.convertMarkdown(
       await this.md(source),
-      MetadataScrier.ParseFilePathFromSource(source) || undefined
+      ParseFilePathFromSource(source) || undefined
     );
   }
   
@@ -366,7 +372,7 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   dvMatter(source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null {
-    const providedPath: string = source ? MetadataScrier.ParseFilePathFromSource(source) as string : this.Current.Path;
+    const providedPath: string = source ? ParseFilePathFromSource(source) as string : this.Current.Path;
     const paths = MetadataScrier
       .DataviewApi
       .pagePaths(useSourceQuery ? providedPath : (`"` + providedPath + '"'));
@@ -389,7 +395,7 @@ export class MetadataScrier implements MetaScryApi {
   cache(source: FileSource = null): Cache | Cache[] {
     const fileObject = this.vault(source);
     if (fileObject === null) {
-      const key = MetadataScrier.ParseFilePathFromSource(source);
+      const key = ParseFilePathFromSource(source);
       if (key !== null && key !== undefined) {
         MetadataScrier._caches[key] = MetadataScrier._caches[key] || {};
 
@@ -424,11 +430,11 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null {
-    return this.frontmatter(MetadataScrier.BuildPrototypeFileFullPath(prototypePath));
+    return this.frontmatter(BuildPrototypeFileFullPath(prototypePath));
   }
 
   values(dataPath: string): Frontmatter | Frontmatter[] | null {
-    return this.frontmatter(MetadataScrier.BuildDataFileFullPath(dataPath));
+    return this.frontmatter(BuildDataValueFileFullPath(dataPath));
   }
 
   get(file: FileSource = null, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null {
@@ -437,7 +443,7 @@ export class MetadataScrier implements MetaScryApi {
     }
 
     const fileName = file
-      ? (MetadataScrier.ParseFilePathFromSource(file)
+      ? (ParseFilePathFromSource(file)
         ?? this.current.path)
       : this.Current.Path;
 
@@ -647,8 +653,7 @@ export class MetadataScrier implements MetaScryApi {
    */
   static TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean {
     const keys = (IsString(propertyPath))
-      ? (propertyPath as string)
-        .split('.')
+      ? parsePath(propertyPath as string)
       : propertyPath;
 
     let parent = fromObject;
@@ -754,61 +759,20 @@ export class MetadataScrier implements MetaScryApi {
     return (MetadataScrier.Api.path(relativePath, extension, rootFolder));
   }
 
-  /**
-   * Get a file path string based on a file path string or file object.
-   *
-   * @param {FileSource} file The file object (with a path property) or file name
-   *
-   * @returns The file path
-   */
-  static ParseFilePathFromSource(file: FileSource): string | null {
-    let fileName = file || null;
-    if (IsObject(file) && file !== null) {
-      fileName = (file as FileData | TAbstractFile).path!;
-    }
-
-    //@ts-expect-error: Accounted For.
-    return fileName;
-  }
-
-  /**
-   * Get the full path of a data file from it's data path.
-   *
-   * @param dataPath The path after the value set in settings for the path to data value files.
-   *
-   * @returns the full path from the root of the vault.
-   */
-  static BuildDataFileFullPath(dataPath: string) {
-    // @ts-expect-error: app.plugin is not mapped.
-    return app.plugins.plugins[MetadataScrierPluginKey].settings.dataFilesPath + dataPath;
-  }
-
-  /**
-   * Get the full path of a prototype file from it's data path.
-   *
-   * @param prototypePath The path after the value set in settings for the path to data prototypes files.
-   *
-   * @returns the full path from the root of the vault.
-   */
-  static BuildPrototypeFileFullPath(prototypePath: string) {
-    // @ts-expect-error: app.plugin is not mapped.
-    return app.plugins.plugins[MetadataScrierPluginKey].settings.prototypesPath + prototypePath;
-  }
-
   private static _parseFileNameFromDataFileFileOrPrototype(toValuesFile: string | boolean, file: FileSource, prototype: string | boolean) {
     return toValuesFile
       ? file
-        ? MetadataScrier.BuildDataFileFullPath(MetadataScrier.ParseFilePathFromSource(file)!)
+        ? BuildDataValueFileFullPath(ParseFilePathFromSource(file)!)
         : (IsString(toValuesFile)
-          ? MetadataScrier.BuildDataFileFullPath(toValuesFile as string)
-          : MetadataScrier.BuildDataFileFullPath(MetadataScrier.Api.Current.Path))
+          ? BuildDataValueFileFullPath(toValuesFile as string)
+          : BuildDataValueFileFullPath(MetadataScrier.Api.Current.Path))
       : prototype
         ? file
-          ? MetadataScrier.BuildPrototypeFileFullPath(MetadataScrier.ParseFilePathFromSource(file)!)
+          ? BuildPrototypeFileFullPath(ParseFilePathFromSource(file)!)
           : (IsString(prototype)
-            ? MetadataScrier.BuildPrototypeFileFullPath(prototype as string)
-            : MetadataScrier.BuildPrototypeFileFullPath(MetadataScrier.Api.Current.Path))
-        : MetadataScrier.ParseFilePathFromSource(file) || MetadataScrier.Api.Current.Path;
+            ? BuildPrototypeFileFullPath(prototype as string)
+            : BuildPrototypeFileFullPath(MetadataScrier.Api.Current.Path))
+        : ParseFilePathFromSource(file) || MetadataScrier.Api.Current.Path;
   }
   
   private static _findPath(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null) : string {

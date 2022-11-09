@@ -2,7 +2,7 @@
 import {
   MetaScryPluginSettings,
   SplayKebabCasePropertiesOption
-} from "./api";
+} from "./api"
 
 export const DefaultPluginSettings: MetaScryPluginSettings = {
   globalCacheNames: 'cache',
@@ -20,12 +20,10 @@ export const DefaultPluginSettings: MetaScryPluginSettings = {
 
 export const MetadataScrierPluginKey = "meta-scry";
 export const DataviewPluginKey = "dataview";
-export const OdpMetadataEditLibPluginKey = "opd-settings-plugin";
 export const CopyToHtmlPluginKey = "copy-document-as-html";
 export const ReactComponentsPluginKey = "obsidian-react-components";
 
 export const MetascryPluginDepencencies = [
-  OdpMetadataEditLibPluginKey,
   CopyToHtmlPluginKey,
   DataviewPluginKey
 ];
@@ -63,8 +61,3 @@ export const KebabCaseDashesRegex = /-/g;
 export const MarkdownWikiLinkRegex = new RegExp("\\[\\[(?:(?:([^\\]]*)\\|([^\\]]*))|([^\\]]*))\\]\\]", "g");
 export const DataviewInlineRegex = new RegExp("\\[(?:(?:([^\\[:\\|]*)::([^\\]]*)))\\]|\\((?:(?:([^\\[:\\|]*)::([^\\]]*)))\\)", "g");
 export const PropertyNameIllegalCharachtersRegex = new RegExp("(?:(^[\\d ][^{a-zA-Z_\\-}]*)|([^{a-zA-Z0-9_\\-\\\$ }]))", "g");
-
-export const IsFunction = (symbol: any) => typeof symbol === "function";
-export const IsObject = (symbol: any) => typeof symbol === "object";
-export const IsString = (symbol: any) => typeof symbol === "string";
-export const IsArray = (symbol: any) => Array.isArray(symbol);

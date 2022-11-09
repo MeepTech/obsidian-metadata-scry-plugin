@@ -16,9 +16,10 @@ import {
   Sections,
   FrontmatterUpdateOptions,
   DvData,
-  CurrentMetadataEditApi
+  CurrentNoteMetadataEditApi
 } from './api';
-import { IsString } from './constants';
+import { IsString } from './utilities';
+import { InternalStaticMetadataScrierPluginContainer } from './static';
 
 /**
  * Access to current metadata via localized versions of the calls in MetaScryApi
@@ -136,23 +137,27 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     return this.dv;
   }
 
-  get edit(): CurrentMetadataEditApi {
+  get edit(): CurrentNoteMetadataEditApi {
     const api = this._api.edit;
     const currentFile = this.note;
 
+    // Apply the current file as the file to update
     return {
-      plugin: api.plugin,
-      Plugin: api.plugin,
-      getField: (x, y) => api.getFieldFromTFile(x, currentFile, y),
-      doesFieldExist: (x, y) => api.doesFieldExistInTFile(x, currentFile, y),
-      insertField: (x, y, z) => api.insertFieldInTFile(x, y, currentFile, z),
-      updateField: (x, y, z) => api.updateFieldInTFile(x, y, currentFile, z),
-      updateOrInsertField: (x, y, z) => api.updateOrInsertFieldInTFile(x, y, currentFile, z),
-      deleteField: (x, y) => api.deleteFieldInTFile(x, currentFile, y)
+      ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApi,
+      get: (key, inline) => api.getFieldFromTFile(key, currentFile, inline),
+      exists: (key, inline) => api.doesFieldExistInTFile(key, currentFile, inline),
+      insert: (key, value, inline) => api.insertFieldInTFile(key, value, currentFile, inline),
+      update: (key, value, inline) => api.updateFieldInTFile(key, value, currentFile, inline),
+      upsert: (key, value, inline) => api.updateOrInsertFieldInTFile(key, value, currentFile, inline),
+      delete: (key, inline) => api.deleteFieldInTFile(key, currentFile, inline),
+      replace: (value) => api.setAllFrontmatter(value, currentFile),
+      clear: () => {
+        throw "not yet implemented";
+      }
     }
   }
 
-  get Edit(): CurrentMetadataEditApi {
+  get Edit(): CurrentNoteMetadataEditApi {
     return this.edit;
   }
 

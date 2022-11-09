@@ -11,6 +11,7 @@ import {
   Cache
 } from './api';
 import {
+  CopyToHtmlPluginKey,
   DataviewInlineRegex,
   DefaultMarkdownFileExtension,
   ExtensionFilePathSeperatorCharacter,
@@ -19,7 +20,6 @@ import {
   KebabCaseDashesRegex,
   KebabCaseWordSeperatorCharacter,
   MarkdownWikiLinkRegex,
-  OdpMetadataEditLibPluginKey,
   PropertyNameIllegalCharachtersRegex,
   SectionIdPartDelimiter,
   SectionLinkSeperatorCharachter,
@@ -201,7 +201,7 @@ class NoteSection implements Section {
   get html()
     : Promise<HTMLElement> {
     return (async () => {
-      return await (app as any).plugins.plugins[OdpMetadataEditLibPluginKey].renderMarkdown(
+      return await (app as any).plugins.plugins[CopyToHtmlPluginKey].renderMarkdown(
       await this.md,
       this.root.path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension
     );
