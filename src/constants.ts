@@ -1,5 +1,14 @@
 import { DataviewApi, getAPI } from "obsidian-dataview";
 import {
+  getFieldFromTFile,
+  doesFieldExistInTFile,
+  insertFieldInTFile,
+  updateFieldInTFile,
+  updateOrInsertFieldInTFile,
+  deleteFieldInTFile
+} from "@opd-libs/opd-metadata-lib/lib/API"
+import {
+  MetadataEditApi,
   MetaScryPluginApi,
   MetaScryPluginSettings,
   SplayKebabCasePropertiesOption
@@ -20,14 +29,23 @@ import {
    * Access to the Metaedit Api
    * (Write access)
    */
-  static get MetaeditApi() : any {
-    // TODO: can we set these to their specific types?
-    return (app as any)
-    .plugins
-    .plugins
-    .metaedit
-    .api;
-  }
+   static get MetadataEditApi(): MetadataEditApi {
+     const plugin = (app as any)
+       .plugins
+       .plugins
+       ["opd-settings-lib-test-plugin"];
+       
+    return {
+      plugin,
+      Plugin: plugin,
+      getFieldFromTFile: (x, y, z) => getFieldFromTFile(x, y, plugin, z),
+      doesFieldExistInTFile: (x, y, z) => doesFieldExistInTFile(x, y, plugin, z),
+      insertFieldInTFile: (x, y, z, a) => insertFieldInTFile(x, y, z, plugin, a),
+      updateFieldInTFile: (x, y, z, a) => updateFieldInTFile(x, y, z, plugin, a),
+      updateOrInsertFieldInTFile: (x, y, z, a) => updateOrInsertFieldInTFile(x, y, z, plugin, a),
+      deleteFieldInTFile: (x, y, z) => deleteFieldInTFile(x, y, plugin, z)
+    }
+   }
   
   /**
    * Access to the Dataview Api

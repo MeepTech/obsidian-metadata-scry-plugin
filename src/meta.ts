@@ -3,7 +3,10 @@ import {
   TFile,
   TFolder
 } from 'obsidian';
-import { DataArray, DataviewApi, getAPI } from "obsidian-dataview";
+import {
+  DataArray,
+  DataviewApi
+} from "obsidian-dataview";
 
 import {
   CachedFileMetadata,
@@ -19,7 +22,8 @@ import {
   SplayKebabCasePropertiesOption,
   FileItem,
   FrontmatterUpdateOptions,
-  FileData
+  FileData,
+  MetadataEditApi
 } from './api';
 import {
   KebabCaseWordSeperatorCharacter,
@@ -174,10 +178,9 @@ export class MetadataScrier implements MetaScryApi {
   /**
    * Access to the Metaedit Api
    * (Write access)
-   * // TODO: can we set this to their specific types?
    */
-  static get MetaeditApi(): any {
-    return StaticMetaScryPluginContainer.MetaeditApi
+  static get MetadataEditApi(): any {
+    return StaticMetaScryPluginContainer.MetadataEditApi
   }
 
   /**
@@ -227,6 +230,22 @@ export class MetadataScrier implements MetaScryApi {
   get plugin(): MetaScryPluginApi {
     // @ts-expect-error: app.plugin is not mapped.
     return this._plugin ??= app.plugins.plugins[MetadataScrierPluginKey];
+  }
+
+  get edit(): MetadataEditApi {
+    return StaticMetaScryPluginContainer.MetadataEditApi;
+  }
+
+  get Edit(): MetadataEditApi {
+    return this.edit;
+  }
+
+  get dv(): DataviewApi {
+    return StaticMetaScryPluginContainer.DataviewApi;
+  }
+
+  get Dv(): DataviewApi {
+    return StaticMetaScryPluginContainer.DataviewApi;
   }
   
   //#endregion
@@ -318,14 +337,14 @@ export class MetadataScrier implements MetaScryApi {
     }
   }
 
-  dv(source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null {
+  dvMatter(source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null {
     const providedPath: string = source ? MetadataScrier.ParseFilePathFromSource(source) as string : this.Current.Path;
     const paths = MetadataScrier
       .DataviewApi
       .pagePaths(useSourceQuery ? providedPath : (`"` + providedPath + '"'));
 
     if (paths.length > 1) {
-      return paths.map((p: string) => this.dv(p));
+      return paths.map((p: string) => this.dvMatter(p));
     } else if (!paths.length) {
       return null;
     } else {
@@ -337,7 +356,7 @@ export class MetadataScrier implements MetaScryApi {
     }
   }
   dataviewFrontmatter = (source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
-    this.dv(source, useSourceQuery);
+    this.dvMatter(source, useSourceQuery);
 
   cache(source: FileSource = null): Cache | Cache[] {
     const fileObject = this.vault(source);
@@ -485,13 +504,14 @@ export class MetadataScrier implements MetaScryApi {
       return
     }
 
-    const { update } = MetadataScrier.MetaeditApi;
+    const { updateOrInsertFieldInTFile: update } = this.edit;
     const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
+    const fileObject = file instanceof TFile ? file : (this.file(fileName) as TFile);
 
     if (propertyName != null) {
-      update(propertyName, frontmatterData, fileName);
+      update(propertyName, frontmatterData, fileObject);
     } else {
-      Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileName));
+      Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileObject));
     }
   }
 
@@ -503,11 +523,12 @@ export class MetadataScrier implements MetaScryApi {
       return;
     }
 
-    const { update } = MetadataScrier.MetaeditApi;
+    const { updateOrInsertFieldInTFile: update } = this.edit;
     const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
+    const fileObject = file instanceof TFile ? file : (this.file(fileName) as TFile);
 
     this.clear(fileName);
-    Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileName));
+    Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileObject));
   }
 
   clear(file: FileItem = null, frontmatterProperties: string | Array<string> | Record<string, any> | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}) : void {

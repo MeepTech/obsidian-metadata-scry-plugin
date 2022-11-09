@@ -1,11 +1,25 @@
 import {
   CachedMetadata,
   Plugin,
+  Plugin_2,
   TAbstractFile,
   TFile,
   TFolder
 } from "obsidian";
-import { DataArray, Link, PageMetadata, SMarkdownPage } from "obsidian-dataview";
+import {
+  DataArray,
+  DataviewApi,
+  Link,
+  SMarkdownPage
+} from "obsidian-dataview";
+import {
+  getFieldFromTFile,
+  doesFieldExistInTFile,
+  insertFieldInTFile,
+  updateFieldInTFile,
+  updateOrInsertFieldInTFile,
+  deleteFieldInTFile
+} from "@opd-libs/opd-metadata-lib/lib/API"
 
 //#region Plugin
 
@@ -306,6 +320,52 @@ export interface MetadataSources {
 }
 
 /**
+ * Api object with all functions found in the 'OPD-metadata-lib' metadata editor plugin.
+ * 
+ * From: https://github.com/OPD-libs/OPD-libs/blob/main/libs/OPD-metadata-lib/src/API.ts
+ * 
+ * @see {@link CurrentMetadataEditApi}
+ */
+export interface MetadataEditApi {
+  plugin: Plugin_2;
+  Plugin: Plugin_2;
+  getFieldFromTFile(...args: IgnoreSecondToLastParam<typeof getFieldFromTFile>)
+    : ReturnType<typeof getFieldFromTFile>;
+  doesFieldExistInTFile(...args: IgnoreSecondToLastParam<typeof doesFieldExistInTFile>)
+    : ReturnType<typeof doesFieldExistInTFile>;
+  insertFieldInTFile(...args: IgnoreSecondToLastParam<typeof insertFieldInTFile>)
+    : ReturnType<typeof insertFieldInTFile>;
+  updateFieldInTFile(...args: IgnoreSecondToLastParam<typeof updateFieldInTFile>)
+    : ReturnType<typeof updateFieldInTFile>;
+  updateOrInsertFieldInTFile(...args: IgnoreSecondToLastParam<typeof updateOrInsertFieldInTFile>)
+    : ReturnType<typeof updateOrInsertFieldInTFile>;
+  deleteFieldInTFile(...args: IgnoreSecondToLastParam<typeof deleteFieldInTFile>)
+    : ReturnType<typeof deleteFieldInTFile>;
+}
+
+/**
+ * Api object with all functions found in the 'OPD-metadata-lib' metadata editor plugin, with the targets of all of the functions directed to the current file.
+ * 
+ * @see {@link MetadataEditApi}
+ */
+export interface CurrentMetadataEditApi {
+  plugin: Plugin_2;
+  Plugin: Plugin_2;
+  getField(...args: SkipSecondParameterOnly<MetadataEditApi["getFieldFromTFile"]>)
+    : ReturnType<MetadataEditApi["getFieldFromTFile"]>;
+  doesFieldExist(...args: SkipSecondParameterOnly<MetadataEditApi["doesFieldExistInTFile"]>)
+    : ReturnType<MetadataEditApi["doesFieldExistInTFile"]>;
+  insertField(...args: SkipThirdParameterOnly<MetadataEditApi["insertFieldInTFile"]>)
+    : ReturnType<MetadataEditApi["insertFieldInTFile"]>;
+  updateField(...args: SkipThirdParameterOnly<MetadataEditApi["updateFieldInTFile"]>)
+    : ReturnType<MetadataEditApi["updateFieldInTFile"]>;
+  updateOrInsertField(...args: SkipThirdParameterOnly<MetadataEditApi["updateOrInsertFieldInTFile"]>)
+    : ReturnType<MetadataEditApi["updateOrInsertFieldInTFile"]>;
+  deleteField(...args: SkipSecondParameterOnly<MetadataEditApi["deleteFieldInTFile"]>)
+    : ReturnType<MetadataEditApi["deleteFieldInTFile"]>;
+}
+
+/**
  * Interface for the Api.
  * Access and edit metadata about a file from multiple sources.
  */
@@ -328,9 +388,60 @@ export interface MetaScryApi {
   get plugin(): MetaScryPluginApi;
 
   /**
+   * A link to the dv plugin api
+   * 
+   * @alias {@link Dv}
+   * @alias {@link MetadataScrier.DataviewApi}
+   * @alias {@link getAPI} From DataviewApi
+   * 
+   * @see {@link dataviewFrontmatter}
+   * @see {@link CurrentFileMetaScryApi.dataviewFrontmatter}
+   */
+  get dv(): DataviewApi;
+  
+  /**
+   * A link to the dv plugin api
+   * 
+   * @alias {@link dv}
+   * @alias {@link MetadataScrier.DataviewApi}
+   * @alias {@link getAPI} From DataviewApi
+   * 
+   * @see {@link dataviewFrontmatter}
+   * @see {@link CurrentFileMetaScryApi.dataviewFrontmatter}
+   */
+  get Dv(): DataviewApi;
+
+  /**
+   * A link to the opd-metadata-lib plugin api
+   * 
+   * @alias {@link edit}
+   * 
+   * @see {@link CurrentFileMetaScryApi.edit}
+   * @see {@link patch}
+   * @see {@link set}
+   * @see {@link clear}
+   */
+  get Edit(): MetadataEditApi;
+
+  /**
+   * A link to the opd-metadata-lib plugin api
+   * 
+   * @alias {@link Edit}
+   * 
+   * @see {@link CurrentFileMetaScryApi.edit}
+   * @see {@link patch}
+   * @see {@link set}
+   * @see {@link clear}
+   */
+  get edit(): MetadataEditApi;
+
+  /**
    * Used to fetch various metadata for the current file.
    * 
    * @alias {@link current}
+   * 
+   * @see {@link get}
+   * @see {@link data}
    */
   get Current(): CurrentNoteMetaScryApi;
 
@@ -338,6 +449,9 @@ export interface MetaScryApi {
    * Used to fetch various metadata for the current file.
    * 
    * @alias {@link Current}
+   * 
+   * @see {@link get}
+   * @see {@link data}
    */
   get current(): CurrentNoteMetaScryApi;
 
@@ -596,7 +710,7 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  dv(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
+  dvMatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
@@ -606,7 +720,7 @@ export interface MetaScryApi {
    *
    * @returns Just the dataview(+frontmatter) values for the file.
    * 
-   * @alias {@link dv}
+   * @alias {@link dvMatter}
    * 
    * @see {@link get}
    * @see {@link data}
@@ -732,8 +846,8 @@ export interface MetaScryApi {
    * @see {@link dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-   from(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
-  
+  from(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
+    
   /**
    * Patch individual properties of the frontmatter metadata.
    *
@@ -994,6 +1108,30 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.sections}
    */
   get sections(): Sections;
+
+  /**
+   * A link to the opd-metadata-lib plugin api
+   * 
+   * @alias {@link edit}
+   * 
+   * @see {@link MetaScryApi.edit}
+   * @see {@link patch}
+   * @see {@link set}
+   * @see {@link clear}
+   */
+  get Edit(): CurrentMetadataEditApi;
+
+  /**
+   * A link to the opd-metadata-lib plugin api
+   * 
+   * @alias {@link Edit}
+   * 
+   * @see {@link MetaScryApi.edit}
+   * @see {@link patch}
+   * @see {@link set}
+   * @see {@link clear}
+   */
+  get edit(): CurrentMetadataEditApi;
 
   /**
    * Patch individual properties of the current file's frontmatter metadata.
@@ -1775,5 +1913,34 @@ export type Section = SectionChildren & SectionInfo;
  * All of the sections in a note.
  */
 export type Sections = SectionsCollection & SectionsNoteData;
+
+//#endregion
+
+//#region Utility
+
+type Head<T extends any[]> = Required<T> extends [...infer Head, any]
+  ? Head
+  : any[];
+
+type Tail<T extends any[]> = Required<T> extends [any, ...infer Tail]
+  ? Tail
+  : any[];
+
+type FirstParameter<T extends any[]> = Required<T> extends [infer Start, ...any]
+  ? [Start]
+  : any[];
+
+type LastParameter<T extends any[]> = Required<T> extends [...any, infer End]
+  ? [End]
+  : any[];
+
+type IgnoreSecondToLastParam<T extends (...args: any) => any> =
+  [...args: Head<Head<Parameters<T>>>, inline?: LastParameter<Parameters<T>>[0]];
+  
+type SkipSecondParameterOnly<T extends (...args: any) => any> =
+  [field: FirstParameter<Parameters<T>>[0], ...args: Head<Tail<Tail<Parameters<T>>>>, inline?: LastParameter<Parameters<T>>[0]];
+
+type SkipThirdParameterOnly<T extends (...args: any) => any> =
+  [field: FirstParameter<Parameters<T>>[0], value: FirstParameter<Tail<Parameters<T>>>[0], ...args: Head<Tail<Tail<Tail<Parameters<T>>>>>, inline?: LastParameter<Parameters<T>>[0]];
 
 //#endregion

@@ -1,5 +1,13 @@
 import { TFile } from 'obsidian';
 import {
+  getFieldFromTFile,
+  doesFieldExistInTFile,
+  insertFieldInTFile,
+  updateFieldInTFile,
+  updateOrInsertFieldInTFile,
+  deleteFieldInTFile
+} from "@opd-libs/opd-metadata-lib/lib/API"
+import {
   Cache,
   CurrentNoteMetaScryApi,
   Frontmatter,
@@ -7,7 +15,8 @@ import {
   MetaScryApi,
   Sections,
   FrontmatterUpdateOptions,
-  DvData
+  DvData,
+  CurrentMetadataEditApi
 } from './api';
 import { IsString } from './constants';
 
@@ -120,11 +129,31 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
   }
 
   get dv(): DvData {
-    return this._api.dv() as DvData;
+    return this._api.dvMatter() as DvData;
   }
 
   get Dv(): DvData {
     return this.dv;
+  }
+
+  get edit(): CurrentMetadataEditApi {
+    const api = this._api.edit;
+    const currentFile = this.note;
+
+    return {
+      plugin: api.plugin,
+      Plugin: api.plugin,
+      getField: (x, y) => api.getFieldFromTFile(x, currentFile, y),
+      doesFieldExist: (x, y) => api.doesFieldExistInTFile(x, currentFile, y),
+      insertField: (x, y, z) => api.insertFieldInTFile(x, y, currentFile, z),
+      updateField: (x, y, z) => api.updateFieldInTFile(x, y, currentFile, z),
+      updateOrInsertField: (x, y, z) => api.updateOrInsertFieldInTFile(x, y, currentFile, z),
+      deleteField: (x, y) => api.deleteFieldInTFile(x, currentFile, y)
+    }
+  }
+
+  get Edit(): CurrentMetadataEditApi {
+    return this.edit;
   }
 
   patch(frontmatterData: any, propertyName: string | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): any | object {
