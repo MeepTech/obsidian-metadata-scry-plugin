@@ -181,7 +181,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Globals/Scry and scry.md",
+                "file": "Installation.md",
                 "mode": "source",
                 "source": false
               }
@@ -234,7 +234,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -254,7 +255,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/Globals/Scry and scry.md",
+                "file": "Installation.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -271,7 +272,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/Globals/Scry and scry.md",
+                "file": "Installation.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -294,7 +295,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/Globals/Scry and scry.md"
+                "file": "Installation.md"
               }
             }
           }
@@ -307,15 +308,15 @@
   },
   "active": "c30403006e62dc33",
   "lastOpenFiles": [
-    "Api/Functions/MetaScryApi/Metadata Fetchers/cache.md",
-    "Api/Globals/Scry and scry.md",
     "README.md",
+    "Installation.md",
+    "Api/Functions/MetaScryApi/Metadata Updaters/clear.md",
+    "Api/Functions/MetaScryApi/Metadata Updaters/patch.md",
+    "Api/Functions/MetaScryApi/Metadata Updaters/set.md",
+    "Api/Properties/Metadata/Static/MetadataEditApi.md",
+    "Api/Globals/Scry and scry.md",
+    "Api/Functions/MetaScryApi/Metadata Fetchers/cache.md",
     "Api/README.md",
-    "Api/Globals/path.md",
-    "Api/Globals/meta.md",
-    "Api/Globals/cache.md",
-    "Api/Globals/Untitled.md",
-    "Api/Classes/Heading.md",
-    "Api/Classes/Sections.md"
+    "Api/Globals/path.md"
   ]
 }

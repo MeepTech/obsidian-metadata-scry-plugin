@@ -31,12 +31,12 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setName('MetaScryApi Custom Global Variable Name')
       .setDesc('The variable name to use for the MetaScryApi in a global scope.  If left empty; the variable will not be registered. (Mirror for "scry" global variable, just with a custom name if you want)')
       .addText(text => text
-        .setPlaceholder(DefaultSettings.globalMetaScryExtraName)
-        .setValue(this.plugin.settings.globalMetaScryExtraName)
+        .setPlaceholder(DefaultSettings.globalMetaScryExtraNames)
+        .setValue(this.plugin.settings.globalMetaScryExtraNames)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
             ...this.plugin.settings,
-            globalMetaScryExtraName: value
+            globalMetaScryExtraNames: value
           });
         }));
 
@@ -44,12 +44,12 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setName('Global Cache Variable Name')
       .setDesc('The variable name to use for the cache global scope variable registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
-        .setPlaceholder(DefaultSettings.globalCacheName)
-        .setValue(this.plugin.settings.globalCacheName)
+        .setPlaceholder(DefaultSettings.globalCacheNames)
+        .setValue(this.plugin.settings.globalCacheNames)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
             ...this.plugin.settings,
-            globalCacheName: value
+            globalCacheNames: value
           });
         }));
 
@@ -58,11 +58,11 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setDesc('The name to use for the path global helper function registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
         .setPlaceholder('path')
-        .setValue(DefaultSettings.globalPathFunctionName)
+        .setValue(DefaultSettings.globalPathFunctionNames)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
             ...this.plugin.settings,
-            globalPathFunctionName: value
+            globalPathFunctionNames: value
           });
         }));
     

@@ -23,7 +23,8 @@ import {
   FileItem,
   FrontmatterUpdateOptions,
   FileData,
-  MetadataEditApi
+  MetadataEditApi,
+  AppWithPlugins
 } from './api';
 import {
   KebabCaseWordSeperatorCharacter,
@@ -42,8 +43,11 @@ import {
   IsArray,
   IsString,
   IsFunction,
-  StaticMetaScryPluginContainer
+  FrontmatterMarkdownSurroundingTag,
+  OdpMetadataEditLibPluginKey,
+  CopyToHtmlPluginKey
 } from './constants';
+import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { CurrentNoteScrier } from "./current";
 import { NoteSections } from './sections';
 
@@ -164,7 +168,7 @@ export class MetadataScrier implements MetaScryApi {
    * The instance of the Api via the Metascrier class
    */
   static get Api(): MetaScryApi {
-    return StaticMetaScryPluginContainer.Instance.api;
+    return InternalStaticMetadataScrierPluginContainer.Instance.api;
   }
 
   /**
@@ -172,15 +176,15 @@ export class MetadataScrier implements MetaScryApi {
    * (Read access and Data display)
    */
   static get DataviewApi(): DataviewApi {
-    return StaticMetaScryPluginContainer.DataviewApi;
+    return InternalStaticMetadataScrierPluginContainer.DataviewApi;
   }
 
   /**
-   * Access to the Metaedit Api
+   * Access to the Metadata editor Api
    * (Write access)
    */
   static get MetadataEditApi(): any {
-    return StaticMetaScryPluginContainer.MetadataEditApi
+    return InternalStaticMetadataScrierPluginContainer.MetadataEditApi
   }
 
   /**
@@ -228,12 +232,11 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   get plugin(): MetaScryPluginApi {
-    // @ts-expect-error: app.plugin is not mapped.
-    return this._plugin ??= app.plugins.plugins[MetadataScrierPluginKey];
+    return this.Plugin;
   }
 
   get edit(): MetadataEditApi {
-    return StaticMetaScryPluginContainer.MetadataEditApi;
+    return InternalStaticMetadataScrierPluginContainer.MetadataEditApi;
   }
 
   get Edit(): MetadataEditApi {
@@ -241,11 +244,11 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   get dv(): DataviewApi {
-    return StaticMetaScryPluginContainer.DataviewApi;
+    return InternalStaticMetadataScrierPluginContainer.DataviewApi;
   }
 
   get Dv(): DataviewApi {
-    return StaticMetaScryPluginContainer.DataviewApi;
+    return InternalStaticMetadataScrierPluginContainer.DataviewApi;
   }
   
   //#endregion
@@ -286,22 +289,30 @@ export class MetadataScrier implements MetaScryApi {
   folder = (file: FileSource = null): TFolder| null =>
     this.vault(file) as TFolder;
   
-  async markdown(source?: FileSource): Promise<string> {
-    
+  async markdown(source: FileSource = this.current.path): Promise<string> {
+    const file = this.file(source) as TFile;
+    const md = await app.vault.cachedRead(file);
+
+    return md;
   }
-  md = (source?: FileSource): Promise<string> =>
-    this.markdown(source);
+  md = async (source: FileSource = this.current.path): Promise<string> =>
+    await this.markdown(source);
   
-  
-  async html(source?: FileSource): Promise<HTMLElement> {
-  
+  async html(source: FileSource = this.current.path): Promise<HTMLElement> {
+    return await (app as AppWithPlugins).plugins.plugins[CopyToHtmlPluginKey]!.convertMarkdown(
+      await this.md(source),
+      MetadataScrier.ParseFilePathFromSource(source) || undefined
+    );
   }
   
-  async text(source?: FileSource): Promise<string> {
-    
+  async text(source: FileSource = this.current.path): Promise<string> {
+    const html = await this.html(source);
+    const text = html.textContent || "";
+
+    return text;
   }
-  txt = (source?: FileSource): Promise<string> =>
-    this.text(source);
+  txt = async (source: FileSource = this.current.path): Promise<string> =>
+    await this.text(source);
 
   omfc(file: FileSource = null): CachedFileMetadata | CachedFileMetadata[] | null {
     const fileObject = this.vault(file);
@@ -490,7 +501,7 @@ export class MetadataScrier implements MetaScryApi {
     }
 
     // add/remove file metadata field(from dv)?
-    if (sources === "true" || (sources as MetadataSources).FileInfo) {
+    if (sources === true || (sources as MetadataSources).FileInfo) {
       values[FileMetadataPropertyLowercaseKey] = values.file;
       values[FileMetadataPropertyUppercaseKey] = values.file;
     } else {

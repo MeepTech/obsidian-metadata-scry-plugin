@@ -1,5 +1,7 @@
 import {
+  App,
   CachedMetadata,
+  MarkdownView,
   Plugin,
   Plugin_2,
   TAbstractFile,
@@ -20,6 +22,7 @@ import {
   updateOrInsertFieldInTFile,
   deleteFieldInTFile
 } from "@opd-libs/opd-metadata-lib/lib/API"
+import { CopyToHtmlPluginKey, DataviewPluginKey, MetadataScrierPluginKey, OdpMetadataEditLibPluginKey, ReactComponentsPluginKey } from "./constants";
 
 //#region Plugin
 
@@ -44,6 +47,56 @@ export enum SplayKebabCasePropertiesOption {
    */
   LowerAndCamelCase = 3
 }
+
+/**
+ * Internalish Extension to the App with the plugins because it's missing for some reason
+ */
+export type AppWithPlugins = {
+  plugins: {
+    disablePlugin(key: string): void
+    plugins: {
+      [MetadataScrierPluginKey]?: MetaScryPluginApi;
+      [OdpMetadataEditLibPluginKey]?: Plugin;
+      [ReactComponentsPluginKey]?: Plugin;
+      [CopyToHtmlPluginKey]?: {
+        /**
+         * Render a markdown view to an html element, with dataview and other js included.
+         * @async
+         * 
+         * @param {MarkdownView} view The view to conver to html 
+         * @param {{ convertSvgToBitmap: boolean }} options (Optional) rendering options.
+         *
+         * @returns The detatched container html element of the rendered view.
+         * 
+         * @see {@link AppWithPlugins.convertMarkdown}
+         */
+        convertView(
+          view: MarkdownView,
+          options?: { convertSvgToBitmap: boolean }
+        ): Promise<HTMLElement>;
+        /**
+         * Render a markdown view to an html element, with dataview and other js included.
+         * @async
+         * 
+         * @param {MarkdownView} view The view to conver to html 
+         * @param {{ convertSvgToBitmap: boolean }} options (Optional) rendering options.
+         *
+         * @returns The detatched container html element of the rendered view.
+         * 
+         * @see {@link convertView}
+         */
+        convertMarkdown(
+          markdown: string,
+          sourceFilePath?: string | undefined,
+          options?: { convertSvgToBitmap: boolean }
+        ): Promise<HTMLElement>;
+      } & Plugin;
+      [DataviewPluginKey]?: {
+        api: DataviewApi
+      } & Plugin;
+    }
+  }
+} & App;
 
 /**
  * Interface for the plugin itself
@@ -302,7 +355,7 @@ export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | L
  * 
  * Either a 'file' object with a '.path' property, or the path itself as a string.
  */
- export type FileItem = string | TFile | FileData | Link | null
+export type FileItem = string | TFile | FileData | Link | null
 
 /**
  * Passed into any update functions to modify what they do.
@@ -320,22 +373,22 @@ export interface MetadataSources {
    * The 'file' field containing metadata about the file itself
    */
   FileInfo?: boolean;
-   
+
   /**
    * The Frontmatter (YAML at the top of a note)
    */
   Frontmatter?: boolean;
-   
+
   /**
    * Inline Dataview data fields
    */
   DataviewInline?: boolean;
-   
+
   /**
    * Cached values from MetaScryApi.cache
    */
   Cache?: boolean;
-   
+
   /**
    * Sections from the note itself
    */
@@ -421,7 +474,7 @@ export interface MetaScryApi {
    * @see {@link CurrentFileMetaScryApi.dataviewFrontmatter}
    */
   get dv(): DataviewApi;
-  
+
   /**
    * A link to the dv plugin api
    * 
@@ -562,7 +615,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.note}
    */
   folder(source: FileSource): TFolder | null;
-  
+
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api.
    * 
@@ -572,8 +625,8 @@ export interface MetaScryApi {
    *
    * @alias {@link omfc}
    */
-   obsidianMetadataFileCache(source?: FileSource): CachedFileMetadata | CachedFileMetadata[] | null;
-  
+  obsidianMetadataFileCache(source?: FileSource): CachedFileMetadata | CachedFileMetadata[] | null;
+
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api. 
    * 
@@ -613,7 +666,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.markdown}
    * @see {@link Section.markdown}
    */
-  markdown(source?: FileSource) : Promise<string>;
+  markdown(source?: FileSource): Promise<string>;
 
   /**
    * Used to fetch the rendered html elements resulting from the markdown of the entire file (or all provided files).
@@ -626,8 +679,8 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.html}
    * @see {@link Section.html}
    */
-  html(source?: FileSource) : Promise<HTMLElement>;
-  
+  html(source?: FileSource): Promise<HTMLElement>;
+
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
    * 
@@ -641,7 +694,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  txt(source?: FileSource) : Promise<string>;
+  txt(source?: FileSource): Promise<string>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
@@ -656,7 +709,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  text(source?: FileSource) : Promise<string>;
+  text(source?: FileSource): Promise<string>;
 
   /**
    * Get just the frontmatter for the given file. 
@@ -767,7 +820,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
   cache(source?: FileSource): Cache | Cache[];
-  
+
   /**
    * Get just the (meta-scry) cache data for a file.
    *
@@ -783,21 +836,21 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
   temp(source?: FileSource): Cache | Cache[];
-  
-   /**
-    * Get or Set a global values across all obsidian.
-    * WARNING DONT USE THIS IF YOU DONT KNOW WHAT YOURE DOING!
-    *
-    * @param {FileSource} key The key of the global to fetch or set.
-    *
-    * @returns The global or globals with the given key(s)
-    * 
-    * @see {@link get}
-    * @see {@link cache}
-    * @see {@link MetadataScrierPlugin.tryToGetExtraGlobal}
-    * @see {@link MetadataScrierPlugin.tryToSetExtraGlobal}
-    */
-   globals(key: string | string[], setToValue: any): any | any[] | undefined;
+
+  /**
+   * Get or Set a global values across all obsidian.
+   * WARNING DONT USE THIS IF YOU DONT KNOW WHAT YOURE DOING!
+   *
+   * @param {FileSource} key The key of the global to fetch or set.
+   *
+   * @returns The global or globals with the given key(s)
+   * 
+   * @see {@link get}
+   * @see {@link cache}
+   * @see {@link MetadataScrierPlugin.tryToGetExtraGlobal}
+   * @see {@link MetadataScrierPlugin.tryToSetExtraGlobal}
+   */
+  globals(key: string | string[], setToValue: any): any | any[] | undefined;
 
   /**
    * Get the desired prototypes
@@ -823,7 +876,7 @@ export interface MetaScryApi {
     * @see {@link globals}
     * @see {@link prototypes}
    */
-  values(dataPath: string): Frontmatter | Frontmatter[] | null;  
+  values(dataPath: string): Frontmatter | Frontmatter[] | null;
 
   /**
    * Get the Metadata for a given file using the supplied sources.
@@ -847,7 +900,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
   get(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
-  
+
   /**
    * Get the Metadata for a given file using the supplied sources.
    *
@@ -870,7 +923,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
   from(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
-    
+
   /**
    * Patch individual properties of the frontmatter metadata.
    *
@@ -885,7 +938,7 @@ export interface MetaScryApi {
    * @see {@link clear}
    */
   patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName?: string | null, options?: FrontmatterUpdateOptions): void;
-  
+
   /**
    * Replace the existing frontmatter of a file with entirely new data, clearing out all old data in the process.
    *
@@ -898,7 +951,7 @@ export interface MetaScryApi {
    * @see {@link clear}
    * @see {@link patch}
    */
-  set(file: FileItem, frontmatterData: any, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
+  set(file: FileItem, frontmatterData: any, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
 
   /**
    * Used to clear values from metadata.
@@ -912,8 +965,8 @@ export interface MetaScryApi {
    * @see {@link set}
    * @see {@link patch}
    */
-  clear(file?: FileItem, frontmatterProperties?: string | Array<string> | Record<string, any> | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
-  
+  clear(file?: FileItem, frontmatterProperties?: string | Array<string> | Record<string, any> | null, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+
   /**
    * Turn a relative path into a full path
    *
@@ -952,7 +1005,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.get}
    */
   get data(): Metadata;
-  
+
   /**
    * The current note focused by the workspace.
    * 
@@ -963,7 +1016,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.folder}
    */
   get Note(): TFile;
-  
+
   /**
    * The current note focused by the workspace.
    * 
@@ -985,7 +1038,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.path}
    */
   get Path(): string;
-  
+
   /**
    * The current path of the current note without the extension
    * 
@@ -1007,7 +1060,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.path}
    */
   get PathEx(): string;
-  
+
   /**
    * The current path of the current note with it's extension
    * 
@@ -1033,7 +1086,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.get}
    */
   get Matter(): Frontmatter;
-  
+
   /**
    * Get just the frontmatter of the current file
    * 
@@ -1048,7 +1101,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.get}
    */
   get matter(): Frontmatter;
-  
+
   /**
    * Get just the frontmatter of the current file
    * 
@@ -1078,7 +1131,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.get}
    */
   get Frontmatter(): Frontmatter;
-  
+
   /**
    * Get just the frontmatter of the current file
    * 
@@ -1122,7 +1175,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link MetaScryApi.sections}
    */
   get Sections(): Sections;
-  
+
   /**
    * Access the sections for the current file only.
    * 
@@ -1168,8 +1221,8 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link set}
    * @see {@link clear}
    */
-  patch(frontmatterData: any, propertyName?: string | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
-  
+  patch(frontmatterData: any, propertyName?: string | null, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+
   /**
    * Replace the existing frontmatter the current file with entirely new data, clearing out all old data in the process.
    *
@@ -1181,8 +1234,8 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link patch}
    * @see {@link clear}
    */
-  set(frontmatterData: any, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
-  
+  set(frontmatterData: any, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+
   /**
    * Used to clear values from metadata.
    *
@@ -1195,7 +1248,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link set}
    * @see {@link patch}
    */
-  clear(frontmatterProperties?: string | Array<string> | object | null, options?: {toValuesFile?: boolean | string, prototype?: string | boolean}): void;
+  clear(frontmatterProperties?: string | Array<string> | object | null, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
 }
 
 /**
@@ -1338,7 +1391,7 @@ interface SectionInfo {
    * @see {@link Id}
    */
   get path(): string;
-  
+
   /**
    * The path of the note this section is from with the header appended after a #
    *
@@ -1368,7 +1421,7 @@ interface SectionInfo {
    * @see {@link Path}
    */
   get Id(): string;
-  
+
   /**
    * A unique key/identifier for this section out of all notes and sections.
    * 
@@ -1456,7 +1509,7 @@ interface SectionInfo {
    * @see {@link Root}
    */
   get Container(): Section | null;
-  
+
   /**
    * The section that contains this one, if there is one. If not this is a root section.
    *
@@ -1577,7 +1630,7 @@ interface SectionInfo {
    * @see {@link Path}
    */
   get header(): Heading;
-  
+
   /**
    * The heading of this section
    * 
@@ -1959,7 +2012,7 @@ type LastParameter<T extends any[]> = Required<T> extends [...any, infer End]
 
 type IgnoreSecondToLastParam<T extends (...args: any) => any> =
   [...args: Head<Head<Parameters<T>>>, inline?: LastParameter<Parameters<T>>[0]];
-  
+
 type SkipSecondParameterOnly<T extends (...args: any) => any> =
   [field: FirstParameter<Parameters<T>>[0], ...args: Head<Tail<Tail<Parameters<T>>>>, inline?: LastParameter<Parameters<T>>[0]];
 

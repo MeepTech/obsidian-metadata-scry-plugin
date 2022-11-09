@@ -21,7 +21,7 @@ meta.current === meta.Current; //these are aliases
 - [Api](Properties/Metadata/Static/Api.md)
 - [DefaultMetadataSources](Properties/Metadata/Static/DefaultMetadataSources.md)
 - [DataviewApi](Properties/Metadata/Static/DataviewApi.md)
-- [MetaeditApi](Properties/Metadata/Static/MetaeditApi.md)
+- [MetadataEditApi](Properties/Metadata/Static/MetadataEditApi.md)
 ### Instance
 - [Current](Properties/Metadata/Current.md)
 - [Data](Properties/Metadata/Data.md)

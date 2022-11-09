@@ -12,18 +12,19 @@ import {
 } from './api';
 import {
   DataviewInlineRegex,
+  DefaultMarkdownFileExtension,
+  ExtensionFilePathSeperatorCharacter,
   FrontmatterMarkdownSurroundingTag,
   HeadingLevelMarkerCharachter,
   KebabCaseDashesRegex,
   KebabCaseWordSeperatorCharacter,
   MarkdownWikiLinkRegex,
+  OdpMetadataEditLibPluginKey,
   PropertyNameIllegalCharachtersRegex,
   SectionIdPartDelimiter,
   SectionLinkSeperatorCharachter,
-  SpacesRegex,
-  StaticMetaScryPluginContainer as MetaScry
-} from './constants';
-
+  SpacesRegex} from './constants';
+import { InternalStaticMetadataScrierPluginContainer as MetaScry } from "./static";
 
 /**
  * Implementation of Heading
@@ -200,43 +201,10 @@ class NoteSection implements Section {
   get html()
     : Promise<HTMLElement> {
     return (async () => {
-      if (this._html === null) {
-        const md = await this.md;
-        this._html = document.createElement("div");
-
-        /*const renderLeaf: WorkspaceLeaf = app.workspace
-          // @ts-expect-error: Function missing from api
-          .createLeafInTabGroup();
-        const view = new MarkdownView(renderLeaf);*/
- 
-        let localMd = this._md;
-        if (this.root.getMatter()) {
-          localMd = FrontmatterMarkdownSurroundingTag
-            + this.root.getMatter()
-            + `${FrontmatterMarkdownSurroundingTag}\n`
-            + `\n`
-            + localMd;
-        }
- 
-        //view.data = localMd;
-        try {
-          const specialCache: Cache = MetaScry.Instance.api.cache("_zpec:a|");
-          specialCache["CurrentPath"] = this.root.path;
-          await MarkdownRenderer.renderMarkdown(
-            md,
-            this._html,
-            this.root.path,
-            // @ts-expect-error: Null is required here, but clashes with documentation.
-            null//view
-          );
-          specialCache["CurrentPath"] = undefined;
-        
-        } finally {
-          //renderLeaf.detach();
-        }
-      }
-
-      return this._html;
+      return await (app as any).plugins.plugins[OdpMetadataEditLibPluginKey].renderMarkdown(
+      await this.md,
+      this.root.path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension
+    );
     })();
   }
 

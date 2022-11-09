@@ -3,11 +3,13 @@ import {
   MetaScryApi,
   MetaScryPluginSettings,
   MetaScryPluginApi,
-  StaticMetaScryApi
+  StaticMetaScryApi,
+  AppWithPlugins
 } from "./api";
 import {
   AggregateByArrayHelperFunctionKey,
   DefaultSettings,
+  Depencencies,
   GetPropObjectHelperFunctionKey,
   HasPropObjectHelperFunctionKey,
   IndexByArrayHelperFunctionKey,
@@ -15,9 +17,8 @@ import {
   MetadataScrierPluginKey,
   ScryGlobalPropertyCapitalizedKey,
   ScryGlobalPropertyLowercaseKey,
-  SetPropObjectHelperFunctionKey,
-  StaticMetaScryPluginContainer
-} from "./constants";
+  SetPropObjectHelperFunctionKey} from "./constants";
+import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { MetadataScrier } from './meta';
 import { MetadataScrierPluginSettingTab } from './settings';
 import { ReactSectionComponents } from "./components/sections";
@@ -120,7 +121,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   
   private _initApi(): void {
     this._verifyDependencies();
-    StaticMetaScryPluginContainer.Instance = this;
+    InternalStaticMetadataScrierPluginContainer.Instance = this;
     MetadataScrierPlugin._instance = new MetadataScrier(this);
 
     this._initGlobals();
@@ -131,21 +132,19 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
    * if one of the dependenies is missing, disable the plugin and warn the user.
    */
   private _verifyDependencies(): void {
-    // @ts-expect-error: app.plugin is not mapped.
-    if (!app.plugins.plugins.dataview || !app.plugins.plugins.metaedit) {
+    const plugins = Object.keys((app as AppWithPlugins).plugins.plugins);
+    const missingDependencies =
+      Depencencies.filter(dependency => plugins.indexOf(dependency) === -1);
+    
+    if (missingDependencies.length) {
+      (app as AppWithPlugins).plugins.disablePlugin(MetadataScrierPluginKey);
+
       const error =
         `Cannot initialize plugin: ${MetadataScrierPluginKey}. ` +
-        ` Dependency plugins are missing: ` +
-        // @ts-expect-error: app.plugin is not mapped.
-        (!app.plugins.plugins.dataview
-          // @ts-expect-error: app.plugin is not mapped.
-          ? (!app.plugins.plugins.metaedit
-            ? "Dataview and Metaedit"
-            : "Dataview")
-          : "Metaedit") +
-        `. (The ${MetadataScrierPluginKey} plugin has been automatically disabled.)`;
-      // @ts-expect-error: app.plugin is not mapped.
-      app.plugins.disablePlugin(MetadataScrierPluginKey);
+        ` the following dependency plugins are missing: ` +
+        missingDependencies.join(", ") +
+        `. (The ${MetadataScrierPluginKey} plugin has been automatically disabled. Please install the missing plugins and then try to re-enable this one!)`;
+      
       alert(error);
       throw error;
     }

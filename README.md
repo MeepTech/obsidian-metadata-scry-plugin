@@ -13,8 +13,9 @@ Turn your vault into a *frontend, backend, and database* all in one!
 ## Installation
 ### Dependencies
 This plugin requires the following Obsidian plugins to be installed as dependencies prior to being activated:
+  - [Copy As Html](https://github.com/mvdkwast/obsidian-copy-as-html) (**For:** *Converting to html and plain text from markdown source with imbeded blocks included.*)
   - [Dataview](https://github.com/blacksmithgu/obsidian-dataview) (**For:** *Speed and Inline Support*)
-  - [MetaEdit](https://github.com/chhoumann/MetaEdit)  (**For:** *Basic Api for Updating Frontmatter*)
+  - [ODP Metadata Edit Library](https://github.com/OPD-libs/OPD-libs/tree/main/libs/OPD-metadata-lib)  (**For:** *Basic Api for Updating Frontmatter and Dataview Inline Values*)
 
 ### Plugin Installation
 After the above dependencies have been installed, you can install this plugin via the Obsidian Community Plugins menu, or manually:
