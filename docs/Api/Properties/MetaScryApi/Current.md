@@ -1,8 +1,8 @@
-# [MetaScryApi](../../Classes/MetaScryApi.md).Current
+# [MetaScryApi](../../Types/MetaScryApi.md).Current
 **property, instance, class-based**
-Property containing an object of the [CurrentMetaScryApi](../../Classes/CurrentMetaScryApi.md) class which is used to fetch info about the current note's metadata.
+Property containing an object of the [CurrentMetaScryApi](../../Types/CurrentMetaScryApi.md) class which is used to fetch info about the current note's metadata.
 ## Global Access
-Accessable via: "[meta](../../Globals/meta.md).[current](Current.md)"
+Accessable via: "[meta](../Global/meta.md).[current](Current.md)"
 ## Properties
 **NOTE**: The properties are accessable in caps or lower camel case so you can adapt to your desired style.
 **NOTE**: The properties of this object are mostly just aliases for the `Metadata` api class's functions with default paramters.

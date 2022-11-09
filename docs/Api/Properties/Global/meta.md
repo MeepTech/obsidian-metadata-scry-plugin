@@ -1,6 +1,6 @@
 # global.meta
 **property, global, class-based**
-A global instance of an object of the [MetaScryApi](../Classes/MetaScryApi.md) class. Gives access to the Api from pretty much anywhere
+A global instance of an object of the [MetaScryApi](../../Types/MetaScryApi.md) class. Gives access to the Api from pretty much anywhere
 
 **NOTE**: The names of this  global variable can be changed in the settings.
 # Examples

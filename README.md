@@ -26,7 +26,7 @@ After the above dependencies have been installed, you can install this plugin vi
 To manually install this plugin, copy the `manifest.json` and `main.js` from the release you want and add them to a new plugin folder named `meta-scry` within your `.obsidian` folder of your Vault.
 
 ## Api
-The api is mostly built off of the class [[MetadataScrier]] (which extends the [[MetaScryApi]] interface) in `meta.ts`/`main.js`.
+The api is mostly built off of the class MetadataScrier in `meta.ts`/`main.js` (which extends the [MetaScryApi](/docs/Api/Types//MetaScryApi.md) interface) .
 This api is designed to help you quickly edit and access metadata and retrieve whole sections of any file easily.
 **For a full list of all available properties and methods, see the [Full Documentation](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/tree/master/docs)**
 
@@ -34,7 +34,7 @@ This api is designed to help you quickly edit and access metadata and retrieve w
 You can access the api from anywhere you use js in obsidian with a few handy variables:
 
 ### Access the MetaScryApi
-You can access the full api via the global variable: [[Globals/meta|meta]], via the standards js app api path, or via one of the [[Scry and scry|Scry]] variables:
+You can access the full api via the global variable: [meta](/docs/Api/Properties/Global/meta.md), via the standards js app api path, or via one of the [[Scry and scry|Scry]] variables:
 ```
 //example frontmatter:
 ---
@@ -113,7 +113,7 @@ const {
 ```
 
 #### Cache
-You can also access the current file's cache via the global variable `cache`:
+You can also access the current file's cache via the global variable [cache](/docs/Api/Properties/Global/cache.md):
 ```
 // set:
 cache["name"] = "tim";
@@ -137,17 +137,17 @@ const {
   }
 } = meta;
 ```
-**NOTE**: The names of the three global variables: (`path`, `cache`, and `meta`) can be changed in the settings. The name of `scry` cannot, but the variable can be disabled.
+**NOTE**: The keys of the three global variables: [path](/docs/Api/Functions/Global/path.md), [cache](/docs/Api/Properties/Global/cache.md), and [meta](/docs/Api/Properties/Global/meta.md); can be changed in the settings. The names of [Scry and scry](/docs/Api/Properties/Global/Scry%20and%20scry.md) cannot, but their variable declarations on the global object can be disabled in the settings.
 
 ### Metadata Fetching
 The api provides several ways to fetch several different kinds of metadata.
 This api packages the metadata update functions from [Dataview](https://github.com/blacksmithgu/obsidian-dataview) and [Obsidian](https://obsidian.md)'s own api into an easy to use api with increased flexability.
 
-The current file can be accessed via the [current](docs/Api/Properties/Current.md) property on the [meta](docs/Api//Globals/Metadata.md) global variable.
+The current file can be accessed via the [current](docs/Api/Properties/Current.md) property on the [meta](docs/Api//Globals/meta.md) global variable.
 The [sources](docs/Metadata Sources.md) of metadata can be specified via different functions to fetch data from just the frontmatter, or the frontmatter plus dataview, or the frontmatter, dataview, cache, and other file info sources:
-- [get](docs/Api/Functions/MetaScryApi/get.md)
-- [omfc](docs/Api/Functions/MetaScryApi/omfc.md)
-- [dv](docs/Api/Functions/MetaScryApi/dv.md)
+- [get](docs/Api/Functions/MetaScryApi/get.md): General purpose fetcher for all types of [Metadata](/docs/Api/Types/Metadata.md).
+- [omfc](docs/Api/Functions/MetaScryApi/omfc.md): Fetches the []() object from the built-in Obsidian Metadata File Cache.
+- [dataviewFrontmatter](docs/Api/Functions/MetaScryApi/dv.md)
 - [frontmatter](docs/Api/Functions/MetaScryApi/frontmatter.md)
 - [cache](docs/Api/Functions/MetaScryApi/cache.md)
 - [prototypes](docs/Api/Functions/MetaScryApi/prototypes.md)

@@ -1,9 +1,10 @@
+// TODO: Export this file to the npm importable api when that's made.
 import {
   MetaScryPluginSettings,
   SplayKebabCasePropertiesOption
 } from "./api";
 
-export const DefaultSettings: MetaScryPluginSettings = {
+export const DefaultPluginSettings: MetaScryPluginSettings = {
   globalCacheNames: 'cache',
   globalMetaScryExtraNames: 'meta',
   globalPathFunctionNames: "path, GetPath",
@@ -23,7 +24,7 @@ export const OdpMetadataEditLibPluginKey = "opd-settings-plugin";
 export const CopyToHtmlPluginKey = "copy-document-as-html";
 export const ReactComponentsPluginKey = "obsidian-react-components";
 
-export const Depencencies = [
+export const MetascryPluginDepencencies = [
   OdpMetadataEditLibPluginKey,
   CopyToHtmlPluginKey,
   DataviewPluginKey

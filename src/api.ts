@@ -1,3 +1,4 @@
+// TODO: Export this file to the npm importable api when that's made.
 import {
   App,
   CachedMetadata,
@@ -22,7 +23,13 @@ import {
   updateOrInsertFieldInTFile,
   deleteFieldInTFile
 } from "@opd-libs/opd-metadata-lib/lib/API"
-import { CopyToHtmlPluginKey, DataviewPluginKey, MetadataScrierPluginKey, OdpMetadataEditLibPluginKey, ReactComponentsPluginKey } from "./constants";
+import {
+  CopyToHtmlPluginKey,
+  DataviewPluginKey,
+  MetadataScrierPluginKey,
+  OdpMetadataEditLibPluginKey,
+  ReactComponentsPluginKey
+} from "./constants";
 
 //#region Plugin
 

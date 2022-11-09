@@ -7,7 +7,7 @@ import {
   MetaScryPluginApi,
   SplayKebabCasePropertiesOption
 } from './api';
-import { DefaultSettings } from './constants';
+import { DefaultPluginSettings } from './constants';
 
 /**
  * Settings for the plugin
@@ -31,7 +31,7 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setName('MetaScryApi Custom Global Variable Name')
       .setDesc('The variable name to use for the MetaScryApi in a global scope.  If left empty; the variable will not be registered. (Mirror for "scry" global variable, just with a custom name if you want)')
       .addText(text => text
-        .setPlaceholder(DefaultSettings.globalMetaScryExtraNames)
+        .setPlaceholder(DefaultPluginSettings.globalMetaScryExtraNames)
         .setValue(this.plugin.settings.globalMetaScryExtraNames)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
@@ -44,7 +44,7 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setName('Global Cache Variable Name')
       .setDesc('The variable name to use for the cache global scope variable registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
-        .setPlaceholder(DefaultSettings.globalCacheNames)
+        .setPlaceholder(DefaultPluginSettings.globalCacheNames)
         .setValue(this.plugin.settings.globalCacheNames)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
@@ -58,7 +58,7 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setDesc('The name to use for the path global helper function registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
         .setPlaceholder('path')
-        .setValue(DefaultSettings.globalPathFunctionNames)
+        .setValue(DefaultPluginSettings.globalPathFunctionNames)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
             ...this.plugin.settings,
@@ -133,7 +133,7 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setName('Prototypes File Path')
       .setDesc('The path to prototype data storage')
       .addText(text => text
-        .setPlaceholder(DefaultSettings.prototypesPath)
+        .setPlaceholder(DefaultPluginSettings.prototypesPath)
         .setValue(this.plugin.settings.prototypesPath)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
@@ -146,7 +146,7 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setName('Data Storage Values Path')
       .setDesc('The path to the value data storage')
       .addText(text => text
-        .setPlaceholder(DefaultSettings.valuesPath)
+        .setPlaceholder(DefaultPluginSettings.valuesPath)
         .setValue(this.plugin.settings.valuesPath)
         .onChange(async (value) => {
           await this.plugin.updateSettings({

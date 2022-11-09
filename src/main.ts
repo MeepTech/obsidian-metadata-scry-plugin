@@ -8,8 +8,8 @@ import {
 } from "./api";
 import {
   AggregateByArrayHelperFunctionKey,
-  DefaultSettings,
-  Depencencies,
+  DefaultPluginSettings,
+  MetascryPluginDepencencies,
   GetPropObjectHelperFunctionKey,
   HasPropObjectHelperFunctionKey,
   IndexByArrayHelperFunctionKey,
@@ -80,7 +80,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   }
   
   async loadSettings(): Promise<void> {
-    this._settings = Object.assign({}, DefaultSettings, await this.loadData());
+    this._settings = Object.assign({}, DefaultPluginSettings, await this.loadData());
   }
   
   async updateSettings(newSettings: MetaScryPluginSettings): Promise<void> {
@@ -134,7 +134,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _verifyDependencies(): void {
     const plugins = Object.keys((app as AppWithPlugins).plugins.plugins);
     const missingDependencies =
-      Depencencies.filter(dependency => plugins.indexOf(dependency) === -1);
+      MetascryPluginDepencencies.filter(dependency => plugins.indexOf(dependency) === -1);
     
     if (missingDependencies.length) {
       (app as AppWithPlugins).plugins.disablePlugin(MetadataScrierPluginKey);

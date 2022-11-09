@@ -5,10 +5,10 @@ The api is an object that can be used to retreive, edit, delete, and create fron
 **NOTE**: Most of the properties of this class are accessable in caps or lower camel case so you can adapt to your desired style. This also can help with debugging.
 ## Global Access and Objects
 There are two root global objects accessable in all contexts.
-- The  [meta](Globals/meta.md) Api object. (Defaults to `meta`)
+- The  [meta](Properties/Global/meta.md) Api object. (Defaults to `meta`)
 - The Current Note's [Cache](Functions/MetaScryApi/Metadata%20Fetchers/cache.md) object. (Defaults to `cache`)
 ## Properties
-**NOTE**: These properties of the [Metadata Global Object](Globals/meta.md) are all read-only (get).
+**NOTE**: These properties of the [Metadata Global Object](Properties/Global/meta.md) are all read-only (get).
 **NOTE**: The non-static properties are all accessable in caps or lower camel case so you can adapt to your desired style.
 **Ex:**
 ```
@@ -18,13 +18,13 @@ meta.current === meta.Current; //these are aliases
 - Instance methods will always be lower camel case
 - Static properties and methods will always in caps camel case.
 ### Static
-- [Api](Properties/Metadata/Static/Api.md)
-- [DefaultMetadataSources](Properties/Metadata/Static/DefaultMetadataSources.md)
-- [DataviewApi](Properties/Metadata/Static/DataviewApi.md)
-- [MetadataEditApi](Properties/Metadata/Static/MetadataEditApi.md)
+- [Api](Properties/MetaScryApi/Static/Api.md)
+- [DefaultMetadataSources](Properties/MetaScryApi/Static/DefaultMetadataSources.md)
+- [DataviewApi](Properties/MetaScryApi/Static/DataviewApi.md)
+- [MetadataEditApi](Properties/MetaScryApi/Static/MetadataEditApi.md)
 ### Instance
-- [Current](Properties/Metadata/Current.md)
-- [Data](Properties/Metadata/Data.md)
+- [Current](Properties/MetaScryApi/Current.md)
+- [Data](Properties/MetaScryApi/Data.md)
 ## Methods
 **NOTE**: Instance methods will always be lower camel case and Static properties and methods will always in caps camel case.
 - [set](Functions/MetaScryApi/Metadata%20Updaters/set.md) 
