@@ -76,6 +76,29 @@ export type MetaScryPluginApi = {
    * Call after updating the settings object to re-load the api
    */
   updateSettings(newSettings: MetaScryPluginSettings): void;
+
+  /**
+   * Get a global value if it exists.
+   * 
+   * @param {string} key 
+   * 
+   * @alias {@link MetaScryApi.globals}
+   * 
+   * @see {@link tryToSetExtraGlobal}
+   */
+  tryToGetExtraGlobal(key: string): any | undefined;
+
+  /**
+   * Set a global value (or remove it)
+   * 
+   * @param {string} key 
+   * @param {any} setValue (optional) the value to set. Will remove the value if nothing is passed in.
+   * 
+   * @alias {@link MetaScryApi.globals}
+   * 
+   * @see {@link tryToGetExtraGlobal}
+   */
+  tryToSetExtraGlobal(key: string, setValue?: any): boolean;
 } & Plugin;
 
 /**
@@ -762,7 +785,7 @@ export interface MetaScryApi {
   temp(source?: FileSource): Cache | Cache[];
   
    /**
-    * Get or Set a global value across all obsidian.
+    * Get or Set a global values across all obsidian.
     * WARNING DONT USE THIS IF YOU DONT KNOW WHAT YOURE DOING!
     *
     * @param {FileSource} key The key of the global to fetch or set.

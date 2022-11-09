@@ -285,6 +285,23 @@ export class MetadataScrier implements MetaScryApi {
     this.vault(file) as TFile;
   folder = (file: FileSource = null): TFolder| null =>
     this.vault(file) as TFolder;
+  
+  async markdown(source?: FileSource): Promise<string> {
+    
+  }
+  md = (source?: FileSource): Promise<string> =>
+    this.markdown(source);
+  
+  
+  async html(source?: FileSource): Promise<HTMLElement> {
+  
+  }
+  
+  async text(source?: FileSource): Promise<string> {
+    
+  }
+  txt = (source?: FileSource): Promise<string> =>
+    this.text(source);
 
   omfc(file: FileSource = null): CachedFileMetadata | CachedFileMetadata[] | null {
     const fileObject = this.vault(file);
@@ -379,6 +396,21 @@ export class MetadataScrier implements MetaScryApi {
   }
   temp = (source: FileSource = null): Cache | Cache[] =>
     this.cache(source);
+  
+  
+  globals(key: string | string[], setToValue?: any): any | any[] | undefined {
+    if (typeof key === "string") {
+      if (arguments.length > 1) {
+        return this.plugin.tryToSetExtraGlobal(key, setToValue);
+      } else return this.plugin.tryToGetExtraGlobal(key);
+    } else {
+      if (arguments.length > 1) {
+        return key.map(k => this.globals(key, setToValue));
+      } else {
+        return key.map(k => this.globals(key));
+      }
+    }
+  }
 
   prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null {
     return this.frontmatter(MetadataScrier.BuildPrototypeFileFullPath(prototypePath));
