@@ -188,7 +188,7 @@
             }
           }
         ],
-        "currentTab": 14
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -255,7 +255,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Installation.md",
+                "file": "Api/Globals/meta.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -272,7 +272,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Installation.md",
+                "file": "Api/Globals/meta.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -295,7 +295,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Installation.md"
+                "file": "Api/Globals/meta.md"
               }
             }
           }
@@ -306,10 +306,10 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "c30403006e62dc33",
+  "active": "300130f6b93a41bf",
   "lastOpenFiles": [
-    "README.md",
     "Installation.md",
+    "README.md",
     "Api/Functions/MetaScryApi/Metadata Updaters/clear.md",
     "Api/Functions/MetaScryApi/Metadata Updaters/patch.md",
     "Api/Functions/MetaScryApi/Metadata Updaters/set.md",

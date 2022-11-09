@@ -3,12 +3,14 @@ This is a plugin for [Obsidian](https://obsidian.md) that adds JS coding tools r
 Turn your vault into a *frontend, backend, and database* all in one!
 
 ## Features
- - Create, Edit, Delete, Update, and Retreive the data of YAML/Frontmatter, Inline Dataview(WIP), and other Metadata properties of your notes quickly and easily from any executable code-block, templater snippet, or custom js class file within your vault.
- - The ability to quickly access markdown, plain-text, and rendered html under specific headings in your files, with support for Dataview(WIP) and JSX(WIP)
+ - Create, Edit, Delete, Update, and Retreive the data of YAML/Frontmatter, Inline [Dataview](https://github.com/blacksmithgu/obsidian-dataview)[editing/updating::WIP], and other Metadata properties of your notes quickly and easily from any executable code-block, templater snippet, or custom js class file within your vault.
+ - The ability to quickly access markdown, plain-text, and rendered html under specific headings in your files, with support for embeddings and [Dataview](https://github.com/blacksmithgu/obsidian-dataview) and JSX code blocks/inlines.
  - The ability to store data temporatily between code-blocks in the same note using a cache.
  - The ability to store data perminantly and access it between notes using special value data storage files right in your vault.
  - Utilities to easily access and set deeply nested YAML/JSON/jsObject properties.
  - Utilities to help you access the current and nearby file's datas quicker.
+ - The ability to quickly make and revoke your own globals (if you know what you're doing)
+ - Syntax and utilities that prioritize both readability and speed. Most functions and properties have multiple aliases to fit different note and code styles, and front-matter data keys are splayed across kebab-case to camelCase and lowercase keys.
 
 ## Installation
 ### Dependencies
@@ -24,15 +26,15 @@ After the above dependencies have been installed, you can install this plugin vi
 To manually install this plugin, copy the `manifest.json` and `main.js` from the release you want and add them to a new plugin folder named `meta-scry` within your `.obsidian` folder of your Vault.
 
 ## Api
-The api is built off of the class `MetadataScrier` in `meta.ts`/`main.js`.
+The api is mostly built off of the class [[MetadataScrier]] (which extends the [[MetaScryApi]] interface) in `meta.ts`/`main.js`.
 This api is designed to help you quickly edit and access metadata and retrieve whole sections of any file easily.
 **For a full list of all available properties and methods, see the [Full Documentation](https://github.com/Meep-Tech/obsidian-metadata-api-plugin/tree/master/docs)**
 
 ### Global API Access
-You can access the api from anywhere you use js in obsidian with a few handy variables.
+You can access the api from anywhere you use js in obsidian with a few handy variables:
 
-### MetaScryApi
-You can access the full api via the global variable: `meta`, via the standards js app api path, or via one of the `scry` variable:
+### Access the MetaScryApi
+You can access the full api via the global variable: [[Globals/meta|meta]], via the standards js app api path, or via one of the [[Scry and scry|Scry]] variables:
 ```
 //example frontmatter:
 ---
@@ -65,10 +67,38 @@ const {
 const {
   Data: metadata,
   Current: {
-    Matter: frontmatter,
-    Cache: cache
+    Matter: {
+      name,
+      count
+    }
+    Cache
   }
-} = app.plugins.plugins["metadata-api"].api;
+} = scry;
+```
+
+```
+//   or:
+my.data.frontMatterValue;
+```
+
+```
+//   or:
+Note.FrontMatter.frontMatterKey;
+```
+
+```
+//   or:
+const {
+  Data: metadata,
+  Current: {
+    Matter: frontmatter,
+    Cache: cache,
+    Sections: {
+      FirstHeading,
+      AnotherHeading
+    }
+  }
+} = app.plugins.plugins["meta-scry"].api;
 ```
 
 ```
@@ -79,18 +109,7 @@ const {
     Matter: frontmatter,
     Cache: cache
   }
-} = Metadata.Api;
-```
-
-``` 
-//   or:
-const {
-  Data: metadata,
-  Current: {
-    Matter: frontmatter,
-    Cache: cache
-  }
-} = MetadataPluginApi.Instance;
+} = Scry.Api;
 ```
 
 #### Cache
