@@ -336,8 +336,6 @@ export class MetadataScrier implements MetaScryApi {
       return this._kebabPropSplayer(result, [FileMetadataPropertyLowercaseKey, FileMetadataPropertyUppercaseKey]) as DvData;
     }
   }
-  dvMatter = (source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
-    this.dv(source, useSourceQuery);
   dataviewFrontmatter = (source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
     this.dv(source, useSourceQuery);
 

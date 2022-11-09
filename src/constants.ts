@@ -39,9 +39,10 @@ import {
 }
 
 export const DefaultSettings: MetaScryPluginSettings = {
-  globalCacheName: 'cache',
-  globalMetaScryExtraName: 'meta',
-  globalPathName: "path",
+  globalCacheNames: 'cache',
+  globalMetaScryExtraNames: 'meta',
+  globalPathFunctionNames: "path, GetPath",
+  globalCurrentFilePropertyNames: "my, Note, ThisFile",
   defineScryGlobalVariables: true,
   defineObjectPropertyHelperFunctions: true,
   defineArrayHelperFunctions: true,

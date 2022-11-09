@@ -58,11 +58,11 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .setDesc('The name to use for the path global helper function registered by this plugin. If left empty; the variable will not be registered.')
       .addText(text => text
         .setPlaceholder('path')
-        .setValue(DefaultSettings.globalPathName)
+        .setValue(DefaultSettings.globalPathFunctionName)
         .onChange(async (value) => {
           await this.plugin.updateSettings({
             ...this.plugin.settings,
-            globalPathName: value
+            globalPathFunctionName: value
           });
         }));
     

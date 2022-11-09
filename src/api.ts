@@ -69,19 +69,24 @@ export type MetaScryPluginApi = {
  */
 export interface MetaScryPluginSettings {
   /**
-   * The global property key for the 'cache' variable 
+  * A comma seperated list of the global property keys for the global 'cache' variable 
    */
-  globalCacheName: string;
+  globalCacheNames: string;
 
   /**
-   * The global property key for the 'meta' variable 
+   * A comma seperated list of the global property keys for the global 'meta' variable 
    */
-  globalMetaScryExtraName: string;
+  globalMetaScryExtraNames: string;
 
   /**
-   * The global property key for the 'path' function 
+   * A comma seperated list of he global property keys for the global 'path' function 
    */
-  globalPathName: string;
+  globalPathFunctionNames: string;
+
+  /**
+   * A comma seperated list of the global property keys for the global 'my'/CurrentFileMetaScryApi variable 
+   */
+  globalCurrentFilePropertyNames: string;
 
   /**
    * Option to enable or disable the scry and Scry global api variables
@@ -145,11 +150,10 @@ export type Metadata = {
    * @alias {@link Metadata.File}
    * 
    * @see {@link MetaScryApi.get}
-   * @see {@link MetaScryApi.dv}
    * @see {@link MetaScryApi.file}
-   * @see {@link MetaScryApi.vault}
+   * @see {@link MetaScryApi.dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.note}
-   * @see {@link CurrentNoteMetaScryApi.Note}
+   * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
   file?: FileData;
 
@@ -161,11 +165,10 @@ export type Metadata = {
    * @alias {@link Metadata.file}
    * 
    * @see {@link MetaScryApi.get}
-   * @see {@link MetaScryApi.dv}
    * @see {@link MetaScryApi.file}
-   * @see {@link MetaScryApi.vault}
+   * @see {@link MetaScryApi.dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.note}
-   * @see {@link CurrentNoteMetaScryApi.Note}
+   * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
   File?: FileData;
 
@@ -178,7 +181,6 @@ export type Metadata = {
    * @see {@link MetaScryApi.get}
    * @see {@link MetaScryApi.cache}
    * @see {@link CurrentNoteMetaScryApi.cache}
-   * @see {@link CurrentNoteMetaScryApi.Cache}
    */
   cache?: Cache;
 
@@ -191,7 +193,6 @@ export type Metadata = {
    * @see {@link MetaScryApi.get}
    * @see {@link MetaScryApi.cache}
    * @see {@link CurrentNoteMetaScryApi.cache}
-   * @see {@link CurrentNoteMetaScryApi.Cache}
    */
   Cache?: Cache;
 } & Frontmatter;
@@ -345,8 +346,6 @@ export interface MetaScryApi {
    * 
    * @alias {@link data}
    * @alias {@link CurrentNoteMetaScryApi.data}
-   * @alias {@link CurrentNoteMetaScryApi.data}
-   * @alias {@link CurrentNoteMetaScryApi.Data}
    * @alias {@link CurrentNoteMetaScryApi.Data}
    * 
    * @see {@link get}
@@ -358,8 +357,6 @@ export interface MetaScryApi {
    * 
    * @alias {@link Data}
    * @alias {@link CurrentNoteMetaScryApi.data}
-   * @alias {@link CurrentNoteMetaScryApi.data}
-   * @alias {@link CurrentNoteMetaScryApi.Data}
    * @alias {@link CurrentNoteMetaScryApi.Data}
    * 
    * @see {@link get}
@@ -398,7 +395,6 @@ export interface MetaScryApi {
    * @alias {@link file}
    * 
    * @see {@link CurrentNoteMetaScryApi.note}
-   * @see {@link CurrentNoteMetaScryApi.Note}
    */
   vault(source: FileSource): TFile | TFolder | TAbstractFile | null;
 
@@ -413,7 +409,6 @@ export interface MetaScryApi {
    * 
    * @see {@link folder}
    * @see {@link CurrentNoteMetaScryApi.note}
-   * @see {@link CurrentNoteMetaScryApi.Note}
    */
   file(source: FileSource): TFile | null;
 
@@ -428,7 +423,6 @@ export interface MetaScryApi {
    * 
    * @see {@link file}
    * @see {@link CurrentNoteMetaScryApi.note}
-   * @see {@link CurrentNoteMetaScryApi.Note}
    */
   folder(source: FileSource): TFolder | null;
   
@@ -455,6 +449,79 @@ export interface MetaScryApi {
   omfc(source?: FileSource): CachedFileMetadata | CachedFileMetadata[] | null;
 
   /**
+   * Used to fetch the markdown text of the entire file or all provided files.
+   * 
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * 
+   * @alias {@link markdown}
+   * 
+   * @see {@link html}
+   * @see {@link text}
+   * @see {@link sections}
+   * @see {@link CurrentNoteMetaScryApi.markdown}
+   * @see {@link Section.markdown}
+   */
+  md(source?: FileSource): Promise<string>;
+
+  /**
+   * Used to fetch the markdown text of the entire file or all provided files.
+   * 
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * 
+   * @alias {@link md}
+   * 
+   * @see {@link html}
+   * @see {@link text}
+   * @see {@link sections}
+   * @see {@link CurrentNoteMetaScryApi.markdown}
+   * @see {@link Section.markdown}
+   */
+  markdown(source?: FileSource) : Promise<string>;
+
+  /**
+   * Used to fetch the rendered html elements resulting from the markdown of the entire file (or all provided files).
+   * 
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * 
+   * @see {@link markdown}
+   * @see {@link text}
+   * @see {@link sections}
+   * @see {@link CurrentNoteMetaScryApi.html}
+   * @see {@link Section.html}
+   */
+  html(source?: FileSource) : Promise<HTMLElement>;
+  
+  /**
+   * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
+   * 
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * 
+   * @alias {@link text}
+   * 
+   * @see {@link markdown}
+   * @see {@link html}
+   * @see {@link sections}
+   * @see {@link CurrentNoteMetaScryApi.text}
+   * @see {@link Section.text}
+   */
+  txt(source?: FileSource) : Promise<string>;
+
+  /**
+   * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
+   * 
+   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * 
+   * @alias {@link txt}
+   * 
+   * @see {@link markdown}
+   * @see {@link html}
+   * @see {@link sections}
+   * @see {@link CurrentNoteMetaScryApi.text}
+   * @see {@link Section.text}
+   */
+  text(source?: FileSource) : Promise<string>;
+
+  /**
    * Get just the frontmatter for the given file. 
    *
    * @param {FileSource} source The file/folder object(with a path property) or the full path string
@@ -464,12 +531,8 @@ export interface MetaScryApi {
    * @alias {@link fm}
    * @alias {@link matter}
    * 
-   * @see {@link CurrentNoteMetaScryApi.fm}
-   * @see {@link CurrentNoteMetaScryApi.matter}
-   * @see {@link CurrentNoteMetaScryApi.frontmatter}
-   * @see {@link CurrentNoteMetaScryApi.Matter}
-   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
    * @see {@link get}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
   frontmatter(source?: FileSource): Frontmatter | Frontmatter[] | null;
 
@@ -483,12 +546,8 @@ export interface MetaScryApi {
    * @alias {@link frontmatter}
    * @alias {@link matter}
    * 
-   * @see {@link CurrentNoteMetaScryApi.fm}
-   * @see {@link CurrentNoteMetaScryApi.matter}
-   * @see {@link CurrentNoteMetaScryApi.frontmatter}
-   * @see {@link CurrentNoteMetaScryApi.Matter}
-   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
    * @see {@link get}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
   fm(source?: FileSource): Frontmatter | Frontmatter[] | null;
 
@@ -502,12 +561,8 @@ export interface MetaScryApi {
    * @alias {@link fm}
    * @alias {@link frontmatter}
    * 
-   * @see {@link CurrentNoteMetaScryApi.fm}
-   * @see {@link CurrentNoteMetaScryApi.matter}
-   * @see {@link CurrentNoteMetaScryApi.frontmatter}
-   * @see {@link CurrentNoteMetaScryApi.Matter}
-   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
    * @see {@link get}
+   * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
   matter(source?: FileSource): Frontmatter | Frontmatter[] | null;
 
@@ -518,9 +573,11 @@ export interface MetaScryApi {
    *
    * @returns Just the sections under their headings for the file.
    * 
-   * @see {@link CurrentNoteMetaScryApi.sections}
-   * @see {@link CurrentNoteMetaScryApi.Sections}
    * @see {@link get}
+   * @see {@link html}
+   * @see {@link markdown}
+   * @see {@link text}
+   * @see {@link CurrentNoteMetaScryApi.sections}
    */
   sections(source?: FileSource): Sections | Sections[] | null;
 
@@ -532,12 +589,10 @@ export interface MetaScryApi {
    *
    * @returns Just the dataview(+frontmatter) values for the file.
    * 
-   * @alias {@link dvMatter}
    * @alias {@link dataviewFrontmatter}
    * 
    * @see {@link get}
-   * @see {@link CurrentNoteMetaScryApi.dv}
-   * @see {@link CurrentNoteMetaScryApi.Dv}
+   * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
   dv(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
 
@@ -550,28 +605,9 @@ export interface MetaScryApi {
    * @returns Just the dataview(+frontmatter) values for the file.
    * 
    * @alias {@link dv}
-   * @alias {@link dataviewFrontmatter}
    * 
    * @see {@link get}
-   * @see {@link CurrentNoteMetaScryApi.dv}
-   * @see {@link CurrentNoteMetaScryApi.Dv}
-   */
-  dvMatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
-
-  /**
-   * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
-   *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
-   * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
-   *
-   * @returns Just the dataview(+frontmatter) values for the file.
-   * 
-   * @alias {@link dvMatter}
-   * @alias {@link dv}
-   * 
-   * @see {@link get}
-   * @see {@link CurrentNoteMetaScryApi.dv}
-   * @see {@link CurrentNoteMetaScryApi.Dv}
+   * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter
    */
   dataviewFrontmatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
 
@@ -634,30 +670,15 @@ export interface MetaScryApi {
    * @alias {@link from}
    * 
    * @see {@link data}
-   * @see {@link Data}
    * @see {@link CurrentNoteMetaScryApi.data}
-   * @see {@link CurrentNoteMetaScryApi.data}
-   * @see {@link CurrentNoteMetaScryApi.Data}
-   * @see {@link CurrentNoteMetaScryApi.Data}
-   * @see {@link fm}
-   * @see {@link matter}
    * @see {@link frontmatter}
-   * @see {@link CurrentNoteMetaScryApi.fm}
-   * @see {@link CurrentNoteMetaScryApi.matter}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
-   * @see {@link CurrentNoteMetaScryApi.Matter}
-   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
    * @see {@link sections}
    * @see {@link CurrentNoteMetaScryApi.sections}
-   * @see {@link CurrentNoteMetaScryApi.Sections}
    * @see {@link cache}
    * @see {@link CurrentNoteMetaScryApi.cache}
-   * @see {@link CurrentNoteMetaScryApi.Cache}
-   * @see {@link dv}
    * @see {@link dataviewFrontmatter}
-   * @see {@link dvMatter}
-   * @see {@link CurrentNoteMetaScryApi.Dv}
-   * @see {@link CurrentNoteMetaScryApi.dv}
+   * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
   get(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
   
@@ -672,30 +693,15 @@ export interface MetaScryApi {
    * @alias {@link get}
    * 
    * @see {@link data}
-   * @see {@link Data}
    * @see {@link CurrentNoteMetaScryApi.data}
-   * @see {@link CurrentNoteMetaScryApi.data}
-   * @see {@link CurrentNoteMetaScryApi.Data}
-   * @see {@link CurrentNoteMetaScryApi.Data}
-   * @see {@link fm}
-   * @see {@link matter}
    * @see {@link frontmatter}
-   * @see {@link CurrentNoteMetaScryApi.fm}
-   * @see {@link CurrentNoteMetaScryApi.matter}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
-   * @see {@link CurrentNoteMetaScryApi.Matter}
-   * @see {@link CurrentNoteMetaScryApi.Frontmatter}
    * @see {@link sections}
    * @see {@link CurrentNoteMetaScryApi.sections}
-   * @see {@link CurrentNoteMetaScryApi.Sections}
    * @see {@link cache}
    * @see {@link CurrentNoteMetaScryApi.cache}
-   * @see {@link CurrentNoteMetaScryApi.Cache}
-   * @see {@link dv}
    * @see {@link dataviewFrontmatter}
-   * @see {@link dvMatter}
-   * @see {@link CurrentNoteMetaScryApi.Dv}
-   * @see {@link CurrentNoteMetaScryApi.dv}
+   * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
    from(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
   

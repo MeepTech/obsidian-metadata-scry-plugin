@@ -7,7 +7,8 @@ import {
   Sections,
   Section,
   SplayKebabCasePropertiesOption,
-  Heading
+  Heading,
+  Cache
 } from './api';
 import {
   DataviewInlineRegex,
@@ -20,7 +21,7 @@ import {
   SectionIdPartDelimiter,
   SectionLinkSeperatorCharachter,
   SpacesRegex,
-  StaticMetaScryPluginContainer
+  StaticMetaScryPluginContainer as MetaScry
 } from './constants';
 
 
@@ -219,8 +220,8 @@ class NoteSection implements Section {
  
         //view.data = localMd;
         try {
-          //const specialCache = PluginContainer.Instance.api.cache("_zpec:a|") as Cache;
-          //specialCache["CurrentPath"] = this.root.path;
+          const specialCache: Cache = MetaScry.Instance.api.cache("_zpec:a|");
+          specialCache["CurrentPath"] = this.root.path;
           await MarkdownRenderer.renderMarkdown(
             md,
             this._html,
@@ -228,7 +229,7 @@ class NoteSection implements Section {
             // @ts-expect-error: Null is required here, but clashes with documentation.
             null//view
           );
-          //specialCache["CurrentPath"] = undefined;
+          specialCache["CurrentPath"] = undefined;
         
         } finally {
           //renderLeaf.detach();
@@ -420,7 +421,7 @@ class NoteSection implements Section {
 
     keys.push(cleaned);
 
-    if (StaticMetaScryPluginContainer.Instance.settings.splayFrontmatterWithoutDataview) {
+    if (MetaScry.Instance.settings.splayFrontmatterWithoutDataview) {
       const camel = cleaned.replace(SpacesRegex, "");
       if (!camel) {
         return keys.unique();
@@ -430,8 +431,8 @@ class NoteSection implements Section {
       const lowerCamel = camel[0].toLowerCase() + camel.substring(1);
 
       keys.push(lower, camel, lowerCamel);
-      if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties && cleaned.contains(KebabCaseWordSeperatorCharacter)) {
-        if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
+      if (MetaScry.Instance.settings.splayKebabCaseProperties && cleaned.contains(KebabCaseWordSeperatorCharacter)) {
+        if (MetaScry.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
           // lower
           keys.push(lower.replace(KebabCaseDashesRegex, ""));
           // lower camel
@@ -444,10 +445,10 @@ class NoteSection implements Section {
             .split(KebabCaseWordSeperatorCharacter)
             .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
-        } else if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
+        } else if (MetaScry.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
           // lower
           keys.push(lower.replace(KebabCaseDashesRegex, ""));
-        } else if (StaticMetaScryPluginContainer.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
+        } else if (MetaScry.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
           // lower camel
           keys.push(lowerCamel
             .split(KebabCaseWordSeperatorCharacter)
@@ -649,7 +650,7 @@ export class NoteSections extends Object implements Sections {
     if (this._md !== null) {
       return Promise.resolve(this._md);
     } else {
-      const file = StaticMetaScryPluginContainer.Instance.api.vault(this.path) as TFile;
+      const file = MetaScry.Instance.api.vault(this.path) as TFile;
       this._md = await app.vault.cachedRead(file);
       const frontMarker = FrontmatterMarkdownSurroundingTag;
       if (this._md.startsWith(frontMarker)) {

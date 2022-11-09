@@ -29,13 +29,14 @@ import { ReactMarkdownComponents } from './components/markdown';
 export default class MetadataScrierPlugin extends Plugin implements MetaScryPluginApi {
   private static _instance: MetaScryApi;
   private _settings: MetaScryPluginSettings;
+  private _addedGlobals: string[];
   
   //#region Api Access
 
   /**
    * The current instance of the MetadataScryApi api
    */
-  static get Instance() : MetaScryApi {
+  static get Instance(): MetaScryApi {
     return MetadataScrierPlugin._instance;
   }
 
@@ -45,7 +46,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
    * @alias {@link MetadataScrierPluginKey}
    * @alias {@link MetaScryPluginApi.key}
    */
-  static get Key() : string {
+  static get Key(): string {
     return MetadataScrierPluginKey;
   }
 
@@ -53,7 +54,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     return MetadataScrierPlugin._instance;
   }
 
-  get key() :string {
+  get key(): string {
     return MetadataScrierPluginKey;
   }
 
@@ -65,7 +66,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   //#region Initialization
 
-  async onload() {
+  async onload(): Promise<void> {
     super.onload();
     await this.loadSettings();
     this.addSettingTab(new MetadataScrierPluginSettingTab(this.app, this));
@@ -73,15 +74,15 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     this._initApi();
   }
 
-  onunload() {
+  onunload(): void {
     this._deinitApi();
   }
   
-	async loadSettings() {
-		this._settings = Object.assign({}, DefaultSettings, await this.loadData());
+  async loadSettings(): Promise<void> {
+    this._settings = Object.assign({}, DefaultSettings, await this.loadData());
   }
   
-	async updateSettings(newSettings: MetaScryPluginSettings) {
+  async updateSettings(newSettings: MetaScryPluginSettings): Promise<void> {
     // reset the api when settings are updated.
     this._deinitApi();
 
@@ -94,8 +95,18 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     // reinit
     this._initApi();
   }
+
+  tryToSetExtraGlobal(key: string, setValue: any = undefined): boolean {
+    if (arguments.length == 2) {
+      const [addedOnDesktop, addedOnMobile] = this._tryToAddToGlobals(key, setValue);
+      return addedOnDesktop || addedOnMobile;
+    } else {
+      const [goneOnDesktop, goneOnMobile] = this._tryToRemoveFromGlobals(key);
+      return goneOnDesktop && goneOnMobile;
+    }
+  }
   
-  private _initApi() {
+  private _initApi(): void {
     this._verifyDependencies();
     StaticMetaScryPluginContainer.Instance = this;
     MetadataScrierPlugin._instance = new MetadataScrier(this);
@@ -107,7 +118,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   /** 
    * if one of the dependenies is missing, disable the plugin and warn the user.
    */
-  private _verifyDependencies() {
+  private _verifyDependencies(): void {
     // @ts-expect-error: app.plugin is not mapped.
     if (!app.plugins.plugins.dataview || !app.plugins.plugins.metaedit) {
       const error =
@@ -120,7 +131,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
             ? "Dataview and Metaedit"
             : "Dataview")
           : "Metaedit") +
-        `. (The ${ MetadataScrierPluginKey } plugin has been automatically disabled.)`;
+        `. (The ${MetadataScrierPluginKey} plugin has been automatically disabled.)`;
       // @ts-expect-error: app.plugin is not mapped.
       app.plugins.disablePlugin(MetadataScrierPluginKey);
       alert(error);
@@ -130,18 +141,18 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   //#region Object property and Global defenitions.
 
-  private _initGlobals() {
+  private _initGlobals(): void {
     this._initGlobalPluginApis();
     this._initGlobalCache();
     this._initGlobalPath();
   }
 
-  private _initHelperMethods() {
+  private _initHelperMethods(): void {
     this._initObjectPropertyHelperMethods();
     this._initArrayHelperMethods();
   }
 
-  private _initObjectPropertyHelperMethods() {
+  private _initObjectPropertyHelperMethods(): void {
     if (this.settings.defineObjectPropertyHelperFunctions) {
       /**
        * Find a deep property in an object, returning true on success.
@@ -202,7 +213,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     }
   }
 
-  private _initArrayHelperMethods() {
+  private _initArrayHelperMethods(): void {
     if (this.settings.defineArrayHelperFunctions) {
       /**
        * index an array of objects by a shared property with unique values among the
@@ -263,37 +274,87 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     }
   }
 
-  private _initGlobalPluginApis() {
+  /**
+   * Set up all the global api variables.
+   */
+  private _initGlobalPluginApis(): void {
     this._initGlobalScrys();
     this._initExtraApiGlobal();
+    this._initCurrentFileGlobal();
+  }
+  
+  /**
+   * Set up global access to the MetadataScryApi.
+   */
+  private _initCurrentFileGlobal(): void {
+    this.settings.globalCurrentFilePropertyNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        this._tryToAddToGlobals(
+          key, {
+          get() {
+            return MetadataScrier.Api.current;
+          }
+        });
+      });
   }
 
-  private _initExtraApiGlobal() {
-    if (this.settings.globalMetaScryExtraName) {
+  private _tryToAddToGlobals(key: string, value: PropertyDescriptor & ThisType<any>): [boolean, boolean] {
+    const results = [
+      this._tryToAddToGlobal(key, value, true),
+      this._tryToAddToGlobal(key, value, false)
+    ];
+
+    return results as [boolean, boolean];
+  }
+
+  private _tryToAddToGlobal(key: string, value: PropertyDescriptor & ThisType<any>, isMobile: boolean = false): boolean {
+    let success: boolean = false;
+    if (isMobile) {
       try {
-        /**
-         * Global access to the MetadataScryApi on desktop.
-         */
-        Object.defineProperty(global, this.settings.globalMetaScryExtraName, {
-          get() {
-            return MetadataScrier.Api;
-          }
-        });
+        Object.defineProperty(window, key, value);
+        success = true;
       } catch { }
+    } else {
       try {
-        /**
-         * Global access to the MetadataScryApi on mobile.
-         */
-        Object.defineProperty(window, this.settings.globalMetaScryExtraName, {
-          get() {
-            return MetadataScrier.Api;
-          }
-        });
+        Object.defineProperty(global, key, value);
+        success = true;
       } catch { }
     }
+
+    return success;
   }
 
-  private _initGlobalScrys() {
+  private _initExtraApiGlobal() : void {
+    this.settings.globalMetaScryExtraNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        try {
+          /**
+           * Global access to the MetadataScryApi on desktop.
+           */
+          Object.defineProperty(global, key, {
+            get() {
+              return MetadataScrier.Api;
+            }
+          });
+        } catch { }
+        try {
+          /**
+           * Global access to the MetadataScryApi on mobile.
+           */
+          Object.defineProperty(window, key, {
+            get() {
+              return MetadataScrier.Api;
+            }
+          });
+        } catch { }
+      });
+  }
+
+  private _initGlobalScrys(): void {
     if (this.settings.defineScryGlobalVariables) {
       // build the Static Api
       const apiAndPlugin = {
@@ -361,52 +422,62 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     }
   }
 
-  private _initGlobalCache() {
-    try {
-      /**
-       * Global access to the cache on desktop.
-       * @name global#cache
-       */
-      Object.defineProperty(global, this.settings.globalCacheName, {
-        get() {
-          return MetadataScrier.Api.Current.Cache;
-        }
-      });
-    } catch { }
+  private _initGlobalCache(): void {
+    this.settings.globalCacheNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        try {
+          /**
+           * Global access to the cache on desktop.
+           * @name global#cache
+           */
+          Object.defineProperty(global, key, {
+            get() {
+              return MetadataScrier.Api.Current.Cache;
+            }
+          });
+        } catch { }
 
-    try {
-      /**
-       * Global access to the cache on mobile.
-       * @name global#cache
-       */
-      Object.defineProperty(window, this.settings.globalCacheName, {
-        get() {
-          return MetadataScrier.Api.Current.Cache;
-        }
+        try {
+          /**
+           * Global access to the cache on mobile.
+           * @name global#cache
+           */
+          Object.defineProperty(window, key, {
+            get() {
+              return MetadataScrier.Api.Current.Cache;
+            }
+          });
+        } catch { }
       });
-    } catch { }
   }
 
-  private _initGlobalPath() {
-    try {
-      /**
-       * Global access to the cache on desktop.
-       * @name global#path
-       */
-      Object.defineProperty(global, this.settings.globalPathName, {
-        value: MetadataScrier.Api.path
-      });
-    } catch { }
+  private _initGlobalPath(): void {
+    this.settings.globalPathFunctionNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        try {
+          /**
+           * Global access to the cache on desktop.
+           * @name global#path
+           */
+          Object.defineProperty(global, key, {
+            value: MetadataScrier.Api.path
+          });
+        } catch { }
 
-    try {
-      /**
-       * Global access to the cache on mobile.
-       * @name global#path
-       */
-      Object.defineProperty(window, this.settings.globalPathName, {
-        value: MetadataScrier.Api.path
+        try {
+          /**
+           * Global access to the cache on mobile.
+           * @name global#path
+           */
+          Object.defineProperty(window, key, {
+            value: MetadataScrier.Api.path
+          });
+        } catch { }
       });
-    } catch { }
   }
 
   //#endregion
@@ -415,25 +486,60 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   //#region De-Initialization
 
-  private _deinitApi() {
+  private _deinitApi(): void {
     this._deinitGlobals();
     this._deinitHelperMethods();
     
     MetadataScrierPlugin._instance = undefined!;
   }
 
-  private _deinitHelperMethods() {
+  private _deinitHelperMethods(): void {
     this._deinitObjectPropertyHelpers();
     this._deinitArrayHelpers();
   }
 
-  private _deinitGlobals() {
+  private _deinitGlobals(): void {
     this._deinitGlobalPluginApis();
     this._deinitGlobalCache();
     this._deinitGlobalPath();
   }
 
-  private _deinitGlobalCache() {
+  private _tryToRemoveFromGlobals(key: string): [boolean, boolean] {
+    return [
+      this._tryToRemoveGlobal(key, true),
+      this._tryToRemoveGlobal(key, false)
+    ];
+  }
+
+  private _tryToRemoveGlobal(key: string, isMobile: boolean = false): boolean {
+    if (isMobile) {
+      try {
+        // @ts-ignore: Global Scope
+        delete window[key];
+      } finally {
+        try {
+          // @ts-ignore: Global Scope
+          return typeof window[key] === 'undefined';
+        } catch {
+          return true;
+        }
+      }
+    } else {
+      try {
+        // @ts-ignore: Global Scope
+        delete global[key];
+      } finally {
+        try {
+          // @ts-ignore: Global Scope
+          return typeof global[key] === 'undefined';
+        } catch {
+          return true;
+        }
+      }
+    }
+  }
+
+  private _deinitGlobalCache(): void {
     if (this.settings.globalCacheName) {
       try {
         // @ts-ignore: Global Scope
@@ -446,21 +552,21 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     }
   }
 
-  private _deinitGlobalPath() {
-    if (this.settings.globalPathName) {
+  private _deinitGlobalPath(): void {
+    if (this.settings.globalPathFunctionName) {
       try {
         // @ts-ignore: Global Scope
-        delete global[this.settings.globalPathName];
+        delete global[this.settings.globalPathFunctionName];
       } catch { }
       try {
         // @ts-ignore: Global Scope
-        delete window[this.settings.globalPathName];
+        delete window[this.settings.globalPathFunctionName];
       } catch { }
     }
   }
 
 
-  private _deinitGlobalPluginApis() {
+  private _deinitGlobalPluginApis(): void {
     if (this.settings.defineScryGlobalVariables) {
       try {
         // @ts-ignore: Global Scope
@@ -492,7 +598,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     }
   }
 
-  private _deinitObjectPropertyHelpers() {
+  private _deinitObjectPropertyHelpers(): void {
     if (this.settings.defineObjectPropertyHelperFunctions) {
       try {
         // @ts-ignore: Global Scope
@@ -509,7 +615,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     }
   }
 
-  private _deinitArrayHelpers() {
+  private _deinitArrayHelpers(): void {
     if (this.settings.defineArrayHelperFunctions) {
       try {
         // @ts-ignore: Global Scope
