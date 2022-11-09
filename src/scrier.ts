@@ -15,7 +15,7 @@ import {
   CachedFileMetadata,
   CurrentNoteMetaScryApi,
   DvData,
-  FileSource,
+  NotesSource,
   Frontmatter,
   Metadata,
   MetaScryApi,
@@ -23,7 +23,7 @@ import {
   MetadataSources,
   Sections,
   SplayKebabCasePropertiesOption,
-  FileItem,
+  SingleFileSource,
   FrontmatterUpdateOptions,
   MetadataEditApi,
   AppWithPlugins
@@ -42,7 +42,13 @@ import {
   ParentFolderPathSelector,
   CurrentFolderPathSelector,
   FrontmatterMarkdownSurroundingTag,
-  CopyToHtmlPluginKey
+  CopyToHtmlPluginKey,
+  DefaultFrontmatterUpdateOptions,
+  FileInfoMetadataSourceName,
+  FrontmatterMetadataSourceName,
+  DataviewInlineMetadataSourceName,
+  ScryNoteCacheMetadataSourceName,
+  NoteSectionsMetadataSourceName
 } from './constants';
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { CurrentNoteScrier } from "./current";
@@ -201,23 +207,23 @@ export class MetadataScrier implements MetaScryApi {
       /**
        * The 'file' field containing metadata about the file itself
        */
-      FileInfo: true,
+      [FileInfoMetadataSourceName]: true,
       /**
        * The Frontmatter (YAML at the top of a note)
        */
-      Frontmatter: true,
+      [FrontmatterMetadataSourceName]: true,
       /**
        * Inline Dataview data fields
        */
-      DataviewInline: true,
+      [DataviewInlineMetadataSourceName]: true,
       /**
        * Cached values from the Metadata.Cache in a single field named 'cache'.
        */
-      Cache: true,
+      [ScryNoteCacheMetadataSourceName]: true,
       /**
        * Sections from the Metadata Cache
        */
-      Sections: true
+      [NoteSectionsMetadataSourceName]: true
     };
   }
 
@@ -281,47 +287,47 @@ export class MetadataScrier implements MetaScryApi {
    
   //#region Metadata Fetchers
 
-  vault(file: FileSource = null): TFile | TFolder | TAbstractFile | null {
-    if (file instanceof TAbstractFile) {
-      return file;
+  vault(source: NotesSource = this.current.path): TFile | TFolder | TAbstractFile | null {
+    if (source instanceof TAbstractFile) {
+      return source;
     }
 
-    const path = (ParseFilePathFromSource(file) || this.Current.Path);
+    const path = (ParseFilePathFromSource(source) || this.Current.Path);
     return app.vault.getAbstractFileByPath(path)
       ?? app.vault.getAbstractFileByPath(path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension);
   }
-  file = (file: FileSource = null): TFile | null =>
-    this.vault(file) as TFile;
-  folder = (file: FileSource = null): TFolder| null =>
-    this.vault(file) as TFolder;
+  file = (source: NotesSource = this.current.path): TFile | null =>
+    this.vault(source) as TFile;
+  folder = (source: NotesSource = this.current.path): TFolder| null =>
+    this.vault(source) as TFolder;
   
-  async markdown(source: FileSource = this.current.path): Promise<string> {
+  async markdown(source: NotesSource = this.current.path): Promise<string> {
     const file = this.file(source) as TFile;
     const md = await app.vault.cachedRead(file);
 
     return md;
   }
-  md = async (source: FileSource = this.current.path): Promise<string> =>
+  md = async (source: NotesSource = this.current.path): Promise<string> =>
     await this.markdown(source);
   
-  async html(source: FileSource = this.current.path): Promise<HTMLElement> {
+  async html(source: NotesSource = this.current.path): Promise<HTMLElement> {
     return await (app as AppWithPlugins).plugins.plugins[CopyToHtmlPluginKey]!.convertMarkdown(
       await this.md(source),
       ParseFilePathFromSource(source) || undefined
     );
   }
   
-  async text(source: FileSource = this.current.path): Promise<string> {
+  async text(source: NotesSource = this.current.path): Promise<string> {
     const html = await this.html(source);
     const text = html.textContent || "";
 
     return text;
   }
-  txt = async (source: FileSource = this.current.path): Promise<string> =>
+  txt = async (source: NotesSource = this.current.path): Promise<string> =>
     await this.text(source);
 
-  omfc(file: FileSource = null): CachedFileMetadata | CachedFileMetadata[] | null {
-    const fileObject = this.vault(file);
+  omfc(source: NotesSource = this.current.path): CachedFileMetadata | CachedFileMetadata[] | null {
+    const fileObject = this.vault(source);
 
     if (!(fileObject instanceof TFile)) {
       if (fileObject instanceof TFolder) {
@@ -340,11 +346,11 @@ export class MetadataScrier implements MetaScryApi {
     
     return result;
   }
-  obsidianMetadataFileCache = (file: FileSource = null): CachedFileMetadata | CachedFileMetadata[] | null =>
-    this.omfc(file);
+  obsidianMetadataFileCache = (source: NotesSource = this.current.path): CachedFileMetadata | CachedFileMetadata[] | null =>
+    this.omfc(source);
   
-  frontmatter(file: FileSource = null): Frontmatter | Frontmatter[] | null {
-    const fileCache = this.omfc(file);
+  frontmatter(source: NotesSource = this.current.path): Frontmatter | Frontmatter[] | null {
+    const fileCache = this.omfc(source);
 
     if (Array.isArray(fileCache)) {
       return fileCache.map(f => this.frontmatter(f.path) as Frontmatter);
@@ -354,13 +360,13 @@ export class MetadataScrier implements MetaScryApi {
         : null;
     }
   }
-  fm = (file: FileSource = null): Frontmatter | Frontmatter[] | null =>
-    this.frontmatter(file)
-  matter = (file: FileSource = null): Frontmatter | Frontmatter[] | null =>
-    this.frontmatter(file)
+  fm = (source: NotesSource = this.current.path): Frontmatter | Frontmatter[] | null =>
+    this.frontmatter(source)
+  matter = (source: NotesSource = this.current.path): Frontmatter | Frontmatter[] | null =>
+    this.frontmatter(source)
 
-  sections(file: FileSource = null): Sections | Sections[] | null {
-    const fileCache = this.omfc(file);
+  sections(source: NotesSource = this.current.path): Sections | Sections[] | null {
+    const fileCache = this.omfc(source);
 
     if (Array.isArray(fileCache)) {
       return fileCache.map(f => this.sections(f.path) as Sections);
@@ -371,7 +377,7 @@ export class MetadataScrier implements MetaScryApi {
     }
   }
 
-  dvMatter(source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null {
+  dvMatter(source: NotesSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null {
     const providedPath: string = source ? ParseFilePathFromSource(source) as string : this.Current.Path;
     const paths = MetadataScrier
       .DataviewApi
@@ -389,10 +395,10 @@ export class MetadataScrier implements MetaScryApi {
       return this._kebabPropSplayer(result, [FileMetadataPropertyLowercaseKey, FileMetadataPropertyUppercaseKey]) as DvData;
     }
   }
-  dataviewFrontmatter = (source: FileSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
+  dataviewFrontmatter = (source: NotesSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
     this.dvMatter(source, useSourceQuery);
 
-  cache(source: FileSource = null): Cache | Cache[] {
+  cache(source: NotesSource = null): Cache | Cache[] {
     const fileObject = this.vault(source);
     if (fileObject === null) {
       const key = ParseFilePathFromSource(source);
@@ -411,7 +417,7 @@ export class MetadataScrier implements MetaScryApi {
       return MetadataScrier._caches[fileObject.path];
     }
   }
-  temp = (source: FileSource = null): Cache | Cache[] =>
+  temp = (source: NotesSource = null): Cache | Cache[] =>
     this.cache(source);
   
   
@@ -437,13 +443,24 @@ export class MetadataScrier implements MetaScryApi {
     return this.frontmatter(BuildDataValueFileFullPath(dataPath));
   }
 
-  get(file: FileSource = null, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null {
-    if (file instanceof TFolder) {
-      return file.children.map(c => this.get(c, sources)).flat();
+  get(source: NotesSource | MetadataSources = this.current.path, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null {
+    if (IsObject(source)) {
+      if (source instanceof TFolder) {
+        return source.children.map(c => this.get(c, sources)).flat();
+      } else if (!source!.hasOwnProperty("path")) {
+        if (source!.hasOwnProperty("")
+          || source!.hasOwnProperty("")
+          || source!.hasOwnProperty("")
+          || source!.hasOwnProperty("")
+          || source!.hasOwnProperty("")
+        ) {
+
+        }
+      }
     }
 
-    const fileName = file
-      ? (ParseFilePathFromSource(file)
+    const fileName = source
+      ? (ParseFilePathFromSource(source)
         ?? this.current.path)
       : this.Current.Path;
 
@@ -538,63 +555,83 @@ export class MetadataScrier implements MetaScryApi {
 
     return values;
   }
-  from = (file: FileSource = null, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null =>
-    this.get(file, sources);
+  from = (source: NotesSource = this.current.path, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null =>
+    this.get(source, sources);
 
   //#endregion
 
   //#region Metadata Modifiers
 
-  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName: string | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): void {
+  async patch(
+    source: SingleFileSource,
+    frontmatterData: Record<string, any> | any, propertyName: string | null = null,
+    options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions
+  ): Promise<Frontmatter> {
+    let fileName: string = null!;
     if (options.prototype && options.toValuesFile) {
-      this.patch(file, frontmatterData, propertyName, { ...options, prototype: false });
-      this.patch(file, frontmatterData, propertyName, { ...options, toValuesFile: false });
-
-      return
-    }
-
-    const { updateOrInsertFieldInTFile: update } = this.edit;
-    const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
-    const fileObject = file instanceof TFile ? file : (this.file(fileName) as TFile);
-
-    if (propertyName != null) {
-      update(propertyName, frontmatterData, fileObject);
+      await this.patch(source, frontmatterData, propertyName, { ...options, toValuesFile: false });
+      return await this.patch(source, frontmatterData, propertyName, { ...options, prototype: false });
     } else {
-      Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileObject));
+      fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, source, options.prototype ?? false);
+      const { updateOrInsertFieldInTFile: update } = this.edit;
+      const fileObject = source instanceof TFile ? source : (this.file(fileName) as TFile);
+
+      if (propertyName != null) {
+        return await update(propertyName, frontmatterData, fileObject, options?.inline);
+      } else {
+        const results: Frontmatter[] = await Promise.all(
+          Object.keys(frontmatterData)
+            .map(async propertyName => (await update(
+              propertyName,
+              frontmatterData[propertyName],
+              fileObject,
+              options?.inline
+            )) as Frontmatter)
+        );
+
+        return results[0] || undefined;
+      }
     }
   }
 
-  set(file: FileItem, frontmatterData: any, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): void {
+  async set(
+    source: SingleFileSource,
+    frontmatterData: any,
+    options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions
+  ): Promise<Frontmatter> {
+    let fileName: string = null!;
     if (options.prototype && options.toValuesFile) {
-      this.set(file, frontmatterData, { ...options, prototype: false });
-      this.set(file, frontmatterData, { ...options, toValuesFile: false });
+      await this.set(source, frontmatterData, { ...options, toValuesFile: false });
+      return await this.set(source, frontmatterData, { ...options, prototype: false });
+    } else {
+      const { setAllFrontmatter } = this.edit;
+      fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, source, options.prototype ?? false);
+      const fileObject = source instanceof TFile ? source : (this.file(fileName) as TFile);
 
-      return;
+      await this.clear(fileObject);
+      return await setAllFrontmatter(frontmatterData, fileObject);
     }
-
-    const { updateOrInsertFieldInTFile: update } = this.edit;
-    const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
-    const fileObject = file instanceof TFile ? file : (this.file(fileName) as TFile);
-
-    this.clear(fileName);
-    Object.keys(frontmatterData).forEach(propertyName => update(propertyName, frontmatterData[propertyName], fileObject));
   }
 
-  clear(file: FileItem = null, frontmatterProperties: string | Array<string> | Record<string, any> | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}) : void {
+  async clear(
+    source: SingleFileSource = this.current.path,
+    frontmatterProperties: string | Array<string> | Record<string, any> | undefined = undefined,
+    options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions
+  ): Promise<Frontmatter> {
     if (options.prototype && options.toValuesFile) {
-      this.set(file, frontmatterProperties, { ...options, prototype: false });
-      this.set(file, frontmatterProperties, { ...options, toValuesFile: false });
+      await this.clear(source, frontmatterProperties, { ...options, prototype: false });
+      await this.clear(source, frontmatterProperties, { ...options, toValuesFile: false });
 
-      return;
+      return this.frontmatter(source) as Frontmatter;
     }
 
-    const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, file, options.prototype ?? false);
+    const fileName = MetadataScrier._parseFileNameFromDataFileFileOrPrototype(options.toValuesFile ?? false, source, options.prototype ?? false);
     let propsToClear = [];
 
     if (IsString(frontmatterProperties)) {
       propsToClear.push(frontmatterProperties);
     } else if (IsObject(frontmatterProperties)) {
-      if (frontmatterProperties === null) {
+      if (frontmatterProperties === undefined) {
         propsToClear = Object.keys(this.frontmatter(fileName) as Frontmatter);
       } else if (Array.isArray(frontmatterProperties)) {
         propsToClear = frontmatterProperties;
@@ -759,20 +796,20 @@ export class MetadataScrier implements MetaScryApi {
     return (MetadataScrier.Api.path(relativePath, extension, rootFolder));
   }
 
-  private static _parseFileNameFromDataFileFileOrPrototype(toValuesFile: string | boolean, file: FileSource, prototype: string | boolean) {
+  private static _parseFileNameFromDataFileFileOrPrototype(toValuesFile: string | boolean, source: NotesSource, prototype: string | boolean) {
     return toValuesFile
-      ? file
-        ? BuildDataValueFileFullPath(ParseFilePathFromSource(file)!)
+      ? source
+        ? BuildDataValueFileFullPath(ParseFilePathFromSource(source)!)
         : (IsString(toValuesFile)
           ? BuildDataValueFileFullPath(toValuesFile as string)
           : BuildDataValueFileFullPath(MetadataScrier.Api.Current.Path))
       : prototype
-        ? file
-          ? BuildPrototypeFileFullPath(ParseFilePathFromSource(file)!)
+        ? source
+          ? BuildPrototypeFileFullPath(ParseFilePathFromSource(source)!)
           : (IsString(prototype)
             ? BuildPrototypeFileFullPath(prototype as string)
             : BuildPrototypeFileFullPath(MetadataScrier.Api.Current.Path))
-        : ParseFilePathFromSource(file) || MetadataScrier.Api.Current.Path;
+        : ParseFilePathFromSource(source) || MetadataScrier.Api.Current.Path;
   }
   
   private static _findPath(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null) : string {

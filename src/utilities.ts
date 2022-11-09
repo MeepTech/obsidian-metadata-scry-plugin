@@ -1,5 +1,7 @@
 import { TAbstractFile } from "obsidian";
-import { FileData, FileSource } from "./api";
+import { FileData, NotesSource } from "./api";
+
+//#region Conditionals
 
 /**
  * Helper to check if something's a function.
@@ -9,21 +11,48 @@ import { FileData, FileSource } from "./api";
  * @returns true if the item is a function
  */
 export const IsFunction = (symbol: any) => typeof symbol === "function";
-export const IsObject = (symbol: any) => typeof symbol === "object";
+
+/**
+ * Helper to check if somethings an object or an array.
+ * 
+ * @param symbol The symbol to check 
+ * @param includeNulls (optional) If the value of 'null' returns true or not. (Defaults to false)
+ * 
+ * @returns true if it's an object 
+ */
+export const IsObject = (symbol: any, includeNulls: boolean = false) =>
+  typeof symbol === "object"
+    ? includeNulls
+      ? true
+      : symbol !== null
+    : false;
+
 export const IsString = (symbol: any) => typeof symbol === "string";
+
+/**
+ * Helper to check if somethings specifically an array.
+ * 
+ * @param symbol The symbol to check 
+ * 
+ * @returns true if it's an array
+ */
 export const IsArray = (symbol: any) => Array.isArray(symbol);
+
+//#endregion
+
+//#region Path Manipluation
 
 /**
  * Get a file path string based on a file path string or file object.
  *
- * @param {FileSource} file The file object (with a path property) or file name
+ * @param {NotesSource} source The file object (with a path property) or file name
  *
  * @returns The file path
  */
-  export function ParseFilePathFromSource(file: FileSource): string | null {
-  let fileName = file || null;
-  if (IsObject(file) && file !== null) {
-    fileName = (file as FileData | TAbstractFile).path!;
+  export function ParseFilePathFromSource(source: NotesSource): string | null {
+  let fileName = source || null;
+  if (IsObject(source) && source !== null) {
+    fileName = (source as FileData | TAbstractFile).path!;
   }
 
   //@ts-expect-error: Accounted For.
@@ -53,3 +82,5 @@ export const IsArray = (symbol: any) => Array.isArray(symbol);
   // @ts-expect-error: app.plugin is not mapped.
   return app.plugins.plugins[MetadataScrierPluginKey].settings.prototypesPath + prototypePath;
 }
+
+//#endregion

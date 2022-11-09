@@ -1,8 +1,23 @@
 // TODO: Export this file to the npm importable api when that's made.
 import {
+  FrontmatterUpdateOptions,
   MetaScryPluginSettings,
   SplayKebabCasePropertiesOption
 } from "./api"
+
+export const FileInfoMetadataSourceName = "FileInfo";
+export const FrontmatterMetadataSourceName = "Frontmatter"
+export const DataviewInlineMetadataSourceName = "DataviewInline"
+export const ScryNoteCacheMetadataSourceName = "Cache"
+export const NoteSectionsMetadataSourceName = "Sections"
+
+export const MetadataSourceNames = [
+  FileInfoMetadataSourceName,
+  FrontmatterMetadataSourceName,
+  DataviewInlineMetadataSourceName,
+  ScryNoteCacheMetadataSourceName,
+  NoteSectionsMetadataSourceName
+];
 
 export const DefaultPluginSettings: MetaScryPluginSettings = {
   globalCacheNames: 'cache',
@@ -16,6 +31,12 @@ export const DefaultPluginSettings: MetaScryPluginSettings = {
   splayFrontmatterWithoutDataview: true,
   prototypesPath: "_/_assets/_data/_prototypes",
   valuesPath: "_/_assets/_data/_values"
+}
+
+export const DefaultFrontmatterUpdateOptions : FrontmatterUpdateOptions = {
+  toValuesFile: false,
+  prototype: false,
+  inline: false
 }
 
 export const MetadataScrierPluginKey = "meta-scry";

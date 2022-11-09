@@ -134,6 +134,8 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   /** 
    * if one of the dependenies is missing, disable the plugin and warn the user.
+   * 
+   * @throws Error on missing required dependency. This also disables the plugin on a dependency failure.
    */
   private _verifyDependencies(): void {
     const plugins = Object.keys((app as AppWithPlugins).plugins.plugins);
@@ -141,14 +143,15 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
       MetascryPluginDepencencies.filter(dependency => plugins.indexOf(dependency) === -1);
     
     if (missingDependencies.length) {
-      (app as AppWithPlugins).plugins.disablePlugin(MetadataScrierPluginKey);
-
       const error =
         `Cannot initialize plugin: ${MetadataScrierPluginKey}. ` +
         ` the following dependency plugins are missing: ` +
         missingDependencies.join(", ") +
         `. (The ${MetadataScrierPluginKey} plugin has been automatically disabled. Please install the missing plugins and then try to re-enable this one!)`;
       
+      (app as AppWithPlugins)
+        .plugins
+        .disablePlugin(MetadataScrierPluginKey);
       alert(error);
       throw error;
     }

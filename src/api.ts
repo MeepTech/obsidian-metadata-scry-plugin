@@ -26,9 +26,14 @@ import {
 import { Internal as OpdMetadataEditLibrary } from "@opd-libs/opd-metadata-lib/lib/Internal";
 import {
   CopyToHtmlPluginKey,
+  DataviewInlineMetadataSourceName,
   DataviewPluginKey,
+  FileInfoMetadataSourceName,
+  FrontmatterMetadataSourceName,
   MetadataScrierPluginKey,
-  ReactComponentsPluginKey
+  NoteSectionsMetadataSourceName,
+  ReactComponentsPluginKey,
+  ScryNoteCacheMetadataSourceName
 } from "./constants";
 
 //#region Plugin
@@ -361,19 +366,21 @@ export type DvData = {
 
 //#region Apis
 
+//#region Metadata Api Sources
+
 /**
  * Something we can get a file or folder's path from.
  * 
  * Either a 'file/folder' object with a '.path' property, or the path itself as a string.
  */
-export type FileSource = string | TFile | TFolder | TAbstractFile | FileData | Link | null
+export type NotesSource = string | TFile | TFolder | TAbstractFile | FileData | Link | null
 
 /**
  * Something we can get a specific file's path from.
  * 
  * Either a 'file' object with a '.path' property, or the path itself as a string.
  */
-export type FileItem = string | TFile | FileData | Link | null
+export type SingleFileSource = string | TFile | FileData | Link | null
 
 /**
  * Passed into any update functions to modify what they do.
@@ -381,37 +388,43 @@ export type FileItem = string | TFile | FileData | Link | null
 export interface FrontmatterUpdateOptions {
   toValuesFile?: boolean | string;
   prototype?: string | boolean;
+  inline?: boolean
 };
 
 /**
  * The sources to pull Metadata values from for a file.
  */
-export interface MetadataSources {
+export type MetadataSources = {
+
   /**
    * The 'file' field containing metadata about the file itself
    */
-  FileInfo?: boolean;
+  [FileInfoMetadataSourceName]?: boolean;
 
   /**
    * The Frontmatter (YAML at the top of a note)
    */
-  Frontmatter?: boolean;
+  [FrontmatterMetadataSourceName]?: boolean;
 
   /**
    * Inline Dataview data fields
    */
-  DataviewInline?: boolean;
+  [DataviewInlineMetadataSourceName]?: boolean;
 
   /**
    * Cached values from MetaScryApi.cache
    */
-  Cache?: boolean;
+  [ScryNoteCacheMetadataSourceName]?: boolean;
 
   /**
    * Sections from the note itself
    */
-  Sections?: boolean;
+  [NoteSectionsMetadataSourceName]?: boolean;
 }
+
+//#endregion
+
+//#region Metadata Edit Apis
 
 /**
  * Methods from the 'OPD-metadata-lib' api that are not specific to a given note file, and just work on metadata objects and raw file contents
@@ -439,28 +452,12 @@ export interface ContextlessMetadataEditApiMethods {
  * @see {@link CurrentNoteMetadataEditApi}
  */
 export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
-
-  /**
-   * Set all the frontmatter in a given file
-   * 
-   * @param newMatter 
-   * @param {FileSource} source (optional) Defaults to the current file
-   * 
-   * @returns The updated frontmatter object
-   * 
-   * @alias {@link OpdMetadataEditLibrary.updateFrontmatter} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @alias {@link CurrentNoteMetadataEditApi.replace}
-   * 
-   * @see {@link CurrentNoteMetadataEditApi.set}
-   */
-  setAllFrontmatter(newMatter: Frontmatter, source?: FileSource)
-    : Frontmatter;
   
   /**
    * Get the frontmatter field from a given file
    * 
    * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {FileSource} source (optional) Defaults to the current file
+   * @param {NotesSource} source (optional) Defaults to the current file
    * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
    * 
    * @returns The updated frontmatter object
@@ -471,14 +468,14 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link getField}
    * @see {@link MetaScryApi.get}
    */
-  getFieldFromTFile(propertyAccessorKey: string, source?: FileSource, inline?: boolean)
+  getFieldFromTFile(propertyAccessorKey: string, source?: NotesSource, inline?: boolean)
     : any;
   
   /**
    * Check if the frontmatter field exists in the given file
    * 
    * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {FileSource} source (optional) Defaults to the current file
+   * @param {NotesSource} source (optional) Defaults to the current file
    * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
    * 
    * @returns If the frontmatter property is present in the given file
@@ -487,16 +484,19 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link CurrentNoteMetadataEditApi.exists}
    * 
    * @see {@link hasField}
+   * @see {@link MetaScryApi.get}
+   * @see {@link MetaScryApi.frontmatter}
    */
-  doesFieldExistInTFile(propertyAccessorKey: string, source?: FileSource, inline?: boolean)
+  doesFieldExistInTFile(propertyAccessorKey: string, source?: NotesSource, inline?: boolean)
     : boolean;
   
   /**
    * Insert a new field into the frontmatter of the desired file.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
    * @param {any} value The value to insert
-   * @param {FileSource} source (optional) Defaults to the current file
+   * @param {NotesSource} source (optional) Defaults to the current file
    * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
    * 
    * @returns The updated frontmatter object or single inline value (if inline is true)
@@ -505,16 +505,20 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link CurrentNoteMetadataEditApi.insert}
    * 
    * @see {@link insertField}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.patch}
+   * @see {@link CurrentNoteMetadataEditApi.patch}
    */
-  insertFieldInTFile(propertyAccessorKey: string, value: any, source?: FileSource, inline?: boolean)
-    : Frontmatter | any;
+  insertFieldInTFile(propertyAccessorKey: string, value: (any|(() => any)), source?: NotesSource, inline?: boolean)
+    : Promise<Frontmatter> | Promise<any>;
   
   /**
    * Update the value of an existing field in the frontmatter of the desired file.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
    * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value.
-   * @param {FileSource} source (optional) Defaults to the current file
+   * @param {NotesSource} source (optional) Defaults to the current file
    * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
    * 
    * @returns The updated frontmatter object or single inline value (if inline is true)
@@ -523,16 +527,20 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link CurrentNoteMetadataEditApi.update}
    * 
    * @see {@link updateField}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.patch}
+   * @see {@link CurrentNoteMetadataEditApi.patch}
    */
-  updateFieldInTFile(propertyAccessorKey: string, newValue: any, source?: FileSource, inline?: boolean)
-    : Frontmatter | any;
+  updateFieldInTFile(propertyAccessorKey: string, newValue: any, source?: NotesSource, inline?: boolean)
+    : Promise<Frontmatter> | Promise<any>;
   
   /**
    * Update the value of an existing field in the frontmatter of the desired file, or insert it as a new field if it does not yet exist.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
    * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value. (no arguments are passed in if the field does not exist yet.)
-   * @param {FileSource} source (optional) Defaults to the current file
+   * @param {NotesSource} source (optional) Defaults to the current file
    * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
    * 
    * @returns The updated frontmatter object or single inline value (if inline is true)
@@ -540,16 +548,20 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @alias {@link updateOrInsertFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
    * @see {@link CurrentNoteMetadataEditApi.upsert}
    * 
-   * @see {@link updateField}
+   * @see {@link updateOrInsertField}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.patch}
+   * @see {@link CurrentNoteMetadataEditApi.patch}
    */
-  updateOrInsertFieldInTFile(propertyAccessorKey: string, newValue: any, source?: FileSource, inline?: boolean)
-    : Frontmatter | any;
+  updateOrInsertFieldInTFile(propertyAccessorKey: string, newValue: any, source?: NotesSource, inline?: boolean)
+    : Promise<Frontmatter> | Promise<any>;
   
   /**
    * Delete the existing field in the frontmatter of the desired file.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {FileSource} source (optional) Defaults to the current file
+   * @param {NotesSource} source (optional) Defaults to the current file
    * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
    * 
    * @returns The updated frontmatter object or undefined (if inline is true)
@@ -558,9 +570,31 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link CurrentNoteMetadataEditApi.delete}
    * 
    * @see {@link deleteField}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.clear}
+   * @see {@link CurrentNoteMetadataEditApi.clear}
    */
-  deleteFieldInTFile(propertyAccessorKey: string, source?: FileSource, inline?: boolean)
-    : Frontmatter | undefined;
+  deleteFieldInTFile(propertyAccessorKey: string, source?: NotesSource, inline?: boolean)
+    : Promise<Frontmatter> | Promise<any>;
+
+  /**
+   * Set all the frontmatter in a given file
+   * @async
+   * 
+   * @param newMatter 
+   * @param {NotesSource} source (optional) Defaults to the current file
+   * 
+   * @returns The updated frontmatter object
+   * 
+   * @alias {@link OpdMetadataEditLibrary.updateFrontmatter} This function is a wrapper for an Opd-Metadata-Lib api function.
+   * @alias {@link CurrentNoteMetadataEditApi.replace}
+   * 
+   * @see {@link MetaScryApi.edit}
+   * @see {@link CurrentNoteMetadataEditApi.set}
+   * @see {@link MetaScryApi.set}
+   */
+  setAllFrontmatter(newMatter: Frontmatter, source?: NotesSource)
+    : Promise<Frontmatter>;
 };
 
 /** */
@@ -600,12 +634,15 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @see {@link MetadataEditApi.doesFieldExistInTFile}
    * 
    * @see {@link hasField}
+   * @see {@link MetaScryApi.get}
+   * @see {@link MetaScryApi.frontmatter}
    */
   exists(propertyAccessorKey: string, inline?: boolean)
     : boolean;
   
   /**
    * Insert a new field into the frontmatter of the desired file.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
    * @param {any} value The value to insert
@@ -617,12 +654,16 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @see {@link MetadataEditApi.insertFieldInTFile}
    * 
    * @see {@link insertField}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.patch}
+   * @see {@link CurrentNoteMetadataEditApi.patch}
    */
   insert(propertyAccessorKey: string, value: any, inline?: boolean)
-    : Frontmatter | any;
+    : Promise<Frontmatter> | Promise<any>;
   
   /**
    * Update the value of an existing field in the frontmatter of the desired file.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
    * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value.
@@ -634,12 +675,16 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @see {@link MetadataEditApi.updateFieldInTFile}
    * 
    * @see {@link updateField}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.patch}
+   * @see {@link CurrentNoteMetadataEditApi.patch}
    */
   update(propertyAccessorKey: string, newValue: any, inline?: boolean)
-    : Frontmatter | any;
+    : Promise<Frontmatter> | Promise<any>;
   
   /**
    * Update the value of an existing field in the frontmatter of the desired file, or insert it as a new field if it does not yet exist.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
    * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value. (no arguments are passed in if the field does not exist yet.)
@@ -651,12 +696,16 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @see {@link MetadataEditApi.updateOrInsertFieldInTFile}
    * 
    * @see {@link updateField}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.patch}
+   * @see {@link CurrentNoteMetadataEditApi.patch}
    */
   upsert(propertyAccessorKey: string, newValue: any, inline?: boolean)
-    : ReturnType<MetadataEditApi["updateOrInsertFieldInTFile"]>;
+    : Promise<Frontmatter> | Promise<any>;
   
   /**
    * Delete the existing field in the frontmatter of the desired file.
+   * @async
    * 
    * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
    * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
@@ -666,13 +715,17 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @alias {@link deleteFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
    * @see {@link MetadataEditApi.deleteFieldInTFile}
    * 
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.clear}
+   * @see {@link CurrentNoteMetadataEditApi.clear}
    * @see {@link deleteField}
    */
   delete(propertyAccessorKey: string, inline?: boolean)
-    : Frontmatter | any;
+    : Promise<Frontmatter> | Promise<undefined>;
   
   /**
    * Set all the frontmatter in a given file
+   * @async
    * 
    * @param newMatter 
    * 
@@ -681,18 +734,28 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @alias {@link OpdMetadataEditLibrary.updateFrontmatter} This function is a wrapper for an Opd-Metadata-Lib api function.
    * @alias {@link MetadataEditApi.setAllFrontmatter}
    * 
+   * @see {@link MetaScryApi.edit}
    * @see {@link CurrentNoteMetadataEditApi.set}
+   * @see {@link MetaScryApi.set}
    */
   replace(newMatter: Frontmatter)
-    : Frontmatter;
+    : Promise<Frontmatter> | Promise<any>;
   
   /**
    * Remove the entire frontmatter heading from the current file.
-   *    * 
+   * @async
+   *
    * @see {@link OpdMetadataEditLibrary.removeFrontmatter}
+   * @see {@link MetaScryApi.edit}
+   * @see {@link MetaScryApi.clear}
+   * @see {@link CurrentFileMetaScryApi.clear}
    */
-  clear(): void;
+  clear(): Promise<void>;
 }
+
+//#endregion
+
+//#region Metadata Scrier Apis
 
 /**
  * Interface for the Api.
@@ -830,7 +893,7 @@ export interface MetaScryApi {
   /**
    * Get a file or folder from the vault
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    * 
    * @returns the found TFile or TFolder
    * 
@@ -839,12 +902,12 @@ export interface MetaScryApi {
    * 
    * @see {@link CurrentNoteMetaScryApi.note}
    */
-  vault(source: FileSource): TFile | TFolder | TAbstractFile | null;
+  vault(source: NotesSource): TFile | TFolder | TAbstractFile | null;
 
   /**
    * Get a file from the vault (alias for vault())
    * 
-   * @param {FileSource} source The file object(with a path property) or the full path string
+   * @param {NotesSource} source The file object(with a path property) or the full path string
    * 
    * @returns the found TFile
    * 
@@ -853,12 +916,12 @@ export interface MetaScryApi {
    * @see {@link folder}
    * @see {@link CurrentNoteMetaScryApi.note}
    */
-  file(source: FileSource): TFile | null;
+  file(source: NotesSource): TFile | null;
 
   /**
    * Get a folder from the vault
    * 
-   * @param {FileSource} source The folder object(with a path property) or the full path string
+   * @param {NotesSource} source The folder object(with a path property) or the full path string
    * 
    * @returns the found TFolder
    * 
@@ -867,34 +930,35 @@ export interface MetaScryApi {
    * @see {@link file}
    * @see {@link CurrentNoteMetaScryApi.note}
    */
-  folder(source: FileSource): TFolder | null;
+  folder(source: NotesSource): TFolder | null;
 
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api.
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns The cached file metadata object if it exists, or an array of objects if a folder was provided.
    *
    * @alias {@link omfc}
    */
-  obsidianMetadataFileCache(source?: FileSource): CachedFileMetadata | CachedFileMetadata[] | null;
+  obsidianMetadataFileCache(source?: NotesSource): CachedFileMetadata | CachedFileMetadata[] | null;
 
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api. 
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns The cached file metadata object if it exists, or an array of objects if a folder was provided.
    *
    * @alias {@link obsidianMetadataFileCache}
    */
-  omfc(source?: FileSource): CachedFileMetadata | CachedFileMetadata[] | null;
+  omfc(source?: NotesSource): CachedFileMetadata | CachedFileMetadata[] | null;
 
   /**
    * Used to fetch the markdown text of the entire file or all provided files.
+   * @async
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    * 
    * @alias {@link markdown}
    * 
@@ -904,12 +968,13 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.markdown}
    * @see {@link Section.markdown}
    */
-  md(source?: FileSource): Promise<string>;
+  md(source?: NotesSource): Promise<string>;
 
   /**
    * Used to fetch the markdown text of the entire file or all provided files.
+   * @async
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    * 
    * @alias {@link md}
    * 
@@ -919,12 +984,13 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.markdown}
    * @see {@link Section.markdown}
    */
-  markdown(source?: FileSource): Promise<string>;
+  markdown(source?: NotesSource): Promise<string>;
 
   /**
    * Used to fetch the rendered html elements resulting from the markdown of the entire file (or all provided files).
+   * @async
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    * 
    * @see {@link markdown}
    * @see {@link text}
@@ -932,12 +998,13 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.html}
    * @see {@link Section.html}
    */
-  html(source?: FileSource): Promise<HTMLElement>;
+  html(source?: NotesSource): Promise<HTMLElement>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
+   * @async
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    * 
    * @alias {@link text}
    * 
@@ -947,12 +1014,13 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  txt(source?: FileSource): Promise<string>;
+  txt(source?: NotesSource): Promise<string>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
+   * @async
    * 
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    * 
    * @alias {@link txt}
    * 
@@ -962,12 +1030,12 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  text(source?: FileSource): Promise<string>;
+  text(source?: NotesSource): Promise<string>;
 
   /**
    * Get just the frontmatter for the given file. 
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    * 
    * @returns Just the frontmatter for the file.
    * 
@@ -977,12 +1045,12 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  frontmatter(source?: FileSource): Frontmatter | Frontmatter[] | null;
+  frontmatter(source?: NotesSource): Frontmatter | Frontmatter[] | null;
 
   /**
    * Get just the frontmatter for the given file. 
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns Just the frontmatter for the file.
    * 
@@ -992,12 +1060,12 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  fm(source?: FileSource): Frontmatter | Frontmatter[] | null;
+  fm(source?: NotesSource): Frontmatter | Frontmatter[] | null;
 
   /**
    * Get just the frontmatter for the given file.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns Just the frontmatter for the file.
    * 
@@ -1007,12 +1075,12 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  matter(source?: FileSource): Frontmatter | Frontmatter[] | null;
+  matter(source?: NotesSource): Frontmatter | Frontmatter[] | null;
 
   /**
    * Get just the sections for the given file.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
    *
    * @returns Just the sections under their headings for the file.
    * 
@@ -1022,12 +1090,12 @@ export interface MetaScryApi {
    * @see {@link text}
    * @see {@link CurrentNoteMetaScryApi.sections}
    */
-  sections(source?: FileSource): Sections | Sections[] | null;
+  sections(source?: NotesSource): Sections | Sections[] | null;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
    * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
    *
    * @returns Just the dataview(+frontmatter) values for the file.
@@ -1039,12 +1107,12 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  dvMatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
+  dvMatter(source?: NotesSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
    * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
    *
    * @returns Just the dataview(+frontmatter) values for the file.
@@ -1056,12 +1124,12 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter
    */
-  dataviewFrontmatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
+  dataviewFrontmatter(source?: NotesSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
 
   /**
    * Get just the (meta-scry) cache data for a file.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string.
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
    *
    * @returns The cache data only for the requested file
    * 
@@ -1072,12 +1140,12 @@ export interface MetaScryApi {
    * @see {@link obsidianMetadataFileCache}
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
-  cache(source?: FileSource): Cache | Cache[];
+  cache(source?: NotesSource): Cache | Cache[];
 
   /**
    * Get just the (meta-scry) cache data for a file.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string.
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
    *
    * @returns The cache data only for the requested file
    * 
@@ -1088,13 +1156,13 @@ export interface MetaScryApi {
    * @see {@link obsidianMetadataFileCache}
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
-  temp(source?: FileSource): Cache | Cache[];
+  temp(source?: NotesSource): Cache | Cache[];
 
   /**
    * Get or Set a global values across all obsidian.
    * WARNING DONT USE THIS IF YOU DONT KNOW WHAT YOURE DOING!
    *
-   * @param {FileSource} key The key of the global to fetch or set.
+   * @param {NotesSource} key The key of the global to fetch or set.
    *
    * @returns The global or globals with the given key(s)
    * 
@@ -1134,7 +1202,7 @@ export interface MetaScryApi {
   /**
    * Get the Metadata for a given file using the supplied sources.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string.
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
    * @param {bool|MetadataSources} sources The sources to get metadata from. Defaults to all.
    *
    * @returns The requested metadata
@@ -1152,12 +1220,12 @@ export interface MetaScryApi {
    * @see {@link dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  get(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
+  get(source?: NotesSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
 
   /**
    * Get the Metadata for a given file using the supplied sources.
    *
-   * @param {FileSource} source The file/folder object(with a path property) or the full path string.
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
    * @param {bool|MetadataSources} sources The sources to get metadata from. Defaults to all.
    *
    * @returns The requested metadata
@@ -1175,12 +1243,13 @@ export interface MetaScryApi {
    * @see {@link dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  from(source?: FileSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
+  from(source?: NotesSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
 
   /**
    * Patch individual properties of the frontmatter metadata.
+   * @async
    *
-   * @param {FileItem} file The name of the file or the file object with a path
+   * @param {SingleFileSource} file The name of the file or the file object with a path
    * @param {Record<string, any>|any} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
    * @param {string|null} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
@@ -1190,12 +1259,18 @@ export interface MetaScryApi {
    * @see {@link set}
    * @see {@link clear}
    */
-  patch(file: FileItem, frontmatterData: Record<string, any> | any, propertyName?: string | null, options?: FrontmatterUpdateOptions): void;
+  patch(
+    file: SingleFileSource,
+    frontmatterData: Record<string, any> | any,
+    propertyName?: string | undefined,
+    options?: FrontmatterUpdateOptions
+  ): Promise<Frontmatter>;
 
   /**
    * Replace the existing frontmatter of a file with entirely new data, clearing out all old data in the process.
+   * @async
    *
-   * @param {FileItem} file The name of the file or the file object with a path
+   * @param {SingleFileSource} file The name of the file or the file object with a path
    * @param {Frontmatter} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
@@ -1204,12 +1279,17 @@ export interface MetaScryApi {
    * @see {@link clear}
    * @see {@link patch}
    */
-  set(file: FileItem, frontmatterData: any, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+  set(
+    file: SingleFileSource,
+    frontmatterData: any,
+    options?: FrontmatterUpdateOptions
+  ): Promise<Frontmatter>;
 
   /**
    * Used to clear values from metadata.
+   * @async
    *
-   * @param {FileItem} file The file to clear properties for. defaults to the current file.
+   * @param {SingleFileSource} file The file to clear properties for. defaults to the current file.
    * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
@@ -1218,7 +1298,11 @@ export interface MetaScryApi {
    * @see {@link set}
    * @see {@link patch}
    */
-  clear(file?: FileItem, frontmatterProperties?: string | Array<string> | Record<string, any> | null, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+  clear(
+    file?: SingleFileSource,
+    frontmatterProperties?: string | Array<string> | Record<string, any> | undefined,
+    options?: FrontmatterUpdateOptions
+  ): Promise<Frontmatter>;
 
   /**
    * Turn a relative path into a full path
@@ -1470,11 +1554,17 @@ export interface CurrentNoteMetaScryApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
    *
-   * @see {@link MetaScryApi.patch}
+   * @alias {@link MetaScryApi.patch}
+   * 
    * @see {@link set}
+   * @see {@link edit}
    * @see {@link clear}
    */
-  patch(frontmatterData: any, propertyName?: string | null, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+  patch(
+    frontmatterData: any,
+    propertyName?: string | undefined,
+    options?: FrontmatterUpdateOptions
+  ): Promise<Frontmatter>;
 
   /**
    * Replace the existing frontmatter the current file with entirely new data, clearing out all old data in the process.
@@ -1483,11 +1573,17 @@ export interface CurrentNoteMetaScryApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
    *
-   * @see {@link MetaScryApi.set}
+   * @alias {@link MetaScryApi.set}
+   * 
    * @see {@link patch}
+   * @see {@link edit}
+   * @see {@link CurrentFileMetaScryApi.edit}
    * @see {@link clear}
    */
-  set(frontmatterData: any, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+  set(
+    frontmatterData: any,
+    options?: FrontmatterUpdateOptions
+  ): Promise<Frontmatter>;
 
   /**
    * Used to clear values from metadata.
@@ -1497,11 +1593,17 @@ export interface CurrentNoteMetaScryApi {
    * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
    * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
    *
-   * @see {@link MetaScryApi.clear}
+   * @alias {@link MetaScryApi.clear}
+   * 
    * @see {@link set}
+   * @see {@link edit}
+   * @see {@link CurrentFileMetaScryApi.edit}
    * @see {@link patch}
    */
-  clear(frontmatterProperties?: string | Array<string> | object | null, options?: { toValuesFile?: boolean | string, prototype?: string | boolean }): void;
+  clear(
+    frontmatterProperties?: string | Array<string> | object | undefined,
+    options?: FrontmatterUpdateOptions
+  ): Promise<Frontmatter>;
 }
 
 /**
@@ -1514,6 +1616,8 @@ export interface StaticMetaScryApi {
   Api: MetaScryApi;
   Plugin: MetaScryPluginApi
 }
+
+//#endregion
 
 //#endregion
 
@@ -1902,7 +2006,6 @@ interface SectionInfo {
   get Header(): Heading;
 
   /**
-   * (Async!) 
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
    * @async
@@ -1919,7 +2022,6 @@ interface SectionInfo {
   get md(): Promise<string>;
 
   /**
-   * (Async!) 
    * The plain-text markdown of the section's entire contents. Pre-processed.
    * This contains all sub-section text and headers as well.
    * @async
@@ -1936,7 +2038,6 @@ interface SectionInfo {
   get Md(): Promise<string>;
 
   /**
-   * (Async!) 
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
    * @async
    * 
@@ -1952,7 +2053,6 @@ interface SectionInfo {
   get html(): Promise<HTMLElement>;
 
   /**
-   * (Async!) 
    * The html element rendered from the markdown based on all of obsidian's rendering passes.
    * @async
    * 
@@ -1968,7 +2068,6 @@ interface SectionInfo {
   get Html(): Promise<HTMLElement>;
 
   /**
-   * (Async!) 
    * Get the plain text version of the processed markdown/html.
    * @async
    * 
@@ -1984,7 +2083,6 @@ interface SectionInfo {
   get Txt(): Promise<string>;
 
   /**
-   * (Async!) 
    * Get the plain text version of the processed markdown/html.
    * @async
    * 
@@ -2000,7 +2098,6 @@ interface SectionInfo {
   get txt(): Promise<string>;
 
   /**
-   * (Async!) 
    * Get the plain text version of the processed markdown/html.
    * @async
    * 
@@ -2016,7 +2113,6 @@ interface SectionInfo {
   get Text(): Promise<string>;
 
   /**
-   * (Async!) 
    * Get the plain text version of the processed markdown/html.
    * @async
    * 

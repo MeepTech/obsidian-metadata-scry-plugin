@@ -9,12 +9,12 @@ import {
 } from "@opd-libs/opd-metadata-lib/lib/API";
 import {Internal as OpdMetadataEditLibrary} from "@opd-libs/opd-metadata-lib/lib/Internal";
 import {
-  FileSource,
+  NotesSource,
   MetadataEditApi,
   MetaScryPluginApi,
   ContextlessMetadataEditApiMethods
 } from "./api";
-import { ParseFilePathFromSource } from "./utilities";
+import { IsFunction, IsObject, ParseFilePathFromSource } from "./utilities";
 import { TFile } from "obsidian";
 
 /**
@@ -32,37 +32,6 @@ export class InternalStaticMetadataScrierPluginContainer {
   static Instance: MetaScryPluginApi;
 
   /**
-   * Access to the Metaedit Api
-   * (Write access)
-   */
-  static get MetadataEditApi(): MetadataEditApi {
-    const plugin = InternalStaticMetadataScrierPluginContainer.Instance;
-
-    return {
-      ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApi,
-      setAllFrontmatter: (key, source) =>
-        OpdMetadataEditLibrary.updateFrontmatter(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin),
-      getFieldFromTFile: (key, source, inline) =>
-        getFieldFromTFile(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
-      doesFieldExistInTFile: (key, source, inline) =>
-        doesFieldExistInTFile(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
-      insertFieldInTFile: (key, value, source, inline) =>
-        insertFieldInTFile(key, value, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
-      updateFieldInTFile: (key, value, source, inline) =>
-        updateFieldInTFile(key, value, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
-      updateOrInsertFieldInTFile: (key, value, source, inline) =>
-        updateOrInsertFieldInTFile(key, value, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline),
-      deleteFieldInTFile: (key, source, inline) =>
-        deleteFieldInTFile(key, InternalStaticMetadataScrierPluginContainer._parseSource(source), plugin, inline)
-    };
-  }
-
-  static _parseSource = (source: FileSource | undefined): TFile =>
-    InternalStaticMetadataScrierPluginContainer.Instance.Api.file(typeof source === "object"
-      ? ParseFilePathFromSource(source) || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex
-      : source || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex) as TFile;
-
-  /**
    * Access to the Dataview Api
    * (Read access and Data display)
    */
@@ -71,9 +40,122 @@ export class InternalStaticMetadataScrierPluginContainer {
   }
 
   /**
+   * Access to the Metaedit Api
+   * (Write access)
+   */
+  static get MetadataEditApi(): MetadataEditApi {
+    const plugin = InternalStaticMetadataScrierPluginContainer.Instance;
+
+    return {
+      ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApiMethods,
+      setAllFrontmatter: async (value, source) => {
+        await OpdMetadataEditLibrary.updateFrontmatter(
+          value,
+          InternalStaticMetadataScrierPluginContainer._parseSource(source),
+          plugin
+        );
+
+        return value;
+      },
+      getFieldFromTFile: (key, source, inline) => 
+        getFieldFromTFile(
+          key,
+          InternalStaticMetadataScrierPluginContainer._parseSource(source),
+          plugin,
+          inline
+        ),
+      doesFieldExistInTFile: (key, source, inline) =>
+        doesFieldExistInTFile(
+          key,
+          InternalStaticMetadataScrierPluginContainer._parseSource(source),
+          plugin,
+          inline
+        ),
+      async insertFieldInTFile(key, value, source, inline) {
+        const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
+
+        if (IsFunction(value)) {
+          value = value();
+        }
+
+        await insertFieldInTFile(
+          key,
+          value,
+          file,
+          plugin,
+          inline
+        );
+
+        return inline ? value : this.getMetadataFromFileCache(file, plugin);
+      },
+      async updateFieldInTFile(key, value, source, inline) {
+        const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
+
+        if (IsFunction(value)) {
+          value = value(this.getFieldFromTFile(key, source, inline));
+        }
+
+        await updateFieldInTFile(
+          key,
+          value,
+          file,
+          plugin,
+          inline
+        );
+
+        return inline
+          ? value
+          : this.getMetadataFromFileCache(file, plugin);
+      },
+      async updateOrInsertFieldInTFile(key, value, source, inline){
+        const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
+
+        if (IsFunction(value)) {
+          if (this.doesFieldExistInTFile(key, source, inline)) {
+            value = value(this.getFieldFromTFile(key, source, inline));
+          } else {
+            value = value();
+          }
+        }
+
+        await updateOrInsertFieldInTFile(
+          key,
+          value,
+          file,
+          plugin,
+          inline
+        );
+
+        return inline
+          ? value
+          : this.getMetadataFromFileCache(file, plugin);
+      },
+      async deleteFieldInTFile(key, source, inline) {
+        const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
+
+        await deleteFieldInTFile(
+          key,
+          file,
+          plugin,
+          inline
+        );
+
+        return inline
+          ? undefined
+          : this.getMetadataFromFileCache(file, plugin);
+      }
+    };
+  }
+
+  static _parseSource = (source: NotesSource | undefined): TFile =>
+    InternalStaticMetadataScrierPluginContainer.Instance.Api.file(IsObject(source)
+      ? ParseFilePathFromSource(source as object) || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex
+      : source || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex) as TFile;
+
+  /**
    * The base methods for MetadataEditApi and CurrentNoteMetadataEditApi
    */
-  static get BaseMetadataEditApi() : ContextlessMetadataEditApiMethods {
+  static get BaseMetadataEditApiMethods() : ContextlessMetadataEditApiMethods {
     return {
       getMetadataFromFileCache: OpdMetadataEditLibrary.getMetadataFromFileCache,
       getMetadataFromFileContent: OpdMetadataEditLibrary.getMetaDataFromFileContent,
@@ -85,6 +167,6 @@ export class InternalStaticMetadataScrierPluginContainer {
       updateField: OpdMetadataEditLibrary.updateField,
       insertField: OpdMetadataEditLibrary.insertField,
       updateOrInsertField: OpdMetadataEditLibrary.updateOrInsertField
-    }
+    } as ContextlessMetadataEditApiMethods;
   }
 }

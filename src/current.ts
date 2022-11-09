@@ -143,7 +143,7 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
 
     // Apply the current file as the file to update
     return {
-      ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApi,
+      ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApiMethods,
       get: (key, inline) => api.getFieldFromTFile(key, currentFile, inline),
       exists: (key, inline) => api.doesFieldExistInTFile(key, currentFile, inline),
       insert: (key, value, inline) => api.insertFieldInTFile(key, value, currentFile, inline),
