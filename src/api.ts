@@ -592,6 +592,8 @@ export interface MetaScryApi {
    * @alias {@link dataviewFrontmatter}
    * 
    * @see {@link get}
+   * @see {@link data}
+   * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
   dv(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
@@ -607,6 +609,8 @@ export interface MetaScryApi {
    * @alias {@link dv}
    * 
    * @see {@link get}
+   * @see {@link data}
+   * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter
    */
   dataviewFrontmatter(source?: FileSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
@@ -620,9 +624,10 @@ export interface MetaScryApi {
    * 
    * @alias {@link temp}
    * 
-   * @see {@link CurrentNoteMetaScryApi.cache}
-   * @see {@link CurrentNoteMetaScryApi.Cache}
    * @see {@link get}
+   * @see {@link globals}
+   * @see {@link obsidianMetadataFileCache}
+   * @see {@link CurrentNoteMetaScryApi.cache}
    */
   cache(source?: FileSource): Cache | Cache[];
   
@@ -635,11 +640,27 @@ export interface MetaScryApi {
    * 
    * @alias {@link cache}
    * 
-   * @see {@link CurrentNoteMetaScryApi.cache}
-   * @see {@link CurrentNoteMetaScryApi.Cache}
    * @see {@link get}
+   * @see {@link globals}
+   * @see {@link obsidianMetadataFileCache}
+   * @see {@link CurrentNoteMetaScryApi.cache}
    */
-   temp(source?: FileSource): Cache | Cache[];
+  temp(source?: FileSource): Cache | Cache[];
+  
+   /**
+    * Get or Set a global value across all obsidian.
+    * WARNING DONT USE THIS IF YOU DONT KNOW WHAT YOURE DOING!
+    *
+    * @param {FileSource} key The key of the global to fetch or set.
+    *
+    * @returns The global or globals with the given key(s)
+    * 
+    * @see {@link get}
+    * @see {@link cache}
+    * @see {@link MetadataScrierPlugin.tryToGetExtraGlobal}
+    * @see {@link MetadataScrierPlugin.tryToSetExtraGlobal}
+    */
+   globals(key: string | string[], setToValue: any): any | any[] | undefined;
 
   /**
    * Get the desired prototypes
@@ -647,6 +668,10 @@ export interface MetaScryApi {
    * @param {string} prototypePath The path to the prototype file desired.
    *
    * @returns An object containing the prototypes in the givne file
+   * 
+    * @see {@link cache}
+    * @see {@link globals}
+    * @see {@link values}
    */
   prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null;
 
@@ -656,6 +681,10 @@ export interface MetaScryApi {
    * @param {string} dataPath The path to the data file desired.
    *
    * @returns An object containing the yaml data stored in the givne file
+   * 
+    * @see {@link cache}
+    * @see {@link globals}
+    * @see {@link prototypes}
    */
   values(dataPath: string): Frontmatter | Frontmatter[] | null;  
 

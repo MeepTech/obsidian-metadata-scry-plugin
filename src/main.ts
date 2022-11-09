@@ -105,6 +105,18 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
       return goneOnDesktop && goneOnMobile;
     }
   }
+
+  tryToGetExtraGlobal(key: string): any | undefined {
+    try {
+      return typeof global !== 'undefined'
+        // @ts-ignore: Global Scope
+        ? global[key]
+        // @ts-ignore: Global Scope
+        : window[key];
+    } catch {
+      return undefined;
+    }
+  }
   
   private _initApi(): void {
     this._verifyDependencies();
@@ -282,23 +294,6 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     this._initExtraApiGlobal();
     this._initCurrentFileGlobal();
   }
-  
-  /**
-   * Set up global access to the MetadataScryApi.
-   */
-  private _initCurrentFileGlobal(): void {
-    this.settings.globalCurrentFilePropertyNames
-      .split(",")
-      .map(String.prototype.trim)
-      .forEach(key => {
-        this._tryToAddToGlobals(
-          key, {
-          get() {
-            return MetadataScrier.Api.current;
-          }
-        });
-      });
-  }
 
   private _tryToAddToGlobals(key: string, value: PropertyDescriptor & ThisType<any>): [boolean, boolean] {
     const results = [
@@ -325,32 +320,73 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
     return success;
   }
+  
+  /**
+   * Set up global access to the MetadataScryApi.
+   */
+  private _initCurrentFileGlobal(): void {
+    this.settings.globalCurrentFilePropertyNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        this._tryToAddToGlobals(
+          key, {
+          get() {
+            return MetadataScrier.Api.current;
+          }
+        });
+      });
+  }
 
-  private _initExtraApiGlobal() : void {
+  /**
+   * Global access to the MetadataScryApi on mobile.
+   * @name global#meta
+   */
+  private _initExtraApiGlobal(): void {
     this.settings.globalMetaScryExtraNames
       .split(",")
       .map(String.prototype.trim)
       .forEach(key => {
-        try {
-          /**
-           * Global access to the MetadataScryApi on desktop.
-           */
-          Object.defineProperty(global, key, {
-            get() {
-              return MetadataScrier.Api;
-            }
-          });
-        } catch { }
-        try {
-          /**
-           * Global access to the MetadataScryApi on mobile.
-           */
-          Object.defineProperty(window, key, {
-            get() {
-              return MetadataScrier.Api;
-            }
-          });
-        } catch { }
+        this._tryToAddToGlobals(
+          key, {
+          get() {
+            return MetadataScrier.Api;
+          }
+        });
+      });
+  }
+
+  /**
+   * Global access to the cache on desktop.
+   * @name global#cache
+   */
+  private _initGlobalCache(): void {
+    this.settings.globalCacheNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        this._tryToAddToGlobals(
+          key, {
+          get() {
+            return MetadataScrier.Api.Current.Cache;
+          }
+        });
+      });
+  }
+
+  /**
+   * Global access to the cache on desktop.
+   * @name global#path
+   */
+  private _initGlobalPath(): void {
+    this.settings.globalPathFunctionNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        this._tryToAddToGlobals(
+          key,
+          { value: MetadataScrier.Api.path }
+        );
       });
   }
 
@@ -378,106 +414,19 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
             DefaultSources: MetadataScrier.DefaultSources
           } : apiAndPlugin;
 
-      try {
-        /**
-         * Global access to the StaticMetadataScryPluginApi on desktop.
-         */
-        Object.defineProperty(global, ScryGlobalPropertyCapitalizedKey, {
-          get() {
-            return staticApi;
-          }
-        });
-      } catch { }
-      try {
-        /**
-         * Global access to the StaticMetadataScryPluginApi on mobile.
-         */
-        Object.defineProperty(window, ScryGlobalPropertyCapitalizedKey, {
-          get() {
-            return staticApi;
-          }
-        });
-      } catch { }
-
-      try {
-        /**
-         * Global access to the MetaScryApi on desktop.
-         */
-        Object.defineProperty(global, ScryGlobalPropertyLowercaseKey, {
-          get() {
-            return MetadataScrier.Api;
-          }
-        });
-      } catch { }
-      try {
-        /**
-         * Global access to the MetaScryApi on mobile.
-         */
-        Object.defineProperty(window, ScryGlobalPropertyLowercaseKey, {
-          get() {
-            return MetadataScrier.Api;
-          }
-        });
-      } catch { }
+      this._tryToAddToGlobals(
+        ScryGlobalPropertyCapitalizedKey, {
+        get() {
+          return staticApi;
+        }
+      });
+      this._tryToAddToGlobals(
+        ScryGlobalPropertyLowercaseKey, {
+        get() {
+          return MetadataScrier.Api;
+        }
+      });
     }
-  }
-
-  private _initGlobalCache(): void {
-    this.settings.globalCacheNames
-      .split(",")
-      .map(String.prototype.trim)
-      .forEach(key => {
-        try {
-          /**
-           * Global access to the cache on desktop.
-           * @name global#cache
-           */
-          Object.defineProperty(global, key, {
-            get() {
-              return MetadataScrier.Api.Current.Cache;
-            }
-          });
-        } catch { }
-
-        try {
-          /**
-           * Global access to the cache on mobile.
-           * @name global#cache
-           */
-          Object.defineProperty(window, key, {
-            get() {
-              return MetadataScrier.Api.Current.Cache;
-            }
-          });
-        } catch { }
-      });
-  }
-
-  private _initGlobalPath(): void {
-    this.settings.globalPathFunctionNames
-      .split(",")
-      .map(String.prototype.trim)
-      .forEach(key => {
-        try {
-          /**
-           * Global access to the cache on desktop.
-           * @name global#path
-           */
-          Object.defineProperty(global, key, {
-            value: MetadataScrier.Api.path
-          });
-        } catch { }
-
-        try {
-          /**
-           * Global access to the cache on mobile.
-           * @name global#path
-           */
-          Object.defineProperty(window, key, {
-            value: MetadataScrier.Api.path
-          });
-        } catch { }
-      });
   }
 
   //#endregion
@@ -540,62 +489,36 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   }
 
   private _deinitGlobalCache(): void {
-    if (this.settings.globalCacheName) {
-      try {
-        // @ts-ignore: Global Scope
-        delete global[this.settings.globalCacheName];
-      } catch { }
-      try {
-        // @ts-ignore: Global Scope
-        delete window[this.settings.globalCacheName];
-      } catch { }
-    }
+    this.settings.globalCacheNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        this._tryToRemoveFromGlobals(key);
+      });
   }
 
   private _deinitGlobalPath(): void {
-    if (this.settings.globalPathFunctionName) {
-      try {
-        // @ts-ignore: Global Scope
-        delete global[this.settings.globalPathFunctionName];
-      } catch { }
-      try {
-        // @ts-ignore: Global Scope
-        delete window[this.settings.globalPathFunctionName];
-      } catch { }
-    }
+    this.settings.globalPathFunctionNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        this._tryToRemoveFromGlobals(key);
+      });
   }
 
 
   private _deinitGlobalPluginApis(): void {
     if (this.settings.defineScryGlobalVariables) {
-      try {
-        // @ts-ignore: Global Scope
-        delete global[ScryGlobalPropertyCapitalizedKey];
-      } catch { }
-      try {
-        // @ts-ignore: Global Scope
-        delete window[ScryGlobalPropertyCapitalizedKey];
-      } catch { }
-      try {
-        // @ts-ignore: Global Scope
-        delete global[ScryGlobalPropertyLowercaseKey];
-      } catch { }
-      try {
-        // @ts-ignore: Global Scope
-        delete window[ScryGlobalPropertyLowercaseKey];
-      } catch { }
+      this._tryToRemoveFromGlobals(ScryGlobalPropertyCapitalizedKey);
+      this._tryToRemoveFromGlobals(ScryGlobalPropertyLowercaseKey);
     }
 
-    if (this.settings.globalMetaScryExtraName) {
-      try {
-        // @ts-ignore: Global Scope
-        delete global[this.settings.globalMetaScryExtraName];
-      } catch { }
-      try {
-        // @ts-ignore: Global Scope
-        delete window[this.settings.globalMetaScryExtraName];
-      } catch { }
-    }
+    this.settings.globalMetaScryExtraNames
+      .split(",")
+      .map(String.prototype.trim)
+      .forEach(key => {
+        this._tryToRemoveFromGlobals(key);
+      });
   }
 
   private _deinitObjectPropertyHelpers(): void {
