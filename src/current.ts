@@ -1,13 +1,5 @@
 import { TFile } from 'obsidian';
 import {
-  getFieldFromTFile,
-  doesFieldExistInTFile,
-  insertFieldInTFile,
-  updateFieldInTFile,
-  updateOrInsertFieldInTFile,
-  deleteFieldInTFile
-} from "@opd-libs/opd-metadata-lib/lib/API"
-import {
   Cache,
   CurrentNoteMetaScryApi,
   Frontmatter,
@@ -20,6 +12,7 @@ import {
 } from './api';
 import { IsString } from './utilities';
 import { InternalStaticMetadataScrierPluginContainer } from './static';
+import { DefaultFrontmatterUpdateOptions } from './constants';
 
 /**
  * Access to current metadata via localized versions of the calls in MetaScryApi
@@ -144,15 +137,22 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     // Apply the current file as the file to update
     return {
       ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApiMethods,
-      get: (key, inline) => api.getFieldFromTFile(key, currentFile, inline),
-      exists: (key, inline) => api.doesFieldExistInTFile(key, currentFile, inline),
-      insert: (key, value, inline) => api.insertFieldInTFile(key, value, currentFile, inline),
-      update: (key, value, inline) => api.updateFieldInTFile(key, value, currentFile, inline),
-      upsert: (key, value, inline) => api.updateOrInsertFieldInTFile(key, value, currentFile, inline),
-      delete: (key, inline) => api.deleteFieldInTFile(key, currentFile, inline),
-      replace: (value) => api.setAllFrontmatter(value, currentFile),
-      clear: () => {
-        throw "not yet implemented";
+      get: (key, inline) =>
+        api.getFieldFromTFile(key, currentFile, inline),
+      exists: (key, inline) =>
+        api.doesFieldExistInTFile(key, currentFile, inline),
+      insert: async (key, value, inline) =>
+        await api.insertFieldInTFile(key, value, currentFile, inline),
+      update: async (key, value, inline) =>
+        await api.updateFieldInTFile(key, value, currentFile, inline),
+      upsert: async (key, value, inline) =>
+        await api.updateOrInsertFieldInTFile(key, value, currentFile, inline),
+      delete: async (key, inline) =>
+        await api.deleteFieldInTFile(key, currentFile, inline),
+      replace: async (value) =>
+        await api.setAllFrontmatter(value, currentFile),
+      clear: async () => {
+        await api.setAllFrontmatter({}, currentFile);
       }
     }
   }
@@ -161,15 +161,15 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     return this.edit;
   }
 
-  patch(frontmatterData: any, propertyName: string | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): any | object {
+  patch(frontmatterData: any, propertyName: string | undefined = undefined, options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions): any | object {
     return this._api.patch(this.path, frontmatterData, propertyName, options);
   }
 
-  set(frontmatterData: any, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}): any | object {
+  set(frontmatterData: any, options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions): any | object {
     return this._api.set(this.path, frontmatterData, options);
   }
 
-  clear(frontmatterProperties: string | Array<string> | object | null = null, options: FrontmatterUpdateOptions = {toValuesFile: false, prototype: false}) {
+  clear(frontmatterProperties: string | Array<string> | object | undefined = undefined, options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions) {
     return this._api.clear(this.path, frontmatterProperties, options);
   }
 }
