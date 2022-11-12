@@ -5,11 +5,9 @@ import {
 } from 'obsidian';
 import {
   Sections,
-  Section,
-  SplayKebabCasePropertiesOption,
-  Heading,
-  Cache
-} from './api';
+  Heading} from './types/sections';
+import { Section } from "./types/section";
+import { SplayKebabCasePropertiesOption } from "./types/plugin";
 import {
   CopyToHtmlPluginKey,
   DataviewInlineRegex,

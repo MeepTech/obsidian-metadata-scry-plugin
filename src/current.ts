@@ -1,15 +1,16 @@
 import { TFile } from 'obsidian';
 import {
-  Cache,
-  CurrentNoteMetaScryApi,
-  Frontmatter,
+  Sections} from './types/sections';
+import {
+  MetaScryApi
+} from "./types/scrier";
+import { CurrentNoteMetaScryApi } from "./types/current";
+import { CurrentNoteMetadataEditApi, FrontmatterUpdateOptions } from "./types/editor";
+import {
+  Cache, Frontmatter,
   Metadata,
-  MetaScryApi,
-  Sections,
-  FrontmatterUpdateOptions,
-  DvData,
-  CurrentNoteMetadataEditApi
-} from './api';
+  DvData
+} from "./types/data";
 import { IsString } from './utilities';
 import { InternalStaticMetadataScrierPluginContainer } from './static';
 import { DefaultFrontmatterUpdateOptions } from './constants';

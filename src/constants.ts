@@ -1,9 +1,9 @@
 // TODO: Export this file to the npm importable api when that's made.
+import { FrontmatterUpdateOptions } from "./types/editor";
 import {
-  FrontmatterUpdateOptions,
   MetaScryPluginSettings,
   SplayKebabCasePropertiesOption
-} from "./api"
+} from "./types/plugin";
 
 export const FileInfoMetadataSourceName = "FileInfo";
 export const FrontmatterMetadataSourceName = "Frontmatter"

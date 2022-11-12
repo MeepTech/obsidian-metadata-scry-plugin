@@ -9,13 +9,13 @@ import {
 } from "@opd-libs/opd-metadata-lib/lib/API";
 import {Internal as OpdMetadataEditLibrary} from "@opd-libs/opd-metadata-lib/lib/Internal";
 import {
-  NotesSource,
   MetadataEditApi,
-  MetaScryPluginApi,
   ContextlessMetadataEditApiMethods
-} from "./api";
+} from "./types/editor";
+import { MetaScryPluginApi } from "./types/plugin";
 import { IsFunction, IsObject, ParseFilePathFromSource } from "./utilities";
 import { TFile } from "obsidian";
+import { NotesSource } from "./types/sources";
 
 /**
  * Static container for the current meta-scry plugin instance.

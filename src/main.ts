@@ -1,11 +1,12 @@
 import { Plugin } from 'obsidian';
 import {
   MetaScryApi,
+  StaticMetaScryApi
+} from "./types/scrier";
+import {
   MetaScryPluginSettings,
-  MetaScryPluginApi,
-  StaticMetaScryApi,
-  AppWithPlugins
-} from "./api";
+  MetaScryPluginApi, AppWithPlugins
+} from "./types/plugin";
 import {
   AggregateByArrayHelperFunctionKey,
   DefaultPluginSettings,
@@ -333,7 +334,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _initCurrentFileGlobal(): void {
     this.settings.globalCurrentFilePropertyNames
       .split(",")
-      .map(String.prototype.trim)
+      .map(this._trimString)
       .forEach(key => {
         this._tryToAddToGlobals(
           key, {
@@ -351,7 +352,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _initExtraApiGlobal(): void {
     this.settings.globalMetaScryExtraNames
       .split(",")
-      .map(String.prototype.trim)
+      .map(this._trimString)
       .forEach(key => {
         this._tryToAddToGlobals(
           key, {
@@ -369,7 +370,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _initGlobalCache(): void {
     this.settings.globalCacheNames
       .split(",")
-      .map(String.prototype.trim)
+      .map(this._trimString)
       .forEach(key => {
         this._tryToAddToGlobals(
           key, {
@@ -387,7 +388,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _initGlobalPath(): void {
     this.settings.globalPathFunctionNames
       .split(",")
-      .map(String.prototype.trim)
+      .map(this._trimString)
       .forEach(key => {
         this._tryToAddToGlobals(
           key,
@@ -497,7 +498,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _deinitGlobalCache(): void {
     this.settings.globalCacheNames
       .split(",")
-      .map(String.prototype.trim)
+      .map(this._trimString)
       .forEach(key => {
         this._tryToRemoveFromGlobals(key);
       });
@@ -506,7 +507,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _deinitGlobalPath(): void {
     this.settings.globalPathFunctionNames
       .split(",")
-      .map(String.prototype.trim)
+      .map(this._trimString)
       .forEach(key => {
         this._tryToRemoveFromGlobals(key);
       });
@@ -521,7 +522,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
     this.settings.globalMetaScryExtraNames
       .split(",")
-      .map(String.prototype.trim)
+      .map(this._trimString)
       .forEach(key => {
         this._tryToRemoveFromGlobals(key);
       });
@@ -555,6 +556,10 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         delete Array.prototype[IndexByArrayHelperFunctionKey];
       } catch { }
     }
+  }
+
+  private _trimString(value: string) {
+    return value?.trim();
   }
 
   //#endregion

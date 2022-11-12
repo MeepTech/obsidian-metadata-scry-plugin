@@ -6,7 +6,7 @@ import {
 import {
   MetaScryPluginApi,
   SplayKebabCasePropertiesOption
-} from './api';
+} from "./types/plugin";
 import { DefaultPluginSettings } from './constants';
 
 /**

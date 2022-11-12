@@ -1,6 +1,6 @@
 import { ReactComponentsPluginKey } from "src/constants";
 import { IsFunction } from "src/utilities";
-import { Section } from "../api";
+import { Section } from "../types/section";
 
 const ComponentLoadingText = "...Loading";
 

@@ -12,22 +12,21 @@ import {
 } from "@opd-libs/opd-metadata-lib/lib/Utils"
 
 import {
-  CachedFileMetadata,
-  CurrentNoteMetaScryApi,
-  DvData,
-  NotesSource,
-  Frontmatter,
-  Metadata,
-  MetaScryApi,
+  Sections} from './types/sections';
+import {
+  MetaScryApi} from "./types/scrier";
+import { CurrentNoteMetaScryApi } from "./types/current";
+import { FrontmatterUpdateOptions, MetadataEditApi } from "./types/editor";
+import {
   MetaScryPluginApi,
-  MetadataSources,
-  Sections,
   SplayKebabCasePropertiesOption,
-  SingleFileSource,
-  FrontmatterUpdateOptions,
-  MetadataEditApi,
   AppWithPlugins
-} from './api';
+} from "./types/plugin";
+import {
+  CachedFileMetadata, DvData,
+  Frontmatter,
+  Metadata
+} from "./types/data";
 import {
   KebabCaseWordSeperatorCharacter,
   ExtensionFilePathSeperatorCharacter,
@@ -41,7 +40,6 @@ import {
   SectionsMetadataPropertyLowercaseKey,
   ParentFolderPathSelector,
   CurrentFolderPathSelector,
-  FrontmatterMarkdownSurroundingTag,
   CopyToHtmlPluginKey,
   DefaultFrontmatterUpdateOptions,
   FileInfoMetadataSourceName,
@@ -63,6 +61,7 @@ import {
   IsString,
   ParseFilePathFromSource
 } from './utilities';
+import { MetadataSources, NotesSource, SingleFileSource } from './types/sources';
 
 /**
  * Access and edit metadata about a file from multiple sources.

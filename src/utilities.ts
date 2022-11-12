@@ -1,5 +1,6 @@
 import { TAbstractFile } from "obsidian";
-import { FileData, NotesSource } from "./api";
+import { FileData } from "./types/data";
+import { NotesSource } from "./types/sources";
 
 //#region Conditionals
 
