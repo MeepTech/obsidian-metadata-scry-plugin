@@ -1,13 +1,14 @@
 import {
   HeadingCache,
   MarkdownRenderer,
+  MarkdownView,
   TFile
 } from 'obsidian';
 import {
   Sections,
   Heading} from './types/sections';
 import { Section } from "./types/section";
-import { SplayKebabCasePropertiesOption } from "./types/plugin";
+import { AppWithPlugins, SplayKebabCasePropertiesOption } from "./types/plugin";
 import {
   CopyToHtmlPluginKey,
   DataviewInlineRegex,
@@ -22,7 +23,9 @@ import {
   SectionIdPartDelimiter,
   SectionLinkSeperatorCharachter,
   SpacesRegex} from './constants';
-import { InternalStaticMetadataScrierPluginContainer as MetaScry } from "./static";
+import { InternalStaticMetadataScrierPluginContainer, InternalStaticMetadataScrierPluginContainer as MetaScry } from "./static";
+import { ParseFilePathFromSource } from './utilities';
+import { SingleFileSource } from './types/sources';
 
 /**
  * Implementation of Heading
@@ -199,10 +202,36 @@ class NoteSection implements Section {
   get html()
     : Promise<HTMLElement> {
     return (async () => {
-      return await (app as any).plugins.plugins[CopyToHtmlPluginKey].renderMarkdown(
-      await this.md,
-      this.root.path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension
-    );
+      if (this._html === null) {
+        const md = await this.md;
+        this._html = await MetaScry.Instance.Api.html(this.root.path, md);
+      }
+
+      return this._html;
+      /*const containerEl = document.createElement("div");
+      const workspaceEl = app.workspace.getActiveViewOfType(MarkdownView)!.containerEl.children[1];
+      workspaceEl.appendChild(containerEl);
+      const noteSource = InternalStaticMetadataScrierPluginContainer.Instance.Api.file(this.root.path);
+      const embedData = {
+        app,
+        containerEl,
+        displayMode: false,
+        linktext: this.path,
+        remainingNestLevel: 5,
+        showTitle: true,
+        sourcePath: InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.Path
+      };
+    
+      const embed = MarkdownRenderer.loadEmbed(
+        embedData,
+        noteSource,
+        containerEl
+      )
+
+      embed.load();
+      await embed.loadFile();
+
+      return containerEl as HTMLElement;*/
     })();
   }
 
@@ -611,6 +640,18 @@ export class NoteSections extends Object implements Sections {
   }
   
   // @ts-expect-error: Default Indexer Type Override
+  embed(
+    container: HTMLElement | undefined = undefined,
+    intoNote: SingleFileSource | undefined = undefined
+  ): HTMLElement {
+    return InternalStaticMetadataScrierPluginContainer.Instance.Api.embed(
+      this.path,
+      container,
+      intoNote
+    );
+  }
+  
+  // @ts-expect-error: Default Indexer Type Override
   async loadText()
     : Promise<string> {
     if (this._md !== null) {
@@ -635,13 +676,8 @@ export class NoteSections extends Object implements Sections {
     if (this._html !== null) {
       return Promise.resolve(this._html);
     } else {
-      return this.loadText().then(_v => {
-        this._html = document.createElement("div");
-        //@ts-expect-error: Api should expect null but does not.
-        MarkdownRenderer.renderMarkdown(this._md, this._html, this.root.path, null);
-
-        return this._html;
-      });
+      const md = await this.loadText()
+      return await MetaScry.Instance.Api.html(this.path, md);
     }
   }
 

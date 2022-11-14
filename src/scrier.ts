@@ -1,4 +1,6 @@
 import {
+  MarkdownRenderer,
+  MarkdownView,
   TAbstractFile,
   TFile,
   TFolder
@@ -310,11 +312,20 @@ export class MetadataScrier implements MetaScryApi {
   md = async (source: NotesSource = this.current.path): Promise<string> =>
     await this.markdown(source);
   
-  async html(source: NotesSource = this.current.path): Promise<HTMLElement> {
-    return await (app as AppWithPlugins).plugins.plugins[CopyToHtmlPluginKey]!.convertMarkdown(
-      await this.md(source),
-      ParseFilePathFromSource(source) || undefined
+  async html(source: NotesSource = this.current.path, rawMd: string | undefined = undefined): Promise<HTMLElement> {
+    const file = this.file(source)!;
+    const leaf = app.workspace.getLeaf(true);
+    await leaf.openFile(file, { active: false });
+    (leaf.view as MarkdownView).data = rawMd || await this.md(file);
+    (leaf.view as MarkdownView).file = file;
+
+    const result = await (app as AppWithPlugins).plugins.plugins[CopyToHtmlPluginKey]!.convertView(
+      leaf.view as MarkdownView
     );
+
+    leaf.detach();
+
+    return result;
   }
   
   async text(source: NotesSource = this.current.path): Promise<string> {
@@ -325,6 +336,44 @@ export class MetadataScrier implements MetaScryApi {
   }
   txt = async (source: NotesSource = this.current.path): Promise<string> =>
     await this.text(source);
+  
+  embed(source: NotesSource, container: HTMLElement | undefined = undefined, intoNote: SingleFileSource | undefined = undefined)
+  : HTMLElement {
+    const containerEl = container || document.createElement("div");
+    if (!container) {
+      const workspaceEl = app.workspace.getActiveViewOfType(MarkdownView)!.containerEl.children[1];
+      workspaceEl.appendChild(containerEl);
+    }
+    
+    if (!intoNote) {
+      intoNote = this.file(this.current.path) as TFile;
+    } else {
+      intoNote = intoNote instanceof TFile
+        ? intoNote
+        : this.file(ParseFilePathFromSource(intoNote))
+    }
+
+    const embedData = {
+      app,
+      containerEl,
+      displayMode: false,
+      linktext: this.path,
+      remainingNestLevel: 5,
+      showTitle: true,
+      sourcePath: (intoNote as TFile).path
+    };
+  
+    const embed = MarkdownRenderer.loadEmbed(
+      embedData,
+      intoNote,
+      containerEl
+    )
+
+    embed.load();
+    embed.loadFile();
+
+    return containerEl;
+  }
 
   omfc(source: NotesSource = this.current.path): CachedFileMetadata | CachedFileMetadata[] | null {
     const fileObject = this.vault(source);

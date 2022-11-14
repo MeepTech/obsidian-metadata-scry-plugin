@@ -247,14 +247,15 @@ export interface MetaScryApi {
    * @async
    *
    * @param {NotesSource} source The file/folder object(with a path property) or the full path string
-   *
+   * @param {string} rawMd (optional) Md to render instead of the full file contents.
+   * 
    * @see {@link markdown}
    * @see {@link text}
    * @see {@link sections}
    * @see {@link CurrentNoteMetaScryApi.html}
    * @see {@link Section.html}
    */
-  html(source?: NotesSource): Promise<HTMLElement>;
+  html(source?: NotesSource, rawMd?: string|undefined): Promise<HTMLElement>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
@@ -287,6 +288,24 @@ export interface MetaScryApi {
    * @see {@link Section.text}
    */
   text(source?: NotesSource): Promise<string>;
+
+  /**
+   * Used to embed the desired link into a file using a div element.
+   * 
+   * @param {NotesSource} source The file/folder object(with a path property) or the full path string with the desired optional section after a #
+   * @param container (Optional) an existing container to attach the element to.
+   * @param intoNote (Optional) the note you are embeding into, this defaults to the current note.
+   *
+   * @returns A div with the embeded content attached.
+   *
+   * @see {@link html}
+   * @see {@link Section.embed}
+   */
+  embed(
+    source: NotesSource,
+    container?: HTMLElement | undefined,
+    intoNote?: SingleFileSource | undefined
+  ): HTMLElement
 
   /**
    * Get just the frontmatter for the given file.
