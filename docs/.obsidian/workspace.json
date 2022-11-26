@@ -37,7 +37,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Api/Properties/Global/meta.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               }
@@ -238,7 +238,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 425.5
+    "width": 200
   },
   "right": {
     "id": "6c5aea8906a7cd90",
@@ -254,7 +254,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Api/Properties/Global/meta.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -271,7 +271,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Api/Properties/Global/meta.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -294,7 +294,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Api/Properties/Global/meta.md"
+                "file": "README.md"
               }
             }
           }
@@ -305,17 +305,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "f66bc394a85ee79c",
+  "active": "300130f6b93a41bf",
   "lastOpenFiles": [
     "Installation.md",
+    "Metadata Sources.md",
     "README.md",
-    "Api/Functions/MetaScryApi/Metadata Updaters/clear.md",
-    "Api/Functions/MetaScryApi/Metadata Updaters/patch.md",
-    "Api/Functions/MetaScryApi/Metadata Updaters/set.md",
-    "Api/Properties/MetaScryApi/Static/MetadataEditApi.md",
-    "Api/Properties/Global/Scry and scry.md",
-    "Api/Functions/MetaScryApi/Metadata Fetchers/cache.md",
+    "Api/Types/MetaScryApi.md",
+    "md.md",
+    "Api/Properties/MetaScryApi/Plugin.md",
+    "Api/Properties/MetaScryApi/Current.md",
     "Api/README.md",
-    "Api/Functions/Global/path.md"
+    "Compatibility.md",
+    "Configuration.md"
   ]
 }

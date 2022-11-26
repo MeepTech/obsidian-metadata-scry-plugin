@@ -1,45 +1,33 @@
 # Api
+***See**: [StaticMetaScryApi](StaticMetaScryApi)*
 The api is an object that can be used to retreive, edit, delete, and create frontmatter data, as well as other note metadata quickly and easily within any codeblock or custom javascript script files used in the [compatible plugins](../Compatibility.md).
 
-**NOTE**: The api is built off of the js class `Metadata` in `main.ts`/`main.js`.
-**NOTE**: Most of the properties of this class are accessable in caps or lower camel case so you can adapt to your desired style. This also can help with debugging.
+**NOTE**: The api is mainly built off of the js class `MetadataScrier` in `src/scrier.ts`/`main.js`.
+
+**NOTE**: Most of the properties in the entire api are accessable in upper or lower camel case so you can adapt to your desired style. This also can help with debugging.
+
 ## Global Access and Objects
-There are two root global objects accessable in all contexts.
-- The  [meta](Properties/Global/meta.md) Api object. (Defaults to `meta`)
+There are multiple root global objects accessable in all contexts.
+- The [meta](Properties/Global/meta.md) Api object with access to the [[MetaScryApi]] interface. (Defaults to `meta`)
 - The Current Note's [Cache](Functions/MetaScryApi/Metadata%20Fetchers/cache.md) object. (Defaults to `cache`)
-## Properties
+- The [Scry and scry](Properties/Global/Scry%20and%20scry.md) objects with access to the [[StaticMetaScryApi]] interface and [MetaScryApi](Types/MetaScryApi.md) interface respectively.
+
+## Naming Schemes 
 **NOTE**: These properties of the [Metadata Global Object](Properties/Global/meta.md) are all read-only (get).
 **NOTE**: The non-static properties are all accessable in caps or lower camel case so you can adapt to your desired style.
+
 **Ex:**
 ```
 meta.current === meta.Current; //these are aliases
 ```
 **Also**:
 - Instance methods will always be lower camel case
-- Static properties and methods will always in caps camel case.
-### Static
-- [Api](Properties/MetaScryApi/Static/Api.md)
-- [DefaultMetadataSources](Properties/MetaScryApi/Static/DefaultMetadataSources.md)
-- [DataviewApi](Properties/MetaScryApi/Static/DataviewApi.md)
-- [MetadataEditApi](Properties/MetaScryApi/Static/MetadataEditApi.md)
-### Instance
-- [Current](Properties/MetaScryApi/Current.md)
-- [Data](Properties/MetaScryApi/Data.md)
-## Methods
-**NOTE**: Instance methods will always be lower camel case and Static properties and methods will always in caps camel case.
-- [set](Functions/MetaScryApi/Metadata%20Updaters/set.md) 
-- [patch](Functions/MetaScryApi/Metadata%20Updaters/patch.md)
-- [clear](Functions/MetaScryApi/Metadata%20Updaters/clear.md)
-- [get](Functions/MetaScryApi/Metadata%20Fetchers/get.md)
-	- [frontmatter](Functions/MetaScryApi/Metadata%20Fetchers/frontmatter.md)
-	- [cache](Functions/MetaScryApi/Metadata%20Fetchers/cache.md)
-	- [prototypes](Functions/MetaScryApi/Metadata%20Fetchers/prototypes.md)
-	- [values](Functions/MetaScryApi/Metadata%20Fetchers/values.md)
-- [path](Functions/MetaScryApi/Utility/path.md)
+- Static properties and methods will always in upper camel case.
+
 ### Object Property Helper Methods
 This plugin api provides methods to help with accessing 'deep' properies in js objects. This is usefull for accessing metadata that you're not sure exists.
 
-EX:
+**Ex:**
 ```
 const {metadata} = meta.Current;
 

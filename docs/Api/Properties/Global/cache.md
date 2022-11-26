@@ -1,6 +1,6 @@
 # global.cache
 **property, global**
-Gives you global access to the [Cache](../../../Data%20Storage/Cache.md) of the current note between code-blocks.
+Gives you global access to the [Cache](../../../Concepts/Data%20Storage/Cache.md) of the current note between code-blocks.
 
 **NOTE**: The names of this  global variable can be changed in the settings.
 # Examples
