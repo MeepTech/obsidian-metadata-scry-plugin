@@ -9,9 +9,12 @@ import {
 import {
   CopyToHtmlPluginKey,
   DataviewPluginKey,
+  MetaBindWithApiPluginKey,
   MetadataScrierPluginKey,
   ReactComponentsPluginKey
 } from "../constants";
+import { CopyToHtmlPlugin } from "./external/copy-to-html";
+import { MetaBindPlugin } from "./external/meta-bind";
 import { MetaScryApi } from "./scrier";
 
 /**
@@ -41,43 +44,13 @@ export enum SplayKebabCasePropertiesOption {
  */
 export type AppWithPlugins = {
   plugins: {
+	enabledPlugins: Set<string>;	
     disablePlugin(key: string): void;
     plugins: {
       [MetadataScrierPluginKey]?: MetaScryPluginApi;
       [ReactComponentsPluginKey]?: Plugin;
-      [CopyToHtmlPluginKey]?: {
-        /**
-         * Render a markdown view to an html element, with dataview and other js included.
-         * @async
-         *
-         * @param {MarkdownView} view The view to conver to html
-         * @param {{ convertSvgToBitmap: boolean }} options (Optional) rendering options.
-         *
-         * @returns The detatched container html element of the rendered view.
-         *
-         * @see {@link AppWithPlugins.convertMarkdown}
-         */
-        convertView(
-          view: MarkdownView,
-          options?: { convertSvgToBitmap: boolean; }
-        ): Promise<HTMLElement>;
-        /**
-         * Render a markdown view to an html element, with dataview and other js included.
-         * @async
-         *
-         * @param {MarkdownView} view The view to conver to html
-         * @param {{ convertSvgToBitmap: boolean }} options (Optional) rendering options.
-         *
-         * @returns The detatched container html element of the rendered view.
-         *
-         * @see {@link convertView}
-         */
-        convertMarkdown(
-          markdown: string,
-          sourceFilePath?: string | undefined,
-          options?: { convertSvgToBitmap: boolean; }
-        ): Promise<HTMLElement>;
-      } & Plugin;
+      [MetaBindWithApiPluginKey]?: MetaBindPlugin;
+      [CopyToHtmlPluginKey]?: CopyToHtmlPlugin;
       [DataviewPluginKey]?: {
         api: DataviewApi;
       } & Plugin;
@@ -212,5 +185,4 @@ export interface MetaScryPluginSettings {
    */
   valuesPath: string;
 }
-
 

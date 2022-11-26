@@ -1,10 +1,7 @@
 import {
-  CachedMetadata, TAbstractFile,
-  TFile,
-  TFolder
-} from "obsidian";
+  CachedMetadata
+  } from "obsidian";
 import {
-  Link,
   SMarkdownPage
 } from "obsidian-dataview";
 import { Sections } from "./sections";

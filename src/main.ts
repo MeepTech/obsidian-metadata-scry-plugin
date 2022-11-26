@@ -139,9 +139,9 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
    * @throws Error on missing required dependency. This also disables the plugin on a dependency failure.
    */
   private _verifyDependencies(): void {
-    const plugins = Object.keys((app as AppWithPlugins).plugins.plugins);
+    const plugins = (app as AppWithPlugins).plugins.enabledPlugins;
     const missingDependencies =
-      MetascryPluginDepencencies.filter(dependency => plugins.indexOf(dependency) === -1);
+      MetascryPluginDepencencies.filter(dependency => !plugins.has(dependency));
     
     if (missingDependencies.length) {
       const error =

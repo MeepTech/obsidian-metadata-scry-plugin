@@ -12,6 +12,8 @@ import { Sections } from "./sections";
 import { NotesSource, MetadataSources, SingleFileSource } from "./sources";
 import { MetadataEditApi, FrontmatterUpdateOptions } from "./editor";
 import { CurrentNoteMetaScryApi } from "./current";
+import { InputFieldMarkdownRenderChildType } from "./external/meta-bind";
+import { MetaBindApi } from "./bind";
 
  /**
  * Interface for the Api.
@@ -255,7 +257,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.html}
    * @see {@link Section.html}
    */
-  html(source?: NotesSource, rawMd?: string|undefined): Promise<HTMLElement>;
+  html(source?: NotesSource, rawMd?: string | undefined): Promise<HTMLElement>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
@@ -526,9 +528,8 @@ export interface MetaScryApi {
    *
    * @param {SingleFileSource} file The name of the file or the file object with a path
    * @param {Record<string, any>|any} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
-   * @param {string|null} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
-   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
-   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
+   * @param {string|null} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here. 
+   * @param {FrontmatterUpdateOptions} options (Optional) options.
    *
    * @see {@link CurrentNoteMetaScryApi.patch}
    * @see {@link set}
@@ -547,9 +548,8 @@ export interface MetaScryApi {
    *
    * @param {SingleFileSource} file The name of the file or the file object with a path
    * @param {Frontmatter} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
-   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
-   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
-   *
+   * @param {FrontmatterUpdateOptions} options (Optional) options.
+   * 
    * @see {@link CurrentNoteMetaScryApi.set}
    * @see {@link clear}
    * @see {@link patch}
@@ -566,8 +566,7 @@ export interface MetaScryApi {
    *
    * @param {SingleFileSource} file The file to clear properties for. defaults to the current file.
    * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
-   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
-   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
+   * @param {FrontmatterUpdateOptions} options (Optional) options.
    *
    * @see {@link CurrentNoteMetaScryApi.clear}
    * @see {@link set}
@@ -578,6 +577,54 @@ export interface MetaScryApi {
     frontmatterProperties?: string | Array<string> | Record<string, any> | undefined,
     options?: FrontmatterUpdateOptions
   ): Promise<Frontmatter>;
+ 
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link Bind}
+   * @alias {@link inputField}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  bind: MetaBindApi;
+    
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link bind}
+   * @alias {@link inputField}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  Bind: MetaBindApi;
+
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link InputField}
+   * @alias {@link bind}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  inputField: MetaBindApi;
+
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link inputField}
+   * @alias {@link bind}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  InputField: MetaBindApi;
 
   /**
    * Turn a relative path into a full path
@@ -603,3 +650,14 @@ export interface StaticMetaScryApi {
   Api: MetaScryApi;
   Plugin: MetaScryPluginApi;
 }
+
+/**
+ * Settings used for the Binding Api
+ */
+export type BindSettings = {
+  templateName?: string;
+  renderMode?: InputFieldMarkdownRenderChildType | 'inline' | 'block' | 'div' | 'span',
+  recurseFrontmatterFields?: boolean,
+  returnAbstractField?: boolean,
+  callOnLoad?: true | boolean
+} & Object

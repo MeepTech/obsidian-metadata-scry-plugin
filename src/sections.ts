@@ -1,19 +1,14 @@
 import {
   HeadingCache,
-  MarkdownRenderer,
-  MarkdownView,
   TFile
 } from 'obsidian';
 import {
   Sections,
   Heading} from './types/sections';
 import { Section } from "./types/section";
-import { AppWithPlugins, SplayKebabCasePropertiesOption } from "./types/plugin";
+import { SplayKebabCasePropertiesOption } from "./types/plugin";
 import {
-  CopyToHtmlPluginKey,
   DataviewInlineRegex,
-  DefaultMarkdownFileExtension,
-  ExtensionFilePathSeperatorCharacter,
   FrontmatterMarkdownSurroundingTag,
   HeadingLevelMarkerCharachter,
   KebabCaseDashesRegex,
@@ -24,7 +19,6 @@ import {
   SectionLinkSeperatorCharachter,
   SpacesRegex} from './constants';
 import { InternalStaticMetadataScrierPluginContainer, InternalStaticMetadataScrierPluginContainer as MetaScry } from "./static";
-import { ParseFilePathFromSource } from './utilities';
 import { SingleFileSource } from './types/sources';
 
 /**
@@ -559,7 +553,9 @@ export class NoteSections extends Object implements Sections {
   //#region Initialization
 
   constructor(notePath: string | undefined, headings: HeadingCache[] | undefined) {
-    super();
+		super();
+    this._hidePrivateProperties();
+
     if (notePath !== undefined && headings !== undefined) {
       this._path = notePath;
 
@@ -622,6 +618,14 @@ export class NoteSections extends Object implements Sections {
     }
   }
 
+  // @ts-expect-error: Default Indexer Type Override
+  _hidePrivateProperties = () =>
+    Object.keys(this).forEach(key => {
+      if (key[0] === '_') {
+        Object.defineProperty(this, key, { enumerable: false })
+      }
+    });
+  
   //#endregion
 
   /**

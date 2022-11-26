@@ -43,11 +43,38 @@ export const MetadataScrierPluginKey = "meta-scry";
 export const DataviewPluginKey = "dataview";
 export const CopyToHtmlPluginKey = "copy-document-as-html";
 export const ReactComponentsPluginKey = "obsidian-react-components";
+export const MetaBindWithApiPluginKey = "obsidian-meta-bind-plugin";
 
-export const MetascryPluginDepencencies = [
-  CopyToHtmlPluginKey,
-  DataviewPluginKey
+/**
+ * Required to enable the plugin
+ */
+export const MetascryPluginHardDepencencies = [
+  DataviewPluginKey,
 ];
+
+/**
+ * Plugins that aren't required for the entire api, but parts of it.
+ * The methods these are responsible for will return undefined if their plugin isn't present and a warning will be posted to the console.
+ */
+// TODO: make these not required to run, but throw a warning pop-up if they're missing and replace function calls with undefined returns and warning pop-ups.
+export const MetascryPluginSoftDepencencies = [
+  CopyToHtmlPluginKey,
+  MetaBindWithApiPluginKey
+];
+
+/**
+ * Not required, doesn't limit the api, but features are added for compatibility with this plugin:
+ */
+export const MetascryPluginCompatibleNonDepencencies = [
+  ReactComponentsPluginKey
+];
+
+/**
+ * All dependencies for this plugin.
+ */
+export const MetascryPluginDepencencies =
+  MetascryPluginHardDepencencies
+    .concat(MetascryPluginSoftDepencencies);
 
 export const ExtensionFilePathSeperatorCharacter = ".";
 export const ParentFolderPathSelector = "..";

@@ -2,6 +2,8 @@ import { TFile } from "obsidian";
 import { Frontmatter, Metadata, Cache } from "./data";
 import { Sections } from "./sections";
 import { FrontmatterUpdateOptions, CurrentNoteMetadataEditApi } from "./editor";
+import { InputFieldDeclaration } from "./external/meta-bind";
+import { CurrentMetaBindApi } from "./bind";
 
 /**
  * Interface for the current note within the api
@@ -289,4 +291,52 @@ export interface CurrentNoteMetaScryApi {
     frontmatterProperties?: string | Array<string> | object | undefined,
     options?: FrontmatterUpdateOptions
   ): Promise<Frontmatter>;
+
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link Bind}
+   * @alias {@link inputField}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  bind: CurrentMetaBindApi;
+    
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link bind}
+   * @alias {@link inputField}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  Bind: CurrentMetaBindApi;
+ 
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link InputField}
+   * @alias {@link bind}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  inputField: CurrentMetaBindApi;
+ 
+  /**
+   * Make input fields bound to your frontmatter properties! 
+   * (Meta-Bind plugin api access)
+   * 
+   * @alias {@link inputField}
+   * @alias {@link bind}
+   * 
+   * @see {@link MetaBindPlugin.bindTargetMetadataField}
+   * @see {@link MetaBindPlugin.buildDeclaration}
+   */
+  InputField: CurrentMetaBindApi;
 }

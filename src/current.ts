@@ -14,6 +14,8 @@ import {
 import { IsString } from './utilities';
 import { InternalStaticMetadataScrierPluginContainer } from './static';
 import { DefaultFrontmatterUpdateOptions } from './constants';
+import { CurrentMetaBindApi } from './types/bind';
+import { CurrentMetadataInputBinder } from './bind';
 
 /**
  * Access to current metadata via localized versions of the calls in MetaScryApi
@@ -173,4 +175,16 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
   clear(frontmatterProperties: string | Array<string> | object | undefined = undefined, options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions) {
     return this._api.clear(this.path, frontmatterProperties, options);
   }
+  
+  bind: CurrentMetaBindApi
+    = CurrentMetadataInputBinder;
+    //alias:
+  inputField: CurrentMetaBindApi
+    = CurrentMetadataInputBinder;
+    //alias:
+  Bind: CurrentMetaBindApi
+    = CurrentMetadataInputBinder;
+    //alias:
+  InputField: CurrentMetaBindApi
+    = CurrentMetadataInputBinder;
 }

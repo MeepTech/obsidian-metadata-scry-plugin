@@ -12,10 +12,12 @@ import {
   MetadataEditApi,
   ContextlessMetadataEditApiMethods
 } from "./types/editor";
-import { MetaScryPluginApi } from "./types/plugin";
+import { AppWithPlugins, MetaScryPluginApi } from "./types/plugin";
 import { IsFunction, IsObject, ParseFilePathFromSource } from "./utilities";
 import { TFile } from "obsidian";
 import { NotesSource } from "./types/sources";
+import { MetaBindPlugin } from "./types/external/meta-bind";
+import { MetaBindWithApiPluginKey } from "./constants";
 
 /**
  * Static container for the current meta-scry plugin instance.
@@ -37,6 +39,17 @@ export class InternalStaticMetadataScrierPluginContainer {
    */
   static get DataviewApi(): DataviewApi {
     return getAPI() as DataviewApi;
+  }
+
+  /**
+   * Access to the Meta-Bind Api
+   * (Binding of Input Fields)
+   */
+  static get MetaBindApi() : MetaBindPlugin {
+    return (app as AppWithPlugins)
+      .plugins
+      .plugins
+      [MetaBindWithApiPluginKey]!;
   }
 
   /**
