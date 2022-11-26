@@ -1,7 +1,7 @@
 # Exists and is an object
 ## -Code
 ```js
-dv.el("p", typeof meta.sections(meta.path("test.data")));
+dv.el("p", typeof meta.sections(meta.path("./test.data")));
 ```
 ## -Result
 ```dataviewjs
@@ -27,24 +27,25 @@ dv.el("p", meta.sections(meta.path()).count);
 # Correct Number of Sections
 ## -Code
 ```js
-dv.el("p", meta.sections(meta.path("test.data")).count);
+dv.el("p", meta.sections(meta.path("./test.data")).count);
 ```
 ## -Result
 ```dataviewjs
-dv.el("p", meta.sections(meta.path("test.data")).count);
+dv.el("p", meta.sections(meta.path("./test.data")).count);
 ```
 
 ## -Expected
-4
+7
 
 # Correct Section Keys as properties
+#retest
 ## -Code
 ```js
-dv.el("p", Object.keys(meta.sections(meta.path("test.data"))).join(", "));
+dv.el("p", Object.keys(meta.sections(meta.path("./test.data"))).join(", "));
 ```
 ## -Result
 ```dataviewjs
-dv.el("p", Object.keys(meta.sections(meta.path("test.data"))).join(", "));
+dv.el("p", Object.keys(meta.sections(meta.path("./test.data"))).join(", "));
 ```
 
 ## -Expected
@@ -57,9 +58,11 @@ all, path, count, Test-Section, test-section, test-Section, testsection, testSec
 const {
   testSection: outerTestSection,
   testSection2: {
-	testSection: innerTestSection
+    withdata9: {
+	    testSection: innerTestSection
+    }
   }
-} = meta.sections(meta.path("test.data"));
+} = meta.sections(meta.path("./test.data"));
 
 <p>{outerTestSection && innerTestSection ? "true" : "false"}</p>
 ```
@@ -69,9 +72,11 @@ const {
 const {
   testSection: outerTestSection,
   testSection2: {
-	testSection: innerTestSection
+    withdata9: {
+	    testSection: innerTestSection
+    }
   }
-} = meta.sections(meta.path("test.data"));
+} = meta.sections(meta.path("./test.data"));
 
 <p>{outerTestSection && innerTestSection ? "true" : "false"}</p>
 ```
@@ -86,9 +91,11 @@ true
 const {
   testSection: outerTestSection,
   testSection2: {
-	testSection: innerTestSection
+    withdata9: {
+	    testSection: innerTestSection
+    }
   }
-} = meta.sections(meta.path("test.data"));
+} = meta.sections(meta.path("./test.data"));
 
 <p>
 	{outerTestSection.level !== innerTestSection.level ? "true" : "false"}
@@ -104,16 +111,18 @@ const {
 const {
   testSection: outerTestSection,
   testSection2: {
-	testSection: innerTestSection
+    withdata9: {
+	    testSection: innerTestSection
+    }
   }
-} = meta.sections(meta.path("test.data"));
+} = meta.sections(meta.path("./test.data"));
 
 <p>
-	{outerTestSection.level !== innerTestSection.level ? "true" : "false"}
+	{outerTestSection.header.level !== innerTestSection.header.level ? "true" : "false"}
 	{", "}
-	{outerTestSection.level}
+	{outerTestSection.header.level}
 	{", "}
-	{innerTestSection.level}
+	{innerTestSection.header.level}
 </p>
 ```
 

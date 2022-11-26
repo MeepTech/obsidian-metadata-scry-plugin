@@ -1,18 +1,13 @@
 import {
   App,
-  MarkdownView,
   Plugin
 } from "obsidian";
+import { DataviewApi } from "obsidian-dataview";
 import {
-  DataviewApi
-} from "obsidian-dataview";
-import {
-  CopyToHtmlPluginKey,
-  DataviewPluginKey,
-  MetaBindWithApiPluginKey,
-  MetadataScrierPluginKey,
-  ReactComponentsPluginKey
-} from "../constants";
+    CopyToHtmlPluginKey,
+    DataviewPluginKey,
+    MetaBindWithApiPluginKey,
+  MetadataScrierPluginKey, ReactComponentsPluginKey} from "../constants";
 import { CopyToHtmlPlugin } from "./external/copy-to-html";
 import { MetaBindPlugin } from "./external/meta-bind";
 import { MetaScryApi } from "./scrier";
@@ -44,16 +39,15 @@ export enum SplayKebabCasePropertiesOption {
  */
 export type AppWithPlugins = {
   plugins: {
-	enabledPlugins: Set<string>;	
+    enabledPlugins: Set<string>;	
     disablePlugin(key: string): void;
     plugins: {
       [MetadataScrierPluginKey]?: MetaScryPluginApi;
       [ReactComponentsPluginKey]?: Plugin;
+      // TODO: remove this plugin field when all of these are moved to npm packages:      
       [MetaBindWithApiPluginKey]?: MetaBindPlugin;
+      // TODO: remove this plugin field when all of these are moved to npm packages:      
       [CopyToHtmlPluginKey]?: CopyToHtmlPlugin;
-      [DataviewPluginKey]?: {
-        api: DataviewApi;
-      } & Plugin;
     };
   };
 } & App;

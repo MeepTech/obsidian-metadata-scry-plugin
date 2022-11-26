@@ -1,4 +1,5 @@
 # Set Existing Deep Propery Successful
+#retest 
 ## -Code
 ```js
 const test = {
@@ -30,6 +31,7 @@ dv.el("p", test.deep.deeper.deepest);
 ## -Expected
 sand
 # Set Non-Existing Deep Propery Successful
+#retest 
 ## -Code
 ```js
 const test = {};

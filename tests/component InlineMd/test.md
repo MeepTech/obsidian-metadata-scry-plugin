@@ -4,12 +4,12 @@ testValue: "tess"
 # Renders without newlines
 ## -Code
 ```jsx
-<p>{"- "}<Metadata.InlineMd src={"**bold**"}/></p>
+<p>{"- "}<Scry.InlineMd src={"**bold**"}/></p>
 ```
 
 ## -Result
 ```jsx:
-<p>{"- "}<Metadata.InlineMd src={"**bold**"}/></p>
+<p>{"- "}<Scry.InlineMd src={"**bold**"}/></p>
 ```
 
 ## -Expected
@@ -18,12 +18,12 @@ testValue: "tess"
 # Renders Inline Dv Text
 ## -Code
 ```jsx
-<p>{"- "}<Metadata.InlineMd src={"[dataValue::test]"}/></p>
+<p>{"- "}<Scry.InlineMd src={"[dataValue::test]"}/></p>
 ```
 
 ## -Result
 ```jsx:
-<p>{"- "}<Metadata.InlineMd src={"[dataValue::test]"}/></p>
+<p>{"- "}<Scry.InlineMd src={"[dataValue::test]"}/></p>
 ```
 
 ## -Expected

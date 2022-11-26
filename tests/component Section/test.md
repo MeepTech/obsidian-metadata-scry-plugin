@@ -7,7 +7,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section data={initialSection}/>
+  <Scry.Section data={initialSection}/>
 </>
 ```
 
@@ -19,7 +19,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section data={initialSection}/>
+  <Scry.Section data={initialSection}/>
 </>
 ```
 
@@ -35,7 +35,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section data={initialSection} mode="txt"/>
+  <Scry.Section data={initialSection} mode="txt"/>
 </>
 ```
 
@@ -48,7 +48,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section data={initialSection} mode="txt"/>
+  <Scry.Section data={initialSection} mode="txt"/>
 </>
 ```
 
@@ -64,7 +64,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section data={initialSection} mode="html"/>
+  <Scry.Section data={initialSection} mode="html"/>
 </>
 ```
 
@@ -76,7 +76,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section data={initialSection} mode="html"/>
+  <Scry.Section data={initialSection} mode="html"/>
 </>
 ```
 
@@ -92,7 +92,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section 
+  <Scry.Section 
     data={initialSection}
     mode={"txt"}
     renderer={(s, r) => 
@@ -108,7 +108,7 @@ const {
 } = meta.sections(dataFilePath);
 
 <>
-  <Metadata.Section 
+  <Scry.Section 
     data={initialSection}
     mode={"txt"}
     renderer={(s, r) => 

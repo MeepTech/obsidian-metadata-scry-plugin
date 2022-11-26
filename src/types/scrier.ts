@@ -10,7 +10,7 @@ import { MetaScryPluginApi } from "./plugin";
 import { Frontmatter, Metadata, CachedFileMetadata, DvData, Cache } from "./data";
 import { Sections } from "./sections";
 import { NotesSource, MetadataSources, SingleFileSource } from "./sources";
-import { MetadataEditApi, FrontmatterUpdateOptions } from "./editor";
+import { MetadataEditApi as MetaEditApi, FrontmatterUpdateOptions } from "./editor";
 import { CurrentNoteMetaScryApi } from "./current";
 import { InputFieldMarkdownRenderChildType } from "./external/meta-bind";
 import { MetaBindApi } from "./bind";
@@ -71,7 +71,7 @@ export interface MetaScryApi {
    * @see {@link set}
    * @see {@link clear}
    */
-  get Edit(): MetadataEditApi;
+  get Edit(): MetaEditApi;
 
   /**
    * A link to the opd-metadata-lib plugin api
@@ -83,7 +83,7 @@ export interface MetaScryApi {
    * @see {@link set}
    * @see {@link clear}
    */
-  get edit(): MetadataEditApi;
+  get edit(): MetaEditApi;
 
   /**
    * Used to fetch various metadata for the current file.
@@ -644,9 +644,24 @@ export interface MetaScryApi {
  * Static Api accessed through "Metadata" global calls
  */
 export interface StaticMetaScryApi {
+  /**
+   * React components are stored under this as a namespace
+   */
   [key: string | number | symbol]: any;
+
+  /**
+   * You can access all built-in react components from this property.
+   */
   Components?: Record<string, any>;
+
+  /**
+   * React components specific to Sections and the Section Api
+   */
   SectionComponents?: Record<string, any>;
+
+  /**
+   * The Api Itself
+   */
   Api: MetaScryApi;
   Plugin: MetaScryPluginApi;
 }

@@ -1,4 +1,4 @@
-```dataviewjs
+```/dataviewjs
 const pages = meta
     // by file:
     .sections(path("../Metadata Api"))
@@ -13,6 +13,7 @@ const pages = meta
     .aggregateBy("root.path");
 
 for(const path of Object.keys(pages).slice(0, 10)) {
+  debugger;
   if (!pages[path].unique().some(s => s.code)) {
      continue;
   }
@@ -44,3 +45,4 @@ for(const path of Object.keys(pages).slice(0, 10)) {
 	}
 }
 ```
+

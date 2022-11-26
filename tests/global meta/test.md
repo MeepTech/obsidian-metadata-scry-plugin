@@ -62,7 +62,7 @@ const {
    current: {
      path
    }
-} = Metadata.Api;
+} = Scry.Api;
 
 dv.el('p', path);
 ```
@@ -72,7 +72,7 @@ const {
    current: {
      path
    }
-} = Metadata.Api;
+} = Scry.Api;
 
 dv.el('p', path);
 ```
@@ -86,7 +86,7 @@ const {
    current: {
      path
    }
-} = app.plugins.plugins["metadata-api"].api;
+} = app.plugins.plugins["meta-scry"].api;
 
 dv.el('p', path);
 ```
@@ -96,7 +96,7 @@ const {
    current: {
      path
    }
-} = app.plugins.plugins["metadata-api"].api;
+} = app.plugins.plugins["meta-scry"].api;
 
 dv.el('p', path);
 ```

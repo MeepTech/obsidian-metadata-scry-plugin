@@ -20,6 +20,7 @@ object
 ```jsx:
 <p>{typeof meta.Current.Cache}</p>
 ```
+
 ## -Expected
 object
 # Can Get and Set Value
@@ -33,6 +34,7 @@ Cache["b"] = 2;
 ```jsx
 <p>{meta.current.cache["b"]}</p>
 ```
+
 ## -Result
 ```dataviewjs
 const {Cache} = meta.current;
@@ -42,5 +44,6 @@ Cache["b"] = 2;
 ```jsx:
 <p>{meta.current.cache["b"]}</p>
 ```
+
 ## -Expected
 2

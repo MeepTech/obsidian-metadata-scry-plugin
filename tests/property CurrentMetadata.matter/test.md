@@ -13,16 +13,19 @@ dv.el('p', typeof meta.current.matter)
 ```
 ## -Expected
 object
+
 # Exists and is an Object (JSX)
 ## -Code
 *jsx:*
 ```jsx
 <p>{typeof meta.Current.Matter}</p>
 ```
+
 ## -Result
 ```jsx:
 <p>{typeof meta.Current.Matter}</p>
 ```
+
 ## -Expected
 object
 
@@ -32,10 +35,12 @@ object
 ```jsx
 <p>{typeof meta.current.Matter.test}</p>
 ```
+
 ## -Result
 ```jsx:
 <p>{typeof meta.current.Matter.test}</p>
 ```
+
 ## -Expected
 string
 # Lacks File Info Metadata
@@ -44,9 +49,11 @@ string
 ```jsx
 <p>{typeof meta.current.Matter.file}</p>
 ```
+
 ## -Result
 ```jsx:
 <p>{typeof meta.current.Matter.file}</p>
 ```
+
 ## -Expected
 undefined

@@ -2,27 +2,27 @@
 ## -Code
 
 ```jsx
-const [outerTestSection, innerTestSection] = meta.sections(meta.path("test.data")).named("testSection");
+const [outerTestSection, innerTestSection] = meta.sections(meta.path("./test.data")).named("testSection");
 
 <p>
-  {outerTestSection.level !== innerTestSection.level ? "true" : "false"}
+  {outerTestSection.header.level !== innerTestSection.header.level ? "true" : "false"}
   {", "}
-  {outerTestSection.level}
+  {outerTestSection.header.level}
   {", "}
-  {innerTestSection.level}
+  {innerTestSection.header.level}
 </p>
 ```
 
 ## -Result
 ```jsx:
-const [outerTestSection, innerTestSection] = meta.sections(meta.path("test.data")).named("testSection");
+const [outerTestSection, innerTestSection] = meta.sections(meta.path("./test.data")).named("testSection");
 
 <p>
-  {outerTestSection.level !== innerTestSection.level ? "true" : "false"}
+  {outerTestSection.header.level !== innerTestSection.header.level ? "true" : "false"}
   {", "}
-  {outerTestSection.level}
+  {outerTestSection.header.level}
   {", "}
-  {innerTestSection.level}
+  {innerTestSection.header.level}
 </p>
 ```
 

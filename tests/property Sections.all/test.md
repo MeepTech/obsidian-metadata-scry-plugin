@@ -1,11 +1,11 @@
 # Correct Section Keys in all
 ## -Code
 ```js
-dv.el("p", Object.keys(meta.sections(meta.path("test.data")).all).join(", "));
+dv.el("p", Object.keys(meta.sections(meta.path("./test.data")).all).join(", "));
 ```
 ## -Result
 ```dataviewjs
-dv.el("p", Object.keys(meta.sections(meta.path("test.data")).all).join(", "));
+dv.el("p", Object.keys(meta.sections(meta.path("./test.data")).all).join(", "));
 ```
 
 ## -Expected

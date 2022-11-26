@@ -5,7 +5,7 @@ const sections = meta
   .sections(path("./test.data"))
   .unique;
 
-<Metadata.Sections data={sections} />
+<Scry.Sections data={sections} />
 ```
 
 ## -Result
@@ -14,7 +14,7 @@ const sections = meta
   .sections(path("./test.data"))
   .unique;
 
-<Metadata.Sections data={sections} />
+<Scry.Sections data={sections} />
 ```
 
 ## -Expected
@@ -32,13 +32,12 @@ const sections = meta
   .unique;
 
 <ul>
-	<Metadata.Sections data={sections} renderer={(s, r) => 
+	<Scry.Sections data={sections} renderer={(s, r) => 
 	  <li>
 	    <span>
 	      <b>{s.header.text}</b> 
-	      {console.log(r)}
 	      {": "}
-	      <Metadata.InlineMd src={r}/>
+	      <Scry.InlineMd src={r}/>
 	    </span>
 		</li>} />
 </ul>
@@ -52,13 +51,12 @@ const sections = meta
   .unique;
 
 <ul>
-	<Metadata.Sections data={sections} renderer={(s, r) => 
+	<Scry.Sections data={sections} renderer={(s, r) => 
 	  <li>
 	    <span>
 	      <b>{s.header.text}</b> 
-	      {console.log(r)}
 	      {": "}
-	      <Metadata.InlineMd src={r}/>
+	      <Scry.InlineMd src={r}/>
 	    </span>
 		</li>} />
 </ul>
@@ -72,4 +70,4 @@ const sections = meta
 -   **Last Section**: test test test [dataValue::test]
 
 ## -Errors
-- see [[Metadata Api/component InlineMd/test#Renders Inline Dv Text]]
+- see [[Meta Scry/component InlineMd/test#Renders Inline Dv Text]]
