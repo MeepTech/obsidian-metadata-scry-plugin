@@ -5,11 +5,11 @@ import {
   MetaScryApi
 } from "./types/scrier";
 import { CurrentNoteMetaScryApi } from "./types/current";
-import { CurrentNoteMetadataEditApi, FrontmatterUpdateOptions } from "./types/editor";
+import { CurrentNoteMetaEditApi, FrontmatterUpdateSettings } from "./types/editor";
 import {
   Cache, Frontmatter,
   Metadata,
-  DvData
+  DataviewMatter
 } from "./types/data";
 import { IsString } from './utilities';
 import { InternalStaticMetadataScrierPluginContainer } from './static';
@@ -125,15 +125,15 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     return this.Sections;
   }
 
-  get dv(): DvData {
-    return this._api.dvMatter() as DvData;
+  get dv(): DataviewMatter {
+    return this._api.dvMatter() as DataviewMatter;
   }
 
-  get Dv(): DvData {
+  get Dv(): DataviewMatter {
     return this.dv;
   }
 
-  get edit(): CurrentNoteMetadataEditApi {
+  get edit(): CurrentNoteMetaEditApi {
     const api = this._api.edit;
     const currentFile = this.note;
 
@@ -160,19 +160,19 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     }
   }
 
-  get Edit(): CurrentNoteMetadataEditApi {
+  get Edit(): CurrentNoteMetaEditApi {
     return this.edit;
   }
 
-  patch(frontmatterData: any, propertyName: string | undefined = undefined, options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions): any | object {
+  patch(frontmatterData: any, propertyName: string | undefined = undefined, options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions): any | object {
     return this._api.patch(this.path, frontmatterData, propertyName, options);
   }
 
-  set(frontmatterData: any, options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions): any | object {
+  set(frontmatterData: any, options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions): any | object {
     return this._api.set(this.path, frontmatterData, options);
   }
 
-  clear(frontmatterProperties: string | Array<string> | object | undefined = undefined, options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions) {
+  clear(frontmatterProperties: string | Array<string> | object | undefined = undefined, options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions) {
     return this._api.clear(this.path, frontmatterProperties, options);
   }
   

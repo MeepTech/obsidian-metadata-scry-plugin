@@ -117,9 +117,9 @@ export type CachedFileMetadata = CachedMetadata & {
 };
 
 /**
- * A full metadata set returned from meta.get.
+ * Dataview style frontmatter data.
  */
-export type DvData = {
+export type DataviewMatter = {
 
   /**
    * The dv file object

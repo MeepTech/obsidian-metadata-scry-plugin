@@ -5,7 +5,7 @@ import {
 } from "obsidian";
 import { Link } from "obsidian-dataview";
 import { FileData } from "./data";
-import { DataviewInlineMetadataSourceName, FileInfoMetadataSourceName, FrontmatterMetadataSourceName, NoteSectionsMetadataSourceName, ScryNoteCacheMetadataSourceName } from "src/constants";
+import { Keys } from "src/constants";
 
 /**
  * The sources to pull Metadata values from for a file.
@@ -16,27 +16,27 @@ export type MetadataSources = {
   /**
    * The 'file' field containing metadata about the file itself
    */
-  [FileInfoMetadataSourceName]?: boolean;
+  [Keys.FileInfoMetadataSourceKey]?: boolean;
 
   /**
    * The Frontmatter (YAML at the top of a note)
    */
-  [FrontmatterMetadataSourceName]?: boolean;
+  [Keys.FrontmatterMetadataSourceKey]?: boolean;
 
   /**
    * Inline Dataview data fields
    */
-  [DataviewInlineMetadataSourceName]?: boolean;
+  [Keys.DataviewInlineMetadataSourceKey]?: boolean;
 
   /**
    * Cached values from MetaScryApi.cache
    */
-  [ScryNoteCacheMetadataSourceName]?: boolean;
+  [Keys.ScryNoteCacheMetadataSourceKey]?: boolean;
 
   /**
    * Sections from the note itself
    */
-  [NoteSectionsMetadataSourceName]?: boolean;
+  [Keys.NoteSectionsMetadataSourceKey]?: boolean;
 };
 
 /**

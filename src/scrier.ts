@@ -9,47 +9,29 @@ import {
   DataArray,
   DataviewApi
 } from "obsidian-dataview";
-import {
-  parsePath
-} from "@opd-libs/opd-metadata-lib/lib/Utils"
 
 import {
-  Sections} from './types/sections';
+  Sections
+} from './types/sections';
 import {
-  MetaScryApi} from "./types/scrier";
+  MetaScryApi
+} from "./types/scrier";
 import { CurrentNoteMetaScryApi } from "./types/current";
-import { FrontmatterUpdateOptions, MetadataEditApi } from "./types/editor";
+import { FrontmatterUpdateSettings, MetaEditApi } from "./types/editor";
 import {
   MetaScryPluginApi,
   SplayKebabCasePropertiesOption,
   AppWithPlugins
 } from "./types/plugin";
 import {
-  CachedFileMetadata, DvData,
+  CachedFileMetadata, DataviewMatter,
   Frontmatter,
   Metadata
 } from "./types/data";
 import {
-  KebabCaseWordSeperatorCharacter,
-  ExtensionFilePathSeperatorCharacter,
-  DefaultMarkdownFileExtension,
-  FileMetadataPropertyLowercaseKey,
-  FileMetadataPropertyUppercaseKey,
-  FolderPathSeperatorCharacter,
-  CacheMetadataPropertyLowercaseKey,
-  CacheMetadataPropertyCapitalizedKey,
-  SectionsMetadataPropertyCapitalizedKey,
-  SectionsMetadataPropertyLowercaseKey,
-  ParentFolderPathSelector,
-  CurrentFolderPathSelector,
-  CopyToHtmlPluginKey,
-  DefaultFrontmatterUpdateOptions,
-  FileInfoMetadataSourceName,
-  FrontmatterMetadataSourceName,
-  DataviewInlineMetadataSourceName,
-  ScryNoteCacheMetadataSourceName,
-  NoteSectionsMetadataSourceName,
-  MetadataSourceNames
+	Keys,
+	Symbols,
+  DefaultFrontmatterUpdateOptions
 } from './constants';
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { CurrentNoteScrier } from "./current";
@@ -58,10 +40,10 @@ import {
   BuildDataValueFileFullPath,
   BuildPrototypeFileFullPath,
   IsArray,
-  IsFunction,
   IsObject,
   IsString,
-  ParseFilePathFromSource
+  ParseFilePathFromSource,
+  Path
 } from './utilities';
 import { MetadataSources, NotesSource, SingleFileSource } from './types/sources';
 import { MetaBindApi } from './types/bind';
@@ -72,14 +54,12 @@ import { MetadataInputBinder } from './bind';
  */
 export class MetadataScrier implements MetaScryApi {
   private static _caches: any = {};
-  private _plugin: MetaScryPluginApi;
   private _kebabPropSplayer: (base: any, topLevelPropertiesToIgnore: Array<string> | null) => object;
   private _lowerCaseSplayer: (base: any) => object;
 
   //#region Initalization
-  
-  constructor(plugin: MetaScryPluginApi) {
-    this._plugin = plugin;
+
+  constructor() {
     this._initializeKebabPropSplayer();
     this._initializePropLowercaseSplayer();
   }
@@ -88,7 +68,7 @@ export class MetadataScrier implements MetaScryApi {
 
   private _initializeKebabPropSplayer() {
     this._kebabPropSplayer = (() => {
-      switch (this.plugin.settings.splayKebabCaseProperties) {
+      switch (InternalStaticMetadataScrierPluginContainer.Settings.splayKebabCaseProperties) {
         case SplayKebabCasePropertiesOption.Lowercase:
           return (base, topLevelPropertiesToIgnore) =>
             MetadataScrier._recurseOnAllObjectProperties(base, MetadataScrier._splayKebabToLowercase, topLevelPropertiesToIgnore);
@@ -106,7 +86,7 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   private _initializePropLowercaseSplayer() {
-    this._lowerCaseSplayer = this.plugin.settings.splayFrontmatterWithoutDataview
+    this._lowerCaseSplayer = InternalStaticMetadataScrierPluginContainer.Settings.splayFrontmatterWithoutDataview
       ? base => MetadataScrier._recurseOnAllObjectProperties(base, MetadataScrier._splayToLowerCase)
       : base => base;
   }
@@ -137,7 +117,7 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   private static _splayKebabToLowercase(key: string, value: any, data: any | object): any | object {
-    if (key.includes(KebabCaseWordSeperatorCharacter)) {
+    if (key.includes(Symbols.KebabCaseWordSeperatorCharacter)) {
       data[key.replace(/-/g, "").toLowerCase()] = value;
     }
 
@@ -145,7 +125,7 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   private static _splayKebabToLowerCamelcase(key: string, value: any, data: any | object): any | object {
-    if (key.includes(KebabCaseWordSeperatorCharacter)) {
+    if (key.includes(Symbols.KebabCaseWordSeperatorCharacter)) {
       data[key
         .toLowerCase()
         .split('-')
@@ -157,7 +137,7 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   private static _splayKebabToLowerAndLowerCamelcase(key: string, value: any, data: any | object): any | object {
-    if (key.includes(KebabCaseWordSeperatorCharacter)) {
+    if (key.includes(Symbols.KebabCaseWordSeperatorCharacter)) {
       const lowerKey = key.toLowerCase();
       data[lowerKey.replace(/-/g, "")] = value;
       data[lowerKey
@@ -177,31 +157,8 @@ export class MetadataScrier implements MetaScryApi {
   //#endregion
 
   //#endregion
-  
+
   //#region Static Api Access
-
-  /**
-   * The instance of the Api via the Metascrier class
-   */
-  static get Api(): MetaScryApi {
-    return InternalStaticMetadataScrierPluginContainer.Instance.api;
-  }
-
-  /**
-   * Access to the Dataview Api
-   * (Read access and Data display)
-   */
-  static get DataviewApi(): DataviewApi {
-    return InternalStaticMetadataScrierPluginContainer.DataviewApi;
-  }
-
-  /**
-   * Access to the Metadata editor Api
-   * (Write access)
-   */
-  static get MetadataEditApi(): any {
-    return InternalStaticMetadataScrierPluginContainer.MetadataEditApi
-  }
 
   /**
    * The default sources to pull Metadata values from for a file.
@@ -211,23 +168,23 @@ export class MetadataScrier implements MetaScryApi {
       /**
        * The 'file' field containing metadata about the file itself
        */
-      [FileInfoMetadataSourceName]: true,
+      [Keys.FileInfoMetadataSourceKey]: true,
       /**
        * The Frontmatter (YAML at the top of a note)
        */
-      [FrontmatterMetadataSourceName]: true,
+      [Keys.FrontmatterMetadataSourceKey]: true,
       /**
        * Inline Dataview data fields
        */
-      [DataviewInlineMetadataSourceName]: true,
+      [Keys.DataviewInlineMetadataSourceKey]: true,
       /**
        * Cached values from the Metadata.Cache in a single field named 'cache'.
        */
-      [ScryNoteCacheMetadataSourceName]: true,
+      [Keys.ScryNoteCacheMetadataSourceKey]: true,
       /**
        * Sections from the Metadata Cache
        */
-      [NoteSectionsMetadataSourceName]: true
+      [Keys.NoteSectionsMetadataSourceKey]: true
     };
   }
 
@@ -243,19 +200,18 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   get Plugin(): MetaScryPluginApi {
-    // @ts-expect-error: app.plugin is not mapped.
-    return this._plugin ??= app.plugins.plugins[MetadataScrierPluginKey];
+    return InternalStaticMetadataScrierPluginContainer.Plugin;
   }
 
   get plugin(): MetaScryPluginApi {
     return this.Plugin;
   }
 
-  get edit(): MetadataEditApi {
+  get edit(): MetaEditApi {
     return InternalStaticMetadataScrierPluginContainer.MetadataEditApi;
   }
 
-  get Edit(): MetadataEditApi {
+  get Edit(): MetaEditApi {
     return this.edit;
   }
 
@@ -266,7 +222,7 @@ export class MetadataScrier implements MetaScryApi {
   get Dv(): DataviewApi {
     return InternalStaticMetadataScrierPluginContainer.DataviewApi;
   }
-  
+
   //#endregion
 
   //#region Current File Properties
@@ -288,7 +244,7 @@ export class MetadataScrier implements MetaScryApi {
   }
 
   //#endregion
-   
+
   //#region Metadata Fetchers
 
   vault(source: NotesSource = this.current.path): TFile | TFolder | TAbstractFile | null {
@@ -298,13 +254,13 @@ export class MetadataScrier implements MetaScryApi {
 
     const path = (ParseFilePathFromSource(source) || this.Current.Path);
     return app.vault.getAbstractFileByPath(path)
-      ?? app.vault.getAbstractFileByPath(path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension);
+      ?? app.vault.getAbstractFileByPath(path + Symbols.ExtensionFilePathSeperatorCharacter + Symbols.DefaultMarkdownFileExtension);
   } // aliases:
   file = (source: NotesSource = this.current.path): TFile | null =>
     this.vault(source) as TFile;
   folder = (source: NotesSource = this.current.path): TFolder | null =>
     this.vault(source) as TFolder;
-  
+
   async markdown(source: NotesSource = this.current.path): Promise<string> {
     const file = this.file(source) as TFile;
     const md = await app.vault.cachedRead(file);
@@ -313,15 +269,15 @@ export class MetadataScrier implements MetaScryApi {
   } // aliases:
   md = async (source: NotesSource = this.current.path): Promise<string> =>
     await this.markdown(source);
-  
+
   async html(source: NotesSource = this.current.path, rawMd: string | undefined = undefined): Promise<HTMLElement> {
     const path = ParseFilePathFromSource(source)!;
-    return await (app as AppWithPlugins).plugins.plugins[CopyToHtmlPluginKey]!.convertMarkdown(
+    return await (app as AppWithPlugins).plugins.plugins[Keys.CopyToHtmlPluginKey]!.convertMarkdown(
       rawMd || await this.md(path),
       path
     );
   }
-  
+
   async text(source: NotesSource = this.current.path): Promise<string> {
     const html = await this.html(source);
     const text = html.textContent || "";
@@ -330,7 +286,7 @@ export class MetadataScrier implements MetaScryApi {
   } // aliases:
   txt = async (source: NotesSource = this.current.path): Promise<string> =>
     await this.text(source);
-  
+
   embed(source: NotesSource, container: HTMLElement | undefined = undefined, intoNote: SingleFileSource | undefined = undefined)
     : HTMLElement {
     const containerEl = container || document.createElement("div");
@@ -338,7 +294,7 @@ export class MetadataScrier implements MetaScryApi {
       const workspaceEl = app.workspace.getActiveViewOfType(MarkdownView)!.containerEl.children[1];
       workspaceEl.appendChild(containerEl);
     }
-    
+
     if (!intoNote) {
       intoNote = this.file(this.current.path) as TFile;
     } else {
@@ -356,7 +312,7 @@ export class MetadataScrier implements MetaScryApi {
       showTitle: true,
       sourcePath: (intoNote as TFile).path
     };
-  
+
     //@ts-expect-error secret function
     const embed = MarkdownRenderer.loadEmbed(
       embedData,
@@ -387,12 +343,12 @@ export class MetadataScrier implements MetaScryApi {
     if (result !== null) {
       result.path = fileObject.path;
     }
-    
+
     return result;
   } // aliases:
   obsidianMetadataFileCache = (source: NotesSource = this.current.path): CachedFileMetadata | CachedFileMetadata[] | null =>
     this.omfc(source);
-  
+
   frontmatter(source: NotesSource = this.current.path): Frontmatter | Frontmatter[] | null {
     const fileCache = this.omfc(source);
 
@@ -421,9 +377,9 @@ export class MetadataScrier implements MetaScryApi {
     }
   }
 
-  dvMatter(source: NotesSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null {
+  dvMatter(source: NotesSource = null, useSourceQuery: boolean = false): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null {
     const providedPath: string = source ? ParseFilePathFromSource(source) as string : this.Current.Path;
-    const paths = MetadataScrier
+    const paths = InternalStaticMetadataScrierPluginContainer
       .DataviewApi
       .pagePaths(useSourceQuery ? providedPath : (`"` + providedPath + '"'));
 
@@ -432,14 +388,17 @@ export class MetadataScrier implements MetaScryApi {
     } else if (!paths.length) {
       return null;
     } else {
-      const result = MetadataScrier
+      const result = InternalStaticMetadataScrierPluginContainer
         .DataviewApi
         .page(paths[0]);
-    
-      return this._kebabPropSplayer(result, [FileMetadataPropertyLowercaseKey, FileMetadataPropertyUppercaseKey]) as DvData;
+
+			return this._kebabPropSplayer(result, [
+				Keys.FileMetadataPropertyLowercaseKey,
+				Keys.FileMetadataPropertyUppercaseKey
+			]) as DataviewMatter;
     }
   } // aliases:
-  dataviewFrontmatter = (source: NotesSource = null, useSourceQuery: boolean = false): DvData | DataArray<DvData | DataArray<any> | null> | null =>
+  dataviewFrontmatter = (source: NotesSource = null, useSourceQuery: boolean = false): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null =>
     this.dvMatter(source, useSourceQuery);
 
   cache(source: NotesSource = null): Cache | Cache[] {
@@ -451,7 +410,7 @@ export class MetadataScrier implements MetaScryApi {
 
         return MetadataScrier._caches[key];
       }
-      
+
       throw "Invalid Key for File";
     } else if (fileObject instanceof TFolder) {
       return fileObject.children.map(f => this.cache(f) as (Cache | Cache[])).flat();
@@ -463,8 +422,8 @@ export class MetadataScrier implements MetaScryApi {
   } // aliases:
   temp = (source: NotesSource = null): Cache | Cache[] =>
     this.cache(source);
-  
-  
+
+
   globals(key: string | string[], setToValue?: any): any | any[] | undefined {
     if (typeof key === "string") {
       if (arguments.length > 1) {
@@ -493,8 +452,8 @@ export class MetadataScrier implements MetaScryApi {
       if (source instanceof TFolder) {
         return source.children.map(c => this.get(c, sources)).flat();
       } else if (!source!.hasOwnProperty("path")) {
-        if (MetadataSourceNames.some(key => source!.hasOwnProperty(key))) {
-          if (!Object.keys(source!).some(key => !MetadataSourceNames.includes(key))) {
+        if (Keys.MetadataSourceKeys.some(key => source!.hasOwnProperty(key))) {
+          if (!Object.keys(source!).some(key => !Keys.MetadataSourceKeys.includes(key))) {
             return this.get(this.current.path, source as MetadataSources);
           }
         }
@@ -506,7 +465,7 @@ export class MetadataScrier implements MetaScryApi {
         ?? this.current.path)
       : this.Current.Path;
 
-    if (filePath?.endsWith(FolderPathSeperatorCharacter)) {
+    if (filePath?.endsWith(Symbols.FolderPathSeperatorCharacter)) {
       const folderName = filePath.substring(0, -1);
       const fileObject = this.vault(folderName);
 
@@ -526,73 +485,73 @@ export class MetadataScrier implements MetaScryApi {
     let values: any = {};
 
     if (sources === true) {
-      values = this._kebabPropSplayer(MetadataScrier
+      values = this._kebabPropSplayer(InternalStaticMetadataScrierPluginContainer
         .DataviewApi
-        .page(filePath), [FileMetadataPropertyLowercaseKey, FileMetadataPropertyUppercaseKey]) || {};
+        .page(filePath), [Keys.FileMetadataPropertyLowercaseKey, Keys.FileMetadataPropertyUppercaseKey]) || {};
     } else {
       if (sources === false) {
         return {};
       }
 
       // if we need dv sources
-      if (sources[DataviewInlineMetadataSourceName] || sources[FileInfoMetadataSourceName]) {
-        values = this._kebabPropSplayer(MetadataScrier
+      if (sources[Keys.DataviewInlineMetadataSourceKey] || sources[Keys.FileInfoMetadataSourceKey]) {
+        values = this._kebabPropSplayer(InternalStaticMetadataScrierPluginContainer
           .DataviewApi
-          .page(filePath), [FileMetadataPropertyLowercaseKey, FileMetadataPropertyUppercaseKey]) || {};
+          .page(filePath), [Keys.FileMetadataPropertyLowercaseKey, Keys.FileMetadataPropertyUppercaseKey]) || {};
 
         // remove dv inline?
         let frontmatter: Frontmatter = null!;
-        if (!sources[DataviewInlineMetadataSourceName]) {
+        if (!sources[Keys.DataviewInlineMetadataSourceKey]) {
           frontmatter = this.frontmatter(filePath) as Frontmatter;
           Object.keys(values).forEach(prop => {
             // if it's not a frontmatter prop or the 'file' metadata prop
-            if (!frontmatter.hasOwnProperty(prop) && (prop !== FileMetadataPropertyLowercaseKey && prop !== FileMetadataPropertyUppercaseKey)) {
+            if (!frontmatter.hasOwnProperty(prop) && (prop !== Keys.FileMetadataPropertyLowercaseKey && prop !== Keys.FileMetadataPropertyUppercaseKey)) {
               delete values[prop];
             }
           });
         }
 
         // remove frontmatter?
-        if (!sources[FrontmatterMetadataSourceName]) {
+        if (!sources[Keys.FrontmatterMetadataSourceKey]) {
           frontmatter = frontmatter || this.frontmatter(filePath);
           Object.keys(frontmatter).forEach(prop => {
             delete values[prop];
           });
         }
       } // just the frontmatter/cache?
-      else if (sources[FrontmatterMetadataSourceName]) {
+      else if (sources[Keys.FrontmatterMetadataSourceKey]) {
         values = this.frontmatter(filePath);
       }
     }
 
     // add/remove file metadata field(from dv)?
-    if (sources === true || (sources as MetadataSources)[FileInfoMetadataSourceName]) {
-      values[FileMetadataPropertyLowercaseKey] = values.file;
-      values[FileMetadataPropertyUppercaseKey] = values.file;
+    if (sources === true || (sources as MetadataSources)[Keys.FileInfoMetadataSourceKey]) {
+      values[Keys.FileMetadataPropertyLowercaseKey] = values.file;
+      values[Keys.FileMetadataPropertyUppercaseKey] = values.file;
     } else {
-      delete values[FileMetadataPropertyUppercaseKey];
-      delete values[FileMetadataPropertyLowercaseKey];
+      delete values[Keys.FileMetadataPropertyUppercaseKey];
+      delete values[Keys.FileMetadataPropertyLowercaseKey];
     }
 
     // add cache?
-    if (sources === true || sources[ScryNoteCacheMetadataSourceName]) {
+    if (sources === true || sources[Keys.ScryNoteCacheMetadataSourceKey]) {
       const foundCache = this.cache(filePath);
-      values[CacheMetadataPropertyLowercaseKey] = foundCache;
-      values[CacheMetadataPropertyCapitalizedKey] = foundCache;
+      values[Keys.CacheMetadataPropertyLowercaseKey] = foundCache;
+      values[Keys.CacheMetadataPropertyCapitalizedKey] = foundCache;
     }
 
     // add sections?
-    if (sources === true || sources[NoteSectionsMetadataSourceName]) {
-      if (IsObject(sources) && !(sources as MetadataSources)[FileInfoMetadataSourceName]) {
-        values[FileMetadataPropertyLowercaseKey] = {};
-        values[FileMetadataPropertyUppercaseKey] = {};
+    if (sources === true || sources[Keys.NoteSectionsMetadataSourceKey]) {
+      if (IsObject(sources) && !(sources as MetadataSources)[Keys.FileInfoMetadataSourceKey]) {
+        values[Keys.FileMetadataPropertyLowercaseKey] = {};
+        values[Keys.FileMetadataPropertyUppercaseKey] = {};
       }
 
       const sections = this.sections(filePath);
-      values[FileMetadataPropertyLowercaseKey][SectionsMetadataPropertyCapitalizedKey] = sections;
-      values[FileMetadataPropertyLowercaseKey][SectionsMetadataPropertyLowercaseKey] = sections;
-      values[FileMetadataPropertyUppercaseKey][SectionsMetadataPropertyCapitalizedKey] = sections;
-      values[FileMetadataPropertyUppercaseKey][SectionsMetadataPropertyLowercaseKey] = sections;
+      values[Keys.FileMetadataPropertyLowercaseKey][Keys.SectionsMetadataPropertyCapitalizedKey] = sections;
+      values[Keys.FileMetadataPropertyLowercaseKey][Keys.SectionsMetadataPropertyLowercaseKey] = sections;
+      values[Keys.FileMetadataPropertyUppercaseKey][Keys.SectionsMetadataPropertyCapitalizedKey] = sections;
+      values[Keys.FileMetadataPropertyUppercaseKey][Keys.SectionsMetadataPropertyLowercaseKey] = sections;
     }
 
     return values;
@@ -607,7 +566,7 @@ export class MetadataScrier implements MetaScryApi {
   async patch(
     source: SingleFileSource,
     frontmatterData: Record<string, any> | any, propertyName: string | null = null,
-    options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions
+    options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions
   ): Promise<Frontmatter> {
     let fileName: string = null!;
     if (options.prototype && options.toValuesFile) {
@@ -639,7 +598,7 @@ export class MetadataScrier implements MetaScryApi {
   async set(
     source: SingleFileSource,
     frontmatterData: any,
-    options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions
+    options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions
   ): Promise<Frontmatter> {
     let fileName: string = null!;
     if (options.prototype && options.toValuesFile) {
@@ -658,7 +617,7 @@ export class MetadataScrier implements MetaScryApi {
   async clear(
     source: SingleFileSource = this.current.path,
     frontmatterProperties: string | Array<string> | Record<string, any> | undefined = undefined,
-    options: FrontmatterUpdateOptions = DefaultFrontmatterUpdateOptions
+    options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions
   ): Promise<Frontmatter> {
     if (options.prototype && options.toValuesFile) {
       await this.clear(source, frontmatterProperties, { ...options, prototype: false });
@@ -685,170 +644,24 @@ export class MetadataScrier implements MetaScryApi {
     throw "not implemented";
   }
 
-  //#endregion
-  
-  //#region Utilities
-  
-  //#region Object Deep Property Utilities
-  
-  /**
-   * Find a deep property in an object.
-   *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {object} onObject The object containing the desired key
-   *
-   * @returns true if the property exists, false if not.
-   */
-  static ContainsDeepProperty(propertyPath: string | Array<string>, onObject: any): boolean {
-    const keys = (IsString(propertyPath))
-      ? (propertyPath as string)
-        .split('.')
-      : propertyPath;
-
-    let parent = onObject;
-    for (const currentKey of keys) {
-      if (!IsObject(parent)) {
-        return false;
-      }
-
-      if (!parent.hasOwnProperty(currentKey)) {
-        return false;
-      }
-
-      parent = parent[currentKey];
-    }
-
-    return true;
-  }
-
-  /**
-   * Get a deep property in an object, null if not found.
-   *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
-   * @param {object} fromObject The object containing the desired key
-   *
-   * @returns if the property exists.
-   */
-  static TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean {
-    const keys = (IsString(propertyPath))
-      ? parsePath(propertyPath as string)
-      : propertyPath;
-
-    let parent = fromObject;
-    for (const currentKey of keys) {
-      if (!IsObject(parent) || !parent.hasOwnProperty(currentKey)) {
-        if (thenDo && thenDo.onFalse) {
-          thenDo.onFalse();
-        }
-        return false;
-      }
-
-      parent = parent[currentKey];
-    }
-
-    if (thenDo) {
-      const then = thenDo.onTrue || thenDo;
-      if (then) {
-        return then(parent);
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Get a deep property in an object, null if not found.
-   *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {object} fromObject The object containing the desired key
-   *
-   * @returns The found deep property, or null if not found.
-   */
-  static GetDeepProperty(propertyPath: string | Array<string>, fromObject: any): any | null {
-    return (IsString(propertyPath)
-      ? (propertyPath as string)
-        .split('.')
-      : (propertyPath as string[]))
-      .reduce((t, p) => t?.[p], fromObject);
-  }
-
-  /**
-   * Set a deep property in an object, even if it doesn't exist.
-   *
-   * @param {string|[string]} propertyPath Array of keys, or dot seperated propery key.
-   * @param {object|function(object)} value The value to set, or a function to update the current value and return it.
-   * @param {object} fromObject The object containing the desired key
-   *
-   * @returns The found deep property, or null if not found.
-   */
-  static SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void {
-    const keys = (IsString(propertyPath))
-      ? (propertyPath as string)
-        .split('.')
-      : propertyPath;
-
-    let parent = onObject;
-    let currentKey;
-    for (currentKey of keys) {
-      if (!IsObject(parent)) {
-        throw `Property: ${currentKey}, in Path: ${propertyPath}, is not an object. Child property values cannot be set!`;
-      }
-
-      // if this parent doesn't have the property we want, add it as an empty object for now.
-      if (!parent.hasOwnProperty(currentKey)) {
-        parent[currentKey] = {};
-      }
-
-      // if this isn't the last one, set it as parent.
-      if (currentKey != keys[keys.length - 1]) {
-        parent = parent[currentKey];
-      }
-    }
-
-    if (!currentKey) {
-      throw "No Final Key Provided!?";
-    }
-
-    // TODO: add ignore flag options variable for this
-    if (IsFunction(value)) {
-      parent[currentKey] = value(parent[currentKey]);
-    } else {
-      parent[currentKey] = value;
-    }
-  }
-  
   bind: MetaBindApi
     = MetadataInputBinder;
-    //alias:
+  //alias:
   inputField: MetaBindApi
     = MetadataInputBinder;
-    //alias:
+  //alias:
   Bind: MetaBindApi
     = MetadataInputBinder;
-    //alias:
+  //alias:
   InputField: MetaBindApi
     = MetadataInputBinder;
-  
+
   //#endregion
 
-  //#region Filename Utilities
+  //#region Utilities
 
-  path(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null) : string {
-    return MetadataScrier._addExtension(MetadataScrier._findPath(relativePath, extension, rootFolder), extension);
-  }
-
-  /**
-   * Turn a relative path into a full path
-   *
-   * @param relativePath The relative path to map to. Will preform immediate search if it starts with ?.
-   * @param extension The extension to add. Defaults to no extension (false/empty). If true is passed in .md will be added.
-   * @param rootFolder (Optional) The root folder path the relative path is relative too. Defaults to the current note's folder
-   *
-   * @returns The full file path.
-   */
-  static Path(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null): string {
-    return (MetadataScrier.Api.path(relativePath, extension, rootFolder));
+  path(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null): string {
+    return Path(relativePath, extension, rootFolder)
   }
 
   private static _parseFileNameFromDataFileFileOrPrototype(toValuesFile: string | boolean, source: NotesSource, prototype: string | boolean) {
@@ -857,76 +670,15 @@ export class MetadataScrier implements MetaScryApi {
         ? BuildDataValueFileFullPath(ParseFilePathFromSource(source)!)
         : (IsString(toValuesFile)
           ? BuildDataValueFileFullPath(toValuesFile as string)
-          : BuildDataValueFileFullPath(MetadataScrier.Api.Current.Path))
+          : BuildDataValueFileFullPath(InternalStaticMetadataScrierPluginContainer.Api.Current.Path))
       : prototype
         ? source
           ? BuildPrototypeFileFullPath(ParseFilePathFromSource(source)!)
           : (IsString(prototype)
             ? BuildPrototypeFileFullPath(prototype as string)
-            : BuildPrototypeFileFullPath(MetadataScrier.Api.Current.Path))
-        : ParseFilePathFromSource(source) || MetadataScrier.Api.Current.Path;
+            : BuildPrototypeFileFullPath(InternalStaticMetadataScrierPluginContainer.Api.Current.Path))
+        : ParseFilePathFromSource(source) || InternalStaticMetadataScrierPluginContainer.Api.Current.Path;
   }
-  
-  private static _findPath(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null) : string {
-    if (!relativePath) {
-      return MetadataScrier.Api.current.path
-    }
-    
-    let currentFolder: TFolder = rootFolder
-      ? (app.vault.getAbstractFileByPath(rootFolder) as TFolder)
-      : MetadataScrier.Api.Current.Note.parent;
-    
-    if (!currentFolder) {
-      throw `Root Folder Not Found: ${currentFolder}.`;
-    }
-
-    if (relativePath.startsWith("?")) {
-      const foundFile = app.metadataCache.getFirstLinkpathDest(MetadataScrier._addExtension(relativePath.substring(1), extension), currentFolder.path);
-      if (foundFile) {
-        return foundFile.path.substring(0, foundFile.path.length - foundFile.extension.length - 1);
-      }
-    }
-
-    const [fileName, ...folders] = relativePath.split(FolderPathSeperatorCharacter).reverse();
-    let absolutePath = fileName;
-
-    if (folders && folders.length) {
-      for (var folder of folders.reverse()) {
-        if (folder === ParentFolderPathSelector) {
-          currentFolder = currentFolder.parent;
-        } else if (folder === CurrentFolderPathSelector) {
-          continue;
-        } else {
-          absolutePath = folder + (absolutePath ? FolderPathSeperatorCharacter + absolutePath : "");
-        }
-      }
-    } else {
-      const foundFile = app.metadataCache.getFirstLinkpathDest(MetadataScrier._addExtension(relativePath, extension), currentFolder.path);
-      if (foundFile) {
-        return foundFile.path.substring(0, foundFile.path.length - foundFile.extension.length - 1);
-      }
-    }
-
-    if (currentFolder.path !== FolderPathSeperatorCharacter) {
-      return currentFolder.path + (absolutePath ? FolderPathSeperatorCharacter + absolutePath : "");
-    } else {
-      return absolutePath;
-    }
-  }
-
-  private static _addExtension(path: string, extension: string | boolean): string {
-    if (extension) {
-      if (!IsString(extension)) {
-        return path + ExtensionFilePathSeperatorCharacter + DefaultMarkdownFileExtension;
-      } else {
-        return path + ExtensionFilePathSeperatorCharacter + extension;
-      }
-    } else {
-      return path;
-    }
-  }
-
-  //#endregion
 
   //#endregion
 }

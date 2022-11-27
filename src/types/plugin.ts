@@ -2,12 +2,7 @@ import {
   App,
   Plugin
 } from "obsidian";
-import { DataviewApi } from "obsidian-dataview";
-import {
-    CopyToHtmlPluginKey,
-    DataviewPluginKey,
-    MetaBindWithApiPluginKey,
-  MetadataScrierPluginKey, ReactComponentsPluginKey} from "../constants";
+import { Keys } from "../constants";
 import { CopyToHtmlPlugin } from "./external/copy-to-html";
 import { MetaBindPlugin } from "./external/meta-bind";
 import { MetaScryApi } from "./scrier";
@@ -20,14 +15,17 @@ export enum SplayKebabCasePropertiesOption {
    * Only use original keys
    */
   Disabled = 0,
+
   /**
    * Splits into only lower camel case
    */
   Lowercase = 1,
+
   /**
    * Splits only into upper camel case
    */
   CamelCase = 2,
+
   /**
    * Split into loweCamel and Upper/UntouchedCamelCase
    */
@@ -39,15 +37,15 @@ export enum SplayKebabCasePropertiesOption {
  */
 export type AppWithPlugins = {
   plugins: {
-    enabledPlugins: Set<string>;	
+    enabledPlugins: Set<string>;
     disablePlugin(key: string): void;
     plugins: {
-      [MetadataScrierPluginKey]?: MetaScryPluginApi;
-      [ReactComponentsPluginKey]?: Plugin;
+      [Keys.MetadataScrierPluginKey]?: MetaScryPluginApi;
+      [Keys.ReactComponentsPluginKey]?: Plugin;
       // TODO: remove this plugin field when all of these are moved to npm packages:      
-      [MetaBindWithApiPluginKey]?: MetaBindPlugin;
+      [Keys.MetaBindWithApiPluginKey]?: MetaBindPlugin;
       // TODO: remove this plugin field when all of these are moved to npm packages:      
-      [CopyToHtmlPluginKey]?: CopyToHtmlPlugin;
+      [Keys.CopyToHtmlPluginKey]?: CopyToHtmlPlugin;
     };
   };
 } & App;
@@ -60,34 +58,31 @@ export type MetaScryPluginApi = {
   /**
    * Get the current instance of the MetaScryApi object.
    *
-   * @alias {@link MetadataScrier.Api}
    * @alias {@link MetaScryPluginApi.api}
-   * @alias {@link MetadataScrierPlugin.Instance}
    * @alias {@link global#scry}
+   * @alias {@link global#meta}
+   * @alias {@link MetaScry.Api}
    */
   get Api(): MetaScryApi;
 
   /**
    * Get the current instance of the MetaScryApi object.
    *
-   * @alias {@link MetadataScrier.Api}
    * @alias {@link MetaScryPluginApi.Api}
-   * @alias {@link MetadataScrierPlugin.Instance}
    * @alias {@link global#scry}
+   * @alias {@link global#meta}
+   * @alias {@link MetaScry.Api}
    */
   get api(): MetaScryApi;
 
   /**
    * The key for this plugin.
-   *
-   * @alias {@link MetadataScrierPluginKey}
-   * @alias {@link MetadataScrierPlugin.Key}
    */
   get key(): string;
 
   /**
    * The settings for the api.
-   * Call saveSettings if you want to update this
+   * Call updateSettings if you want to update this
    */
   get settings(): MetaScryPluginSettings;
 
@@ -124,6 +119,7 @@ export type MetaScryPluginApi = {
  * Interface for the plugin settings
  */
 export interface MetaScryPluginSettings {
+
   /**
   * A comma seperated list of the global property keys for the global 'cache' variable
    */

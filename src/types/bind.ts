@@ -1,10 +1,21 @@
 import {
     AbstractInputField,
   InputFieldArgumentType,
+  InputFieldMarkdownRenderChildType,
   InputFieldType
 } from "./external/meta-bind";
-import { BindSettings } from "./scrier";
 import { NotesSource } from "./sources";
+
+/**
+ * Settings used for the Binding Api
+ */
+ export type BindSettings = {
+	templateName?: string;
+	renderMode?: InputFieldMarkdownRenderChildType | 'inline' | 'block' | 'div' | 'span',
+	recurseFrontmatterFields?: boolean,
+	returnAbstractField?: boolean,
+	callOnLoad?: true | boolean
+  } & Object
 
 //#region global
 

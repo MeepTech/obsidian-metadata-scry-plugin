@@ -1,6 +1,7 @@
 import { TFolder } from "obsidian";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import {
+	BindSettings,
     CurrentMetaBindApi,
     CurrentMetaBindGenericFunction,
     CurrentMetaBindIndividualInputTypeFunction,
@@ -16,7 +17,6 @@ import {
     InputFieldMarkdownRenderChildType,
     InputFieldType
 } from "./types/external/meta-bind";
-import { BindSettings } from "./types/scrier";
 import { NotesSource } from "./types/sources";
 import { IsArray, ParseFilePathFromSource } from "./utilities";
 
@@ -32,8 +32,8 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
   args: Record<InputFieldArgumentType, any> | {} = {},
   options: BindSettings = {}
 ): MetaBindApiReturn => {
-  const meta = InternalStaticMetadataScrierPluginContainer.Instance.Api;
-  const plugin = InternalStaticMetadataScrierPluginContainer.MetaBindApi;
+  const meta = InternalStaticMetadataScrierPluginContainer.Api;
+  const metaBindApi = InternalStaticMetadataScrierPluginContainer.MetaBindApi;
 
   // check if one or many files.
   var declaration: string | InputFieldDeclaration;
@@ -88,7 +88,7 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
       : meta.current.pathex;
   }
     
-  declaration = plugin.buildDeclaration(
+  declaration = metaBindApi.buildDeclaration(
     declaration,
     args,
     undefined,
@@ -106,7 +106,7 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
     ) ? InputFieldMarkdownRenderChildType.CODE_BLOCK
       : InputFieldMarkdownRenderChildType.INLINE_CODE_BLOCK;
   
-  const abstractField = plugin.buildInputFieldMarkdownRenderChild(
+  const abstractField = metaBindApi.buildInputFieldMarkdownRenderChild(
     declaration,
     source,
     document.createElement(mode ? 'div' : 'span'),

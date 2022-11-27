@@ -1,7 +1,7 @@
 import { TFile } from "obsidian";
 import { Frontmatter, Metadata, Cache } from "./data";
 import { Sections } from "./sections";
-import { FrontmatterUpdateOptions, CurrentNoteMetadataEditApi } from "./editor";
+import { FrontmatterUpdateSettings, CurrentNoteMetaEditApi } from "./editor";
 import { InputFieldDeclaration } from "./external/meta-bind";
 import { CurrentMetaBindApi } from "./bind";
 
@@ -219,7 +219,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link set}
    * @see {@link clear}
    */
-  get Edit(): CurrentNoteMetadataEditApi;
+  get Edit(): CurrentNoteMetaEditApi;
 
   /**
    * A link to the opd-metadata-lib plugin api
@@ -231,7 +231,7 @@ export interface CurrentNoteMetaScryApi {
    * @see {@link set}
    * @see {@link clear}
    */
-  get edit(): CurrentNoteMetadataEditApi;
+  get edit(): CurrentNoteMetaEditApi;
 
   /**
    * Patch individual properties of the current file's frontmatter metadata.
@@ -250,7 +250,7 @@ export interface CurrentNoteMetaScryApi {
   patch(
     frontmatterData: any,
     propertyName?: string | undefined,
-    options?: FrontmatterUpdateOptions
+    options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
 
   /**
@@ -269,7 +269,7 @@ export interface CurrentNoteMetaScryApi {
    */
   set(
     frontmatterData: any,
-    options?: FrontmatterUpdateOptions
+    options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
 
   /**
@@ -289,7 +289,7 @@ export interface CurrentNoteMetaScryApi {
    */
   clear(
     frontmatterProperties?: string | Array<string> | object | undefined,
-    options?: FrontmatterUpdateOptions
+    options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
 
   /**

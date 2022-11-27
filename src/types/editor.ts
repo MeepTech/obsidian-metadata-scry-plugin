@@ -9,10 +9,10 @@ import { NotesSource } from "./sources";
  *
  * // TODO: update the inline variable descriptions when functionality is added to opd-metadata-lib.
  *
- * @see {@link CurrentNoteMetadataEditApi}
+ * @see {@link CurrentNoteMetaEditApi}
  */
 
-export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
+export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
 
   /**
    * Get the frontmatter field from a given file
@@ -24,7 +24,7 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @returns The updated frontmatter object
    *
    * @alias {@link getFieldFromTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link CurrentNoteMetadataEditApi.get}
+   * @see {@link CurrentNoteMetaEditApi.get}
    *
    * @see {@link getField}
    * @see {@link MetaScryApi.get}
@@ -41,7 +41,7 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @returns If the frontmatter property is present in the given file
    *
    * @alias {@link doesFieldExistInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link CurrentNoteMetadataEditApi.exists}
+   * @see {@link CurrentNoteMetaEditApi.exists}
    *
    * @see {@link hasField}
    * @see {@link MetaScryApi.get}
@@ -61,12 +61,12 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
    * @alias {@link insertFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link CurrentNoteMetadataEditApi.insert}
+   * @see {@link CurrentNoteMetaEditApi.insert}
    *
    * @see {@link insertField}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.patch}
-   * @see {@link CurrentNoteMetadataEditApi.patch}
+   * @see {@link CurrentNoteMetaEditApi.patch}
    */
   insertFieldInTFile(propertyAccessorKey: string, value: (any | (() => any)), source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
 
@@ -82,12 +82,12 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
    * @alias {@link updateFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link CurrentNoteMetadataEditApi.update}
+   * @see {@link CurrentNoteMetaEditApi.update}
    *
    * @see {@link updateField}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.patch}
-   * @see {@link CurrentNoteMetadataEditApi.patch}
+   * @see {@link CurrentNoteMetaEditApi.patch}
    */
   updateFieldInTFile(propertyAccessorKey: string, newValue: any, source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
 
@@ -103,12 +103,12 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
    * @alias {@link updateOrInsertFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link CurrentNoteMetadataEditApi.upsert}
+   * @see {@link CurrentNoteMetaEditApi.upsert}
    *
    * @see {@link updateOrInsertField}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.patch}
-   * @see {@link CurrentNoteMetadataEditApi.patch}
+   * @see {@link CurrentNoteMetaEditApi.patch}
    */
   updateOrInsertFieldInTFile(propertyAccessorKey: string, newValue: any, source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
 
@@ -123,12 +123,12 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @returns The updated frontmatter object or undefined (if inline is true)
    *
    * @alias {@link deleteFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link CurrentNoteMetadataEditApi.delete}
+   * @see {@link CurrentNoteMetaEditApi.delete}
    *
    * @see {@link deleteField}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.clear}
-   * @see {@link CurrentNoteMetadataEditApi.clear}
+   * @see {@link CurrentNoteMetaEditApi.clear}
    */
   deleteFieldInTFile(propertyAccessorKey: string, source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
 
@@ -142,10 +142,10 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
    * @returns The updated frontmatter object
    *
    * @alias {@link OpdMetadataEditLibrary.updateFrontmatter} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @alias {@link CurrentNoteMetadataEditApi.replace}
+   * @alias {@link CurrentNoteMetaEditApi.replace}
    *
    * @see {@link MetaScryApi.edit}
-   * @see {@link CurrentNoteMetadataEditApi.set}
+   * @see {@link CurrentNoteMetaEditApi.set}
    * @see {@link MetaScryApi.set}
    */
   setAllFrontmatter(newMatter: Frontmatter, source?: NotesSource): Promise<Frontmatter>;
@@ -155,9 +155,9 @@ export interface MetadataEditApi extends ContextlessMetadataEditApiMethods {
 /**
  * Api object with all functions found in the 'OPD-metadata-lib' metadata editor plugin, with the targets of all of the functions directed to the desired file.
  *
- * @see {@link MetadataEditApi}
+ * @see {@link MetaEditApi}
  */
-export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMethods {
+export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethods {
 
   /**
    * Get the frontmatter field from a given file
@@ -168,7 +168,7 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @returns The updated frontmatter object
    *
    * @alias {@link getFieldFromTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link MetadataEditApi.getFieldFromTFile}
+   * @see {@link MetaEditApi.getFieldFromTFile}
    *
    * @see {@link getField}
    * @see {@link MetaScryApi.get}
@@ -184,7 +184,7 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @returns If the frontmatter property is present in the given file
    *
    * @alias {@link doesFieldExistInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link MetadataEditApi.doesFieldExistInTFile}
+   * @see {@link MetaEditApi.doesFieldExistInTFile}
    *
    * @see {@link hasField}
    * @see {@link MetaScryApi.get}
@@ -203,12 +203,12 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
    * @alias {@link insertFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link MetadataEditApi.insertFieldInTFile}
+   * @see {@link MetaEditApi.insertFieldInTFile}
    *
    * @see {@link insertField}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.patch}
-   * @see {@link CurrentNoteMetadataEditApi.patch}
+   * @see {@link CurrentNoteMetaEditApi.patch}
    */
   insert(propertyAccessorKey: string, value: any, inline?: boolean): Promise<Frontmatter> | Promise<any>;
 
@@ -223,12 +223,12 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
    * @alias {@link updateFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link MetadataEditApi.updateFieldInTFile}
+   * @see {@link MetaEditApi.updateFieldInTFile}
    *
    * @see {@link updateField}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.patch}
-   * @see {@link CurrentNoteMetadataEditApi.patch}
+   * @see {@link CurrentNoteMetaEditApi.patch}
    */
   update(propertyAccessorKey: string, newValue: any, inline?: boolean): Promise<Frontmatter> | Promise<any>;
 
@@ -243,12 +243,12 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
    * @alias {@link updateOrInsertFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link MetadataEditApi.updateOrInsertFieldInTFile}
+   * @see {@link MetaEditApi.updateOrInsertFieldInTFile}
    *
    * @see {@link updateField}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.patch}
-   * @see {@link CurrentNoteMetadataEditApi.patch}
+   * @see {@link CurrentNoteMetaEditApi.patch}
    */
   upsert(propertyAccessorKey: string, newValue: any, inline?: boolean): Promise<Frontmatter> | Promise<any>;
 
@@ -262,11 +262,11 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @returns The updated frontmatter object or undefined (if inline is true)
    *
    * @alias {@link deleteFieldInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @see {@link MetadataEditApi.deleteFieldInTFile}
+   * @see {@link MetaEditApi.deleteFieldInTFile}
    *
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.clear}
-   * @see {@link CurrentNoteMetadataEditApi.clear}
+   * @see {@link CurrentNoteMetaEditApi.clear}
    * @see {@link deleteField}
    */
   delete(propertyAccessorKey: string, inline?: boolean): Promise<Frontmatter> | Promise<undefined>;
@@ -280,10 +280,10 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @returns The updated frontmatter object
    *
    * @alias {@link OpdMetadataEditLibrary.updateFrontmatter} This function is a wrapper for an Opd-Metadata-Lib api function.
-   * @alias {@link MetadataEditApi.setAllFrontmatter}
+   * @alias {@link MetaEditApi.setAllFrontmatter}
    *
    * @see {@link MetaScryApi.edit}
-   * @see {@link CurrentNoteMetadataEditApi.set}
+   * @see {@link CurrentNoteMetaEditApi.set}
    * @see {@link MetaScryApi.set}
    */
   replace(newMatter: Frontmatter): Promise<Frontmatter> | Promise<any>;
@@ -295,7 +295,7 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
    * @see {@link OpdMetadataEditLibrary.removeFrontmatter}
    * @see {@link MetaScryApi.edit}
    * @see {@link MetaScryApi.clear}
-   * @see {@link CurrentFileMetaScryApi.clear}
+   * @see {@link CurrentNoteMetaScryApi.clear}
    */
   clear(): Promise<void>;
 }
@@ -303,7 +303,7 @@ export interface CurrentNoteMetadataEditApi extends ContextlessMetadataEditApiMe
 /**
  * Passed into any update functions to modify what they do.
  */
- export interface FrontmatterUpdateOptions {
+ export interface FrontmatterUpdateSettings {
   toValuesFile?: boolean | string;
   prototype?: string | boolean;
   inline?: boolean;

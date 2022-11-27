@@ -7,12 +7,11 @@ import {
   DataArray,
   DataviewApi} from "obsidian-dataview";
 import { MetaScryPluginApi } from "./plugin";
-import { Frontmatter, Metadata, CachedFileMetadata, DvData, Cache } from "./data";
+import { Frontmatter, Metadata, CachedFileMetadata, DataviewMatter, Cache } from "./data";
 import { Sections } from "./sections";
 import { NotesSource, MetadataSources, SingleFileSource } from "./sources";
-import { MetadataEditApi as MetaEditApi, FrontmatterUpdateOptions } from "./editor";
+import { MetaEditApi as MetaEditApi, FrontmatterUpdateSettings } from "./editor";
 import { CurrentNoteMetaScryApi } from "./current";
-import { InputFieldMarkdownRenderChildType } from "./external/meta-bind";
 import { MetaBindApi } from "./bind";
 
  /**
@@ -25,7 +24,7 @@ export interface MetaScryApi {
    * Get the plugin that runs this api
    *
    * @alias {@link plugin}
-   * @alias {@link StaticMetaScryPluginContainer.Instance}
+   * @alias {@link app.plugins.plugins["meta-scry"]}
    */
   get Plugin(): MetaScryPluginApi;
 
@@ -33,7 +32,7 @@ export interface MetaScryApi {
    * Get the plugin that runs this api
    *
    * @alias {@link Plugin}
-   * @alias {@link StaticMetaScryPluginContainer.Instance}
+   * @alias {@link app.plugins.plugins["meta-scry"]}
    */
   get plugin(): MetaScryPluginApi;
 
@@ -41,7 +40,6 @@ export interface MetaScryApi {
    * A link to the dv plugin api
    *
    * @alias {@link Dv}
-   * @alias {@link MetadataScrier.DataviewApi}
    * @alias {@link getAPI} From DataviewApi
    *
    * @see {@link dataviewFrontmatter}
@@ -53,7 +51,6 @@ export interface MetaScryApi {
    * A link to the dv plugin api
    *
    * @alias {@link dv}
-   * @alias {@link MetadataScrier.DataviewApi}
    * @alias {@link getAPI} From DataviewApi
    *
    * @see {@link dataviewFrontmatter}
@@ -66,7 +63,7 @@ export interface MetaScryApi {
    *
    * @alias {@link edit}
    *
-   * @see {@link CurrentFileMetaScryApi.edit}
+   * @see {@link CurrentNoteMetaScryApi.edit}
    * @see {@link patch}
    * @see {@link set}
    * @see {@link clear}
@@ -78,7 +75,7 @@ export interface MetaScryApi {
    *
    * @alias {@link Edit}
    *
-   * @see {@link CurrentFileMetaScryApi.edit}
+   * @see {@link CurrentNoteMetaScryApi.edit}
    * @see {@link patch}
    * @see {@link set}
    * @see {@link clear}
@@ -130,7 +127,7 @@ export interface MetaScryApi {
   /**
    * Default sources for the MetaScryApi.get function
    *
-   * @alias {@link MetadataScrier.DefaultSources}
+   * @alias {@link Scry.DefaultSources}
    *
    * @see {@link sources}
    * @see {@link get}
@@ -384,7 +381,7 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  dvMatter(source?: NotesSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
+  dvMatter(source?: NotesSource, useSourceQuery?: boolean): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
@@ -401,7 +398,7 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter
    */
-  dataviewFrontmatter(source?: NotesSource, useSourceQuery?: boolean): DvData | DataArray<DvData | DataArray<any> | null> | null;
+  dataviewFrontmatter(source?: NotesSource, useSourceQuery?: boolean): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null;
 
   /**
    * Get just the (meta-scry) cache data for a file.
@@ -529,7 +526,7 @@ export interface MetaScryApi {
    * @param {SingleFileSource} file The name of the file or the file object with a path
    * @param {Record<string, any>|any} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
    * @param {string|null} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here. 
-   * @param {FrontmatterUpdateOptions} options (Optional) options.
+   * @param {FrontmatterUpdateSettings} options (Optional) options.
    *
    * @see {@link CurrentNoteMetaScryApi.patch}
    * @see {@link set}
@@ -539,7 +536,7 @@ export interface MetaScryApi {
     file: SingleFileSource,
     frontmatterData: Record<string, any> | any,
     propertyName?: string | undefined,
-    options?: FrontmatterUpdateOptions
+    options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
 
   /**
@@ -548,7 +545,7 @@ export interface MetaScryApi {
    *
    * @param {SingleFileSource} file The name of the file or the file object with a path
    * @param {Frontmatter} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
-   * @param {FrontmatterUpdateOptions} options (Optional) options.
+   * @param {FrontmatterUpdateSettings} options (Optional) options.
    * 
    * @see {@link CurrentNoteMetaScryApi.set}
    * @see {@link clear}
@@ -557,7 +554,7 @@ export interface MetaScryApi {
   set(
     file: SingleFileSource,
     frontmatterData: any,
-    options?: FrontmatterUpdateOptions
+    options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
 
   /**
@@ -566,7 +563,7 @@ export interface MetaScryApi {
    *
    * @param {SingleFileSource} file The file to clear properties for. defaults to the current file.
    * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
-   * @param {FrontmatterUpdateOptions} options (Optional) options.
+   * @param {FrontmatterUpdateSettings} options (Optional) options.
    *
    * @see {@link CurrentNoteMetaScryApi.clear}
    * @see {@link set}
@@ -575,7 +572,7 @@ export interface MetaScryApi {
   clear(
     file?: SingleFileSource,
     frontmatterProperties?: string | Array<string> | Record<string, any> | undefined,
-    options?: FrontmatterUpdateOptions
+    options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
  
   /**
@@ -641,38 +638,90 @@ export interface MetaScryApi {
 }
 
 /**
- * Static Api accessed through "Metadata" global calls
+ * A container for access to the whole Api and other features like components and utilities too.
  */
-export interface StaticMetaScryApi {
+export interface MetaScry {
+
   /**
-   * React components are stored under this as a namespace
+   * React components and other special functions are stored under this as a namespace
    */
-  [key: string | number | symbol]: any;
+  readonly [key: string | number | symbol]: any;
 
   /**
    * You can access all built-in react components from this property.
    */
-  Components?: Record<string, any>;
+  readonly Components?: Record<string, React.Component | React.FC>;
 
   /**
    * React components specific to Sections and the Section Api
    */
-  SectionComponents?: Record<string, any>;
+  readonly SectionComponents?: Record<string, React.Component | React.FC>;
 
   /**
    * The Api Itself
    */
-  Api: MetaScryApi;
-  Plugin: MetaScryPluginApi;
-}
+  readonly Api: MetaScryApi;
+ 
+  /**
+   * The currently active plugin.
+   */
+  readonly Plugin?: MetaScryPluginApi;
+  
+  /**
+   * Default Metadata Sources
+   */
+  readonly DefaultSources: MetadataSources;
+    
+  /**
+   * Turn a relative path into a full path
+   *
+   * @param relativePath The relative path to map to. Will preform immediate search if it starts with ?.
+   * @param extension The extension to add. Defaults to no extension (false/empty). If true is passed in .md will be added.
+   * @param rootFolder (Optional) The root folder path the relative path is relative too. Defaults to the current note's folder
+   *
+   * @returns The full file path.
+   */
+  Path(relativePath?: string, extension?: string | boolean, rootFolder?: string): string;
+  
+  /**
+   * Find a deep property in an object.
+   *
+   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
+   * @param {object} onObject The object containing the desired key
+   *
+   * @returns true if the property exists, false if not.
+   */
+  ContainsDeepProperty(propertyPath: string | Array<string>, onObject: any): boolean
 
-/**
- * Settings used for the Binding Api
- */
-export type BindSettings = {
-  templateName?: string;
-  renderMode?: InputFieldMarkdownRenderChildType | 'inline' | 'block' | 'div' | 'span',
-  recurseFrontmatterFields?: boolean,
-  returnAbstractField?: boolean,
-  callOnLoad?: true | boolean
-} & Object
+  /**
+   * Get a deep property in an object, null if not found.
+   *
+   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
+   * @param {object} fromObject The object containing the desired key
+   *
+   * @returns The found deep property, or null if not found.
+   */
+  GetDeepProperty(propertyPath: string | Array<string>, fromObject: any): any | null;
+
+  /**
+   * Get a deep property in an object, null if not found.
+   *
+   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
+   * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
+   * @param {object} fromObject The object containing the desired key
+   *
+   * @returns if the property exists.
+   */
+  TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean
+
+  /**
+   * Set a deep property in an object, even if it doesn't exist.
+   *
+   * @param {string|[string]} propertyPath Array of keys, or dot seperated propery key.
+   * @param {object|function(object)} value The value to set, or a function to update the current value and return it.
+   * @param {object} fromObject The object containing the desired key
+   *
+   * @returns The found deep property, or null if not found.
+   */
+  SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void
+}

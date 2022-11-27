@@ -1,10 +1,29 @@
-import { ReactComponentsPluginKey } from "src/constants";
+import { Keys } from "src/constants";
 import { IsFunction } from "src/utilities";
 import { Section } from "../types/section";
 
 const ComponentLoadingText = "...Loading";
 
 export namespace ReactSectionComponents {
+
+  /**
+   * Proptypes for Section component
+   */
+  export type SectionPropTypes = {
+    data: Section,
+    mode?: SectionRenderMode | undefined,
+    renderer?: ((
+      section?: Section,
+      renderedContents?: string | HTMLElement
+    ) => any)
+    | undefined,
+    enabled?: ((
+      section?: Section,
+      renderedContents?: string | HTMLElement
+    ) => boolean)
+    | undefined
+    | boolean
+  };
 
   /**
    * Enum for the render modes of a section or sections
@@ -18,7 +37,7 @@ export namespace ReactSectionComponents {
   /**
    * All of the available render modes or sections.
    */
-  export const SectionRenderModes : Array<SectionRenderMode> = [
+  export const SectionRenderModes: Array<SectionRenderMode> = [
     SectionRenderMode.md,
     SectionRenderMode.txt,
     SectionRenderMode.html
@@ -27,27 +46,13 @@ export namespace ReactSectionComponents {
   /**
    * Render A note Section fetched from Metascry-Api using react.
    */
-  export const Section = ({
+  export const Section: React.FunctionComponent<SectionPropTypes> = ({
     data,
     mode = SectionRenderMode.md,
     renderer = undefined,
     enabled = true
-  }: {
-    data: Section,
-    mode?: SectionRenderMode | undefined,
-    renderer?: ((
-      section?: Section,
-      renderedContents?: string | HTMLElement
-    ) => any)
-      | undefined,
-    enabled?: ((
-      section?: Section,
-      renderedContents?: string | HTMLElement
-    ) => boolean)
-      | undefined
-      | boolean
-  }) => {
-    const { React, Markdown } = (app as any).plugins.plugins[ReactComponentsPluginKey];
+  }: SectionPropTypes) => {
+    const { React, Markdown } = (app as any).plugins.plugins[Keys.ReactComponentsPluginKey];
     const { useState, useEffect } = React;
     const section = data;
 
@@ -58,14 +63,14 @@ export namespace ReactSectionComponents {
     if (!SectionRenderModes.includes(mode)) {
       throw `Unrecognized/invalid mode for Sections React component: ${mode}. Valid modes: ${SectionRenderModes.join(", ")}`;
     }
-    
+
     // load the section content we want
     const [renderedContent, setRenderedContent] = useState(null);
     useEffect(async () => {
       const value = await section[mode];
       setRenderedContent(value);
     }, []);
-    
+
     // wait for content to render/load
     if (renderedContent !== null) {
       // is-enabled check using the loaded content
@@ -99,41 +104,43 @@ export namespace ReactSectionComponents {
         }
       }
     }
-    
+
     // else: loading...
     return <i>{ComponentLoadingText}</i>;
   }
 
+  export type SectionsPropTypes = {
+    data: Section[],
+    mode?: SectionRenderMode | undefined,
+    renderer?: ((
+      section?: Section,
+      renderedContents?: string | HTMLElement,
+      allSections?: Record<string, Section>,
+      allRenderedSectionContents?: Record<string, string> | Record<string, HTMLElement>
+    ) => any)
+    | undefined,
+    filter?: ((
+      section?: Section,
+      renderedContents?: string | HTMLElement,
+      allSections?: Record<string, Section>,
+      allRenderedSectionContents?: Record<string, string> | Record<string, HTMLElement>
+    ) => boolean)
+    | undefined
+    | boolean
+  };
+
   /**
    * Render Note Sections fetched from MetaScryApi using react.
    */
-  export const Sections = ({
+  export const Sections: React.FunctionComponent<SectionsPropTypes> = ({
     data,
     mode = SectionRenderMode.md,
     renderer = undefined,
     filter = true
-  }: {
-      data: Section[],
-      mode?: SectionRenderMode | undefined,
-      renderer?: ((
-        section?: Section,
-        renderedContents?: string | HTMLElement,
-        allSections?: Record<string, Section>,
-        allRenderedSectionContents?: Record<string, string> | Record<string, HTMLElement>
-      ) => any)
-        | undefined,
-      filter?: ((
-        section?: Section,
-        renderedContents?: string | HTMLElement,
-        allSections?: Record<string, Section>,
-        allRenderedSectionContents?: Record<string, string> | Record<string, HTMLElement>
-      ) => boolean)
-        | undefined
-        | boolean
-  }) => {
+  }: SectionsPropTypes) => {
     const { React } = (app as any).plugins.plugins["obsidian-react-components"];
     const { useState, useEffect } = React;
-    
+
     // validation
     if (!data) {
       throw "'data' prop of type Section[] is required.";
@@ -156,19 +163,19 @@ export namespace ReactSectionComponents {
 
     const sections
       = data
-        //@ts-expect-error: indexBy added to array prototype in main.ts
+        //@ts-expect-error: indexBy added to array prototype in plugin.ts
         // TODO: wrap indexBy's contents in a static call and call that here instead.
         .indexBy("id");
 
     // if we're all loaded
     if (renderedSections !== null) {
       // props for individual sections
-      const childProps : any = {
+      const childProps: any = {
         mode
       };
       if (renderer) {
         childProps.renderer
-          = (s: Section, r: string|HTMLElement) => renderer(s, r, sections, renderedSections);
+          = (s: Section, r: string | HTMLElement) => renderer(s, r, sections, renderedSections);
       }
       if (filter) {
         childProps.enabled = IsFunction(filter)

@@ -1,67 +1,47 @@
 import { Plugin } from 'obsidian';
 import {
-  MetaScryApi,
-  StaticMetaScryApi
+  MetaScryApi
 } from "./types/scrier";
 import {
   MetaScryPluginSettings,
   MetaScryPluginApi, AppWithPlugins
 } from "./types/plugin";
 import {
-  AggregateByArrayHelperFunctionKey,
+  Keys,
   DefaultPluginSettings,
-  MetascryPluginDepencencies,
-  GetPropObjectHelperFunctionKey,
-  HasPropObjectHelperFunctionKey,
-  IndexByArrayHelperFunctionKey,
-  MetadataScrierPluginKey,
-  ScryGlobalPropertyCapitalizedKey,
-  ScryGlobalPropertyLowercaseKey,
-  SetPropObjectHelperFunctionKey} from "./constants";
+  MetascryPluginDepencencies
+} from "./constants";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
-import { MetadataScrier } from './scrier';
 import { MetadataScrierPluginSettingTab } from './settings';
-import { ReactSectionComponents } from "./components/sections";
-import { ReactMarkdownComponents } from './components/markdown';
-import { IsFunction } from './utilities';
+import {
+  ContainsDeepProperty,
+  GetDeepProperty,
+  IsFunction,
+  IsObject,
+  SetDeepProperty,
+  TryToGetDeepProperty
+} from './utilities';
 
 /**
  * Metadata Scrier Api Obsidian.md Plugin
  */
 export default class MetadataScrierPlugin extends Plugin implements MetaScryPluginApi {
-  private static _instance: MetaScryApi;
   private _settings: MetaScryPluginSettings;
+  // TODO: why is this unused? Did i forget to log and unload these?   
   private _addedGlobals: string[];
-  
+
   //#region Api Access
 
-  /**
-   * The current instance of the MetadataScryApi api
-   */
-  static get Instance(): MetaScryApi {
-    return MetadataScrierPlugin._instance;
-  }
-
-  /**
-   * The key for this plugin.
-   * 
-   * @alias {@link MetadataScrierPluginKey}
-   * @alias {@link MetaScryPluginApi.key}
-   */
-  static get Key(): string {
-    return MetadataScrierPluginKey;
-  }
-
   get Api(): MetaScryApi {
-    return MetadataScrierPlugin._instance;
+    return InternalStaticMetadataScrierPluginContainer.Api;
   }
 
   get api(): MetaScryApi {
-    return MetadataScrierPlugin._instance;
+    return InternalStaticMetadataScrierPluginContainer.Api;
   }
 
   get key(): string {
-    return MetadataScrierPluginKey;
+    return Keys.MetadataScrierPluginKey;
   }
 
   get settings(): MetaScryPluginSettings {
@@ -83,11 +63,11 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   onunload(): void {
     this._deinitApi();
   }
-  
+
   async loadSettings(): Promise<void> {
     this._settings = Object.assign({}, DefaultPluginSettings, await this.loadData());
   }
-  
+
   async updateSettings(newSettings: MetaScryPluginSettings): Promise<void> {
     // reset the api when settings are updated.
     this._deinitApi();
@@ -123,11 +103,20 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
       return undefined;
     }
   }
-  
+
   private _initApi(): void {
     this._verifyDependencies();
-    InternalStaticMetadataScrierPluginContainer.Instance = this;
-    MetadataScrierPlugin._instance = new MetadataScrier(this);
+
+    const includeReactComponents
+      = IsObject((app as AppWithPlugins)
+        .plugins
+        .plugins[Keys.ReactComponentsPluginKey]);
+
+    InternalStaticMetadataScrierPluginContainer
+      .InitalizeStaticApi({
+        plugin: this,
+        includeReactComponents
+      });
 
     this._initGlobals();
     this._initHelperMethods();
@@ -135,6 +124,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   /** 
    * if one of the dependenies is missing, disable the plugin and warn the user.
+   * // TODO: remove when all dependencies are in npm
    * 
    * @throws Error on missing required dependency. This also disables the plugin on a dependency failure.
    */
@@ -142,17 +132,17 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
     const plugins = (app as AppWithPlugins).plugins.enabledPlugins;
     const missingDependencies =
       MetascryPluginDepencencies.filter(dependency => !plugins.has(dependency));
-    
+
     if (missingDependencies.length) {
       const error =
-        `Cannot initialize plugin: ${MetadataScrierPluginKey}. ` +
+        `Cannot initialize plugin: ${Keys.MetadataScrierPluginKey}. ` +
         ` the following dependency plugins are missing: ` +
         missingDependencies.join(", ") +
-        `. (The ${MetadataScrierPluginKey} plugin has been automatically disabled. Please install the missing plugins and then try to re-enable this one!)`;
-      
+        `. (The ${Keys.MetadataScrierPluginKey} plugin has been automatically disabled. Please install the missing plugins and then try to re-enable this one!)`;
+
       (app as AppWithPlugins)
         .plugins
-        .disablePlugin(MetadataScrierPluginKey);
+        .disablePlugin(Keys.MetadataScrierPluginKey);
       alert(error);
       throw error;
     }
@@ -180,12 +170,12 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo (Optional) A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
        * @returns true if the property exists, false if not.
        */
-      Object.defineProperty(Object.prototype, HasPropObjectHelperFunctionKey, {
+      Object.defineProperty(Object.prototype, Keys.HasPropObjectHelperFunctionKey, {
         value: function (path: string | Array<string>, thenDo: any) {
           if (thenDo) {
-            return MetadataScrier.TryToGetDeepProperty(path, thenDo, this);
+            return TryToGetDeepProperty(path, thenDo, this);
           } else {
-            return MetadataScrier.ContainsDeepProperty(path, this);
+            return ContainsDeepProperty(path, this);
           }
         },
         enumerable: false
@@ -198,9 +188,9 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        *
        * @returns The found deep property, or undefined if not found.
        */
-      Object.defineProperty(Object.prototype, GetPropObjectHelperFunctionKey, {
+      Object.defineProperty(Object.prototype, Keys.GetPropObjectHelperFunctionKey, {
         value: function (path: string | Array<string>, defaultValue: any) {
-          const value = MetadataScrier.GetDeepProperty(path, this);
+          const value = GetDeepProperty(path, this);
           if (defaultValue !== undefined && (value === undefined)) {
             if (IsFunction(defaultValue)) {
               return defaultValue();
@@ -222,13 +212,13 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        *
        * @returns The found deep property, or undefined if not found.
        */
-      Object.defineProperty(Object.prototype, SetPropObjectHelperFunctionKey, {
+      Object.defineProperty(Object.prototype, Keys.SetPropObjectHelperFunctionKey, {
         value: function (propertyPath: string | Array<string>, value: any) {
-          return MetadataScrier.SetDeepProperty(propertyPath, value, this);
+          return SetDeepProperty(propertyPath, value, this);
         },
         enumerable: false
       });
-      
+
     }
   }
 
@@ -241,7 +231,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        * 
        * @returns An aggregate object with the original objects from the input list indexed by the value of the property at the provided key path.
        */
-      Object.defineProperty(Array.prototype, IndexByArrayHelperFunctionKey, {
+      Object.defineProperty(Array.prototype, Keys.IndexByArrayHelperFunctionKey, {
         value: function (uniqueKeyPropertyPath: string): Record<any, any> {
           const result: Record<any, any> = {};
 
@@ -250,7 +240,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
             if (key === undefined) {
               throw `Aggregation Key not found at path: ${uniqueKeyPropertyPath}.`;
             }
-          
+
             if (result[key]) {
               throw `Key already exists in aggregate object, can't index another object by it: ${uniqueKeyPropertyPath}.`;
             } else {
@@ -270,7 +260,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
        * 
        * @returns An object with arrays indexed by the value of the property at the key within the object.
        */
-      Object.defineProperty(Array.prototype, AggregateByArrayHelperFunctionKey, {
+      Object.defineProperty(Array.prototype, Keys.AggregateByArrayHelperFunctionKey, {
         value: function (key: string): Record<any, any[]> {
           const result: Record<any, any[]> = {};
 
@@ -278,7 +268,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
             const k = i
               ? i.getProp(key, "")
               : "";
-          
+
             if (result[k]) {
               result[k].push(i);
             } else {
@@ -327,7 +317,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
     return success;
   }
-  
+
   /**
    * Set up global access to the MetadataScryApi.
    */
@@ -339,7 +329,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         this._tryToAddToGlobals(
           key, {
           get() {
-            return MetadataScrier.Api.current;
+            return InternalStaticMetadataScrierPluginContainer.Api.Current;
           }
         });
       });
@@ -357,7 +347,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         this._tryToAddToGlobals(
           key, {
           get() {
-            return MetadataScrier.Api;
+            return InternalStaticMetadataScrierPluginContainer.Api;
           }
         });
       });
@@ -375,7 +365,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         this._tryToAddToGlobals(
           key, {
           get() {
-            return MetadataScrier.Api.Current.Cache;
+            return InternalStaticMetadataScrierPluginContainer.Api.Current.Cache;
           }
         });
       });
@@ -392,7 +382,7 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
       .forEach(key => {
         this._tryToAddToGlobals(
           key,
-          { value: MetadataScrier.Api.path }
+          { value: InternalStaticMetadataScrierPluginContainer.Api.path }
         );
       });
   }
@@ -400,37 +390,17 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _initGlobalScrys(): void {
     if (this.settings.defineScryGlobalVariables) {
       // build the Static Api
-      const apiAndPlugin = {
-        Api: this.api,
-        Plugin: MetadataScrierPlugin.Instance.plugin
-      };
-      const staticApi: StaticMetaScryApi
-        // if we have react, we want to add the components to the api.
-        // @ts-expect-error: app.plugin is not mapped.
-        = app.plugins.plugins["obsidian-react-components"]
-          ? {
-            ...apiAndPlugin,
-            ...ReactSectionComponents,
-            ...ReactMarkdownComponents,
-            Components: {
-              ...ReactSectionComponents.Components,
-              ...ReactMarkdownComponents.Components
-            },
-            SectionComponents: ReactSectionComponents.Components,
-            MarkdownComponents: ReactMarkdownComponents.Components,
-            DefaultSources: MetadataScrier.DefaultSources
-          } : apiAndPlugin;
 
       this._tryToAddToGlobals(
-        ScryGlobalPropertyCapitalizedKey, {
+        Keys.ScryGlobalPropertyCapitalizedKey, {
         get() {
-          return staticApi;
+          return InternalStaticMetadataScrierPluginContainer.Static;
         }
       });
       this._tryToAddToGlobals(
-        ScryGlobalPropertyLowercaseKey, {
+        Keys.ScryGlobalPropertyLowercaseKey, {
         get() {
-          return MetadataScrier.Api;
+          return InternalStaticMetadataScrierPluginContainer.Api;
         }
       });
     }
@@ -445,8 +415,8 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
   private _deinitApi(): void {
     this._deinitGlobals();
     this._deinitHelperMethods();
-    
-    MetadataScrierPlugin._instance = undefined!;
+
+    InternalStaticMetadataScrierPluginContainer.ClearApi();
   }
 
   private _deinitHelperMethods(): void {
@@ -516,8 +486,8 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   private _deinitGlobalPluginApis(): void {
     if (this.settings.defineScryGlobalVariables) {
-      this._tryToRemoveFromGlobals(ScryGlobalPropertyCapitalizedKey);
-      this._tryToRemoveFromGlobals(ScryGlobalPropertyLowercaseKey);
+      this._tryToRemoveFromGlobals(Keys.ScryGlobalPropertyCapitalizedKey);
+      this._tryToRemoveFromGlobals(Keys.ScryGlobalPropertyLowercaseKey);
     }
 
     this.settings.globalMetaScryExtraNames

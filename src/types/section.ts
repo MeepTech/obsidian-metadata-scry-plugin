@@ -3,8 +3,8 @@ import { Heading, Sections } from "./sections";
 /**
  * A section of a note.
  */
-
 export type Section = SectionChildren & SectionInfo;
+
 /**
  * Information about a section of a note
  */

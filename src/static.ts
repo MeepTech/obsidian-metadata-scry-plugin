@@ -7,17 +7,21 @@ import {
   updateOrInsertFieldInTFile,
   deleteFieldInTFile
 } from "@opd-libs/opd-metadata-lib/lib/API";
-import {Internal as OpdMetadataEditLibrary} from "@opd-libs/opd-metadata-lib/lib/Internal";
+import { Internal as OpdMetadataEditLibrary } from "@opd-libs/opd-metadata-lib/lib/Internal";
 import {
-  MetadataEditApi,
+  MetaEditApi,
   ContextlessMetadataEditApiMethods
 } from "./types/editor";
-import { AppWithPlugins, MetaScryPluginApi } from "./types/plugin";
-import { IsFunction, IsObject, ParseFilePathFromSource } from "./utilities";
+import { AppWithPlugins, MetaScryPluginApi, MetaScryPluginSettings } from "./types/plugin";
+import { ContainsDeepProperty, GetDeepProperty, IsFunction, IsObject, ParseFilePathFromSource, Path, SetDeepProperty, TryToGetDeepProperty } from "./utilities";
 import { TFile } from "obsidian";
 import { NotesSource } from "./types/sources";
 import { MetaBindPlugin } from "./types/external/meta-bind";
-import { MetaBindWithApiPluginKey } from "./constants";
+import { Keys } from "./constants";
+import { ReactMarkdownComponents } from "./components/markdown";
+import { ReactSectionComponents } from "./components/sections";
+import { MetadataScrier } from "./scrier";
+import { MetaScry, MetaScryApi } from "./types/scrier";
 
 /**
  * Static container for the current meta-scry plugin instance.
@@ -25,13 +29,47 @@ import { MetaBindWithApiPluginKey } from "./constants";
  * 
  * Internal Static Metadata Scrier Plugin Container
  */
-
 export class InternalStaticMetadataScrierPluginContainer {
+  static _api: MetaScryApi;
+  static _plugin?: MetaScryPluginApi;
+  static _defaultSettings?: MetaScryPluginSettings;
+  static _static: MetaScry;
 
   /**
-   * The current instance of the Metadata Scry Api Plugin.
+   * The key for the plugin.
    */
-  static Instance: MetaScryPluginApi;
+  static get Key(): string {
+    return Keys.MetadataScrierPluginKey;
+  }
+
+  /**
+   * The current instance of the Metadata Scry Plugin.
+   */
+  static get Plugin(): MetaScryPluginApi {
+    return InternalStaticMetadataScrierPluginContainer._plugin!;
+  }
+
+  /**
+   * The current instance of the Static Metadata Scry Api.
+   */
+  static get Static(): MetaScry {
+    return InternalStaticMetadataScrierPluginContainer._static;
+  }
+
+  /**
+   * The current instance of the MetadataScryApi api
+   */
+  static get Api(): MetaScryApi {
+    return InternalStaticMetadataScrierPluginContainer._api;
+  }
+ 
+  /**
+   * The current settings instance.
+   */
+  static get Settings(): MetaScryPluginSettings {
+    return InternalStaticMetadataScrierPluginContainer.Plugin?.settings
+      || InternalStaticMetadataScrierPluginContainer._defaultSettings!;
+  }
 
   /**
    * Access to the Dataview Api
@@ -45,19 +83,19 @@ export class InternalStaticMetadataScrierPluginContainer {
    * Access to the Meta-Bind Api
    * (Binding of Input Fields)
    */
-  static get MetaBindApi() : MetaBindPlugin {
+  static get MetaBindApi(): MetaBindPlugin {
     return (app as AppWithPlugins)
       .plugins
       .plugins
-      [MetaBindWithApiPluginKey]!;
+    [Keys.MetaBindWithApiPluginKey]!;
   }
 
   /**
    * Access to the Metaedit Api
    * (Write access)
    */
-  static get MetadataEditApi(): MetadataEditApi {
-    const plugin = InternalStaticMetadataScrierPluginContainer.Instance;
+  static get MetadataEditApi(): MetaEditApi {
+    const plugin = InternalStaticMetadataScrierPluginContainer.Plugin;
 
     return {
       ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApiMethods,
@@ -70,7 +108,7 @@ export class InternalStaticMetadataScrierPluginContainer {
 
         return value;
       },
-      getFieldFromTFile: (key, source, inline) => 
+      getFieldFromTFile: (key, source, inline) =>
         getFieldFromTFile(
           key,
           InternalStaticMetadataScrierPluginContainer._parseSource(source),
@@ -120,7 +158,7 @@ export class InternalStaticMetadataScrierPluginContainer {
           ? value
           : this.getMetadataFromFileCache(file, plugin);
       },
-      async updateOrInsertFieldInTFile(key, value, source, inline){
+      async updateOrInsertFieldInTFile(key, value, source, inline) {
         const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
 
         if (IsFunction(value)) {
@@ -161,14 +199,14 @@ export class InternalStaticMetadataScrierPluginContainer {
   }
 
   static _parseSource = (source: NotesSource | undefined): TFile =>
-    InternalStaticMetadataScrierPluginContainer.Instance.Api.file(IsObject(source)
-      ? ParseFilePathFromSource(source as object) || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex
-      : source || InternalStaticMetadataScrierPluginContainer.Instance.Api.Current.pathex) as TFile;
+    InternalStaticMetadataScrierPluginContainer.Api.file(IsObject(source)
+      ? ParseFilePathFromSource(source as object) || InternalStaticMetadataScrierPluginContainer.Api.Current.pathex
+      : source || InternalStaticMetadataScrierPluginContainer.Api.Current.pathex) as TFile;
 
   /**
    * The base methods for MetadataEditApi and CurrentNoteMetadataEditApi
    */
-  static get BaseMetadataEditApiMethods() : ContextlessMetadataEditApiMethods {
+  static get BaseMetadataEditApiMethods(): ContextlessMetadataEditApiMethods {
     return {
       getMetadataFromFileCache: OpdMetadataEditLibrary.getMetadataFromFileCache,
       getMetadataFromFileContent: OpdMetadataEditLibrary.getMetaDataFromFileContent,
@@ -181,5 +219,58 @@ export class InternalStaticMetadataScrierPluginContainer {
       insertField: OpdMetadataEditLibrary.insertField,
       updateOrInsertField: OpdMetadataEditLibrary.updateOrInsertField
     } as ContextlessMetadataEditApiMethods;
+  }
+
+  static InitalizeStaticApi(
+    {
+      includeReactComponents = true,
+      plugin,
+      defaultSettings
+    }: {
+      includeReactComponents?: boolean;
+      plugin?: MetaScryPluginApi;
+      defaultSettings?: MetaScryPluginSettings;
+    } = {}
+  ) : MetaScry {
+    InternalStaticMetadataScrierPluginContainer._api = new MetadataScrier();  
+    InternalStaticMetadataScrierPluginContainer._plugin = plugin || (app as AppWithPlugins).plugins.plugins["meta-scry"];
+    InternalStaticMetadataScrierPluginContainer._defaultSettings = defaultSettings;
+
+    const apiFunctionsAndPlugin = {
+      Api: InternalStaticMetadataScrierPluginContainer._api,
+      Plugin: plugin,
+      Path,
+      ContainsDeepProperty,
+      TryToGetDeepProperty,
+      SetDeepProperty,
+      GetDeepProperty,
+      DefaultSources: InternalStaticMetadataScrierPluginContainer._api.defaultSources
+    };
+    const staticApi: MetaScry
+      // if we have react, we want to add the components to the api.
+      = includeReactComponents
+        ? {
+          ...apiFunctionsAndPlugin,
+          ...ReactSectionComponents,
+          ...ReactMarkdownComponents,
+          Components: {
+            ...ReactSectionComponents.Components,
+            ...ReactMarkdownComponents.Components
+          },
+          SectionComponents: ReactSectionComponents.Components,
+          MarkdownComponents: ReactMarkdownComponents.Components,
+          DefaultSources: MetadataScrier.DefaultSources
+        } : apiFunctionsAndPlugin;
+    
+    InternalStaticMetadataScrierPluginContainer._static = staticApi;
+
+    return InternalStaticMetadataScrierPluginContainer._static;
+  }
+    
+  static ClearApi(): void {
+    InternalStaticMetadataScrierPluginContainer._api = undefined!;
+    InternalStaticMetadataScrierPluginContainer._defaultSettings = undefined!;
+    InternalStaticMetadataScrierPluginContainer._plugin = undefined!;
+    InternalStaticMetadataScrierPluginContainer._static = undefined!;
   }
 }

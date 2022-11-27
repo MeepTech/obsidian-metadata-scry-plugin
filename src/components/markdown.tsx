@@ -1,15 +1,26 @@
 // TODO: Export this file to the npm importable api when that's made.
-import { ReactComponentsPluginKey } from "src/constants";
+import { Keys } from "src/constants";
 
 export namespace ReactMarkdownComponents {
+
+  /**
+   * Proptypes for InlineMd component
+   */
+  export type InlineMdPropTypes = {
+    src: string;
+    maxDepth?: number;
+  }
 
   /**
    * Version of Markdown components, but inline.
    * 
    * TODO: fix dataview inline tag formatting issue
    */
-  export const InlineMd = ({ src, maxDepth = 10 }: { src: string; maxDepth: number }) => {
-    const ReactComponentsPlugin = (app as any).plugins.plugins[ReactComponentsPluginKey];
+  export const InlineMd: React.FunctionComponent<InlineMdPropTypes> = ({
+    src,
+    maxDepth = 10
+  }: InlineMdPropTypes) => {
+    const ReactComponentsPlugin = (app as any).plugins.plugins[Keys.ReactComponentsPluginKey];
     const { Markdown, React } = ReactComponentsPlugin;
     const { useRef, useEffect, useState } = React;
     const containerRef = useRef(null);
@@ -34,5 +45,5 @@ export namespace ReactMarkdownComponents {
 
   export const Components = {
     InlineMd
-  }
+  };
 }

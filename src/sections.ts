@@ -9,16 +9,15 @@ import { Section } from "./types/section";
 import { SplayKebabCasePropertiesOption } from "./types/plugin";
 import {
   DataviewInlineRegex,
-  FrontmatterMarkdownSurroundingTag,
-  HeadingLevelMarkerCharachter,
   KebabCaseDashesRegex,
-  KebabCaseWordSeperatorCharacter,
   MarkdownWikiLinkRegex,
   PropertyNameIllegalCharachtersRegex,
-  SectionIdPartDelimiter,
-  SectionLinkSeperatorCharachter,
-  SpacesRegex} from './constants';
-import { InternalStaticMetadataScrierPluginContainer, InternalStaticMetadataScrierPluginContainer as MetaScry } from "./static";
+  SpacesRegex,
+  Symbols
+} from './constants';
+import {
+  InternalStaticMetadataScrierPluginContainer
+} from "./static";
 import { SingleFileSource } from './types/sources';
 
 /**
@@ -47,7 +46,7 @@ class SectionHeader implements Heading {
   get level(): number { return this._level; }
   get md(): string { return this.Md; }
   get Md(): string {
-    return `${HeadingLevelMarkerCharachter.repeat(this.level)} ${this.text}`
+    return `${Symbols.HeadingLevelMarkerCharachter.repeat(this.level)} ${this.text}`
   }
 
   //#endregion
@@ -198,7 +197,7 @@ class NoteSection implements Section {
     return (async () => {
       if (this._html === null) {
         const md = await this.md;
-        this._html = await MetaScry.Instance.Api.html(this.root.path, md);
+        this._html = await InternalStaticMetadataScrierPluginContainer.Api.html(this.root.path, md);
       }
 
       return this._html;
@@ -264,7 +263,7 @@ class NoteSection implements Section {
   get path()
   : string {
     return this._root.path
-      + SectionLinkSeperatorCharachter
+      + Symbols.SectionLinkSeperatorCharachter
       + this.header.text;
   }
 
@@ -290,9 +289,9 @@ class NoteSection implements Section {
   get Id()
   : string {
     return this._id ??= this.header.index
-      + SectionIdPartDelimiter
+      + Symbols.SectionIdPartDelimiter
       + this.path
-      + SectionIdPartDelimiter
+      + Symbols.SectionIdPartDelimiter
       + this.header.level
   }
 
@@ -337,7 +336,7 @@ class NoteSection implements Section {
     // TODO: cache all 6 regex header levels to make this quicker.
     const match = fullNoteContents
       .substring(start)
-      .match(new RegExp(`(\\n${HeadingLevelMarkerCharachter}\{1,${this.header.level}\})`, "m"));
+      .match(new RegExp(`(\\n${Symbols.HeadingLevelMarkerCharachter}\{1,${this.header.level}\})`, "m"));
     if (match && (match.index || match.index === 0)) {
       return fullNoteContents.substring(start + 1, start + match.index);
     }
@@ -410,7 +409,7 @@ class NoteSection implements Section {
 
     keys.push(cleaned);
 
-    if (MetaScry.Instance.settings.splayFrontmatterWithoutDataview) {
+    if (InternalStaticMetadataScrierPluginContainer.Settings.splayFrontmatterWithoutDataview) {
       const camel = cleaned.replace(SpacesRegex, "");
       if (!camel) {
         return keys.unique();
@@ -420,32 +419,32 @@ class NoteSection implements Section {
       const lowerCamel = camel[0].toLowerCase() + camel.substring(1);
 
       keys.push(lower, camel, lowerCamel);
-      if (MetaScry.Instance.settings.splayKebabCaseProperties && cleaned.contains(KebabCaseWordSeperatorCharacter)) {
-        if (MetaScry.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
+      if (InternalStaticMetadataScrierPluginContainer.Settings.splayKebabCaseProperties && cleaned.contains(Symbols.KebabCaseWordSeperatorCharacter)) {
+        if (InternalStaticMetadataScrierPluginContainer.Settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.LowerAndCamelCase) {
           // lower
           keys.push(lower.replace(KebabCaseDashesRegex, ""));
           // lower camel
           keys.push(lowerCamel
-            .split(KebabCaseWordSeperatorCharacter)
+            .split(Symbols.KebabCaseWordSeperatorCharacter)
             .map((part, i) => (i !== 0 && part) ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
           // upper/default camel
           keys.push(camel
-            .split(KebabCaseWordSeperatorCharacter)
+            .split(Symbols.KebabCaseWordSeperatorCharacter)
             .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
-        } else if (MetaScry.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
+        } else if (InternalStaticMetadataScrierPluginContainer.Settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.Lowercase) {
           // lower
           keys.push(lower.replace(KebabCaseDashesRegex, ""));
-        } else if (MetaScry.Instance.settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
+        } else if (InternalStaticMetadataScrierPluginContainer.Settings.splayKebabCaseProperties === SplayKebabCasePropertiesOption.CamelCase) {
           // lower camel
           keys.push(lowerCamel
-            .split(KebabCaseWordSeperatorCharacter)
+            .split(Symbols.KebabCaseWordSeperatorCharacter)
             .map((part, i) => (i !== 0 && part) ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
           // upper/default camel
           keys.push(camel
-            .split(KebabCaseWordSeperatorCharacter)
+            .split(Symbols.KebabCaseWordSeperatorCharacter)
             .map(part => part ? part.charAt(0).toUpperCase() + part.substring(1) : part)
             .join(''));
         }
@@ -648,7 +647,7 @@ export class NoteSections extends Object implements Sections {
     container: HTMLElement | undefined = undefined,
     intoNote: SingleFileSource | undefined = undefined
   ): HTMLElement {
-    return InternalStaticMetadataScrierPluginContainer.Instance.Api.embed(
+    return InternalStaticMetadataScrierPluginContainer.Api.embed(
       this.path,
       container,
       intoNote
@@ -661,9 +660,9 @@ export class NoteSections extends Object implements Sections {
     if (this._md !== null) {
       return Promise.resolve(this._md);
     } else {
-      const file = MetaScry.Instance.api.vault(this.path) as TFile;
+      const file = InternalStaticMetadataScrierPluginContainer.Api.vault(this.path) as TFile;
       this._md = await app.vault.cachedRead(file);
-      const frontMarker = FrontmatterMarkdownSurroundingTag;
+      const frontMarker = Symbols.FrontmatterMarkdownSurroundingTag;
       if (this._md.startsWith(frontMarker)) {
         var startPosition = this._md.search(frontMarker) + frontMarker.length;
         var endPosition = this._md.slice(startPosition).search(frontMarker) + startPosition;
@@ -681,7 +680,7 @@ export class NoteSections extends Object implements Sections {
       return Promise.resolve(this._html);
     } else {
       const md = await this.loadText()
-      return await MetaScry.Instance.Api.html(this.path, md);
+      return await InternalStaticMetadataScrierPluginContainer.Api.html(this.path, md);
     }
   }
 

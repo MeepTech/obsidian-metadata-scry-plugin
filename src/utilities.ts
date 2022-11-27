@@ -1,4 +1,9 @@
-import { TAbstractFile } from "obsidian";
+import { parsePath } from "@opd-libs/opd-metadata-lib/lib/Utils";
+import { TAbstractFile, TFolder } from "obsidian";
+import {
+  Symbols
+} from "./constants";
+import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { FileData } from "./types/data";
 import { NotesSource } from "./types/sources";
 
@@ -50,7 +55,7 @@ export const IsArray = (symbol: any) => Array.isArray(symbol);
  *
  * @returns The file path
  */
-  export function ParseFilePathFromSource(source: NotesSource): string | null {
+export function ParseFilePathFromSource(source: NotesSource): string | null {
   let fileName = source || null;
   if (IsObject(source) && source !== null) {
     fileName = (source as FileData | TAbstractFile).path!;
@@ -67,7 +72,7 @@ export const IsArray = (symbol: any) => Array.isArray(symbol);
  *
  * @returns the full path from the root of the vault.
  */
- export function  BuildDataValueFileFullPath(dataPath: string) {
+export function BuildDataValueFileFullPath(dataPath: string) {
   // @ts-expect-error: app.plugin is not mapped.
   return app.plugins.plugins[MetadataScrierPluginKey].settings.dataFilesPath + dataPath;
 }
@@ -79,9 +84,214 @@ export const IsArray = (symbol: any) => Array.isArray(symbol);
  *
  * @returns the full path from the root of the vault.
  */
- export function  BuildPrototypeFileFullPath(prototypePath: string) {
+export function BuildPrototypeFileFullPath(prototypePath: string) {
   // @ts-expect-error: app.plugin is not mapped.
   return app.plugins.plugins[MetadataScrierPluginKey].settings.prototypesPath + prototypePath;
+}
+
+//#region Object Deep Property Utilities
+
+/**
+ * Find a deep property in an object.
+ *
+ * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
+ * @param {object} onObject The object containing the desired key
+ *
+ * @returns true if the property exists, false if not.
+ */
+export function ContainsDeepProperty(propertyPath: string | Array<string>, onObject: any): boolean {
+  const keys = (IsString(propertyPath))
+    ? (propertyPath as string)
+      .split('.')
+    : propertyPath;
+
+  let parent = onObject;
+  for (const currentKey of keys) {
+    if (!IsObject(parent)) {
+      return false;
+    }
+
+    if (!parent.hasOwnProperty(currentKey)) {
+      return false;
+    }
+
+    parent = parent[currentKey];
+  }
+
+  return true;
+}
+
+/**
+ * Get a deep property in an object, null if not found.
+ *
+ * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
+ * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
+ * @param {object} fromObject The object containing the desired key
+ *
+ * @returns if the property exists.
+ */
+export function TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean {
+  const keys = (IsString(propertyPath))
+    ? parsePath(propertyPath as string)
+    : propertyPath;
+
+  let parent = fromObject;
+  for (const currentKey of keys) {
+    if (!IsObject(parent) || !parent.hasOwnProperty(currentKey)) {
+      if (thenDo && thenDo.onFalse) {
+        thenDo.onFalse();
+      }
+      return false;
+    }
+
+    parent = parent[currentKey];
+  }
+
+  if (thenDo) {
+    const then = thenDo.onTrue || thenDo;
+    if (then) {
+      return then(parent);
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Get a deep property in an object, null if not found.
+ *
+ * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
+ * @param {object} fromObject The object containing the desired key
+ *
+ * @returns The found deep property, or null if not found.
+ */
+export function GetDeepProperty(propertyPath: string | Array<string>, fromObject: any): any | null {
+  return (IsString(propertyPath)
+    ? (propertyPath as string)
+      .split('.')
+    : (propertyPath as string[]))
+    .reduce((t, p) => t?.[p], fromObject);
+}
+
+/**
+ * Set a deep property in an object, even if it doesn't exist.
+ *
+ * @param {string|[string]} propertyPath Array of keys, or dot seperated propery key.
+ * @param {object|function(object)} value The value to set, or a function to update the current value and return it.
+ * @param {object} fromObject The object containing the desired key
+ *
+ * @returns The found deep property, or null if not found.
+ */
+export function SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void {
+  const keys = (IsString(propertyPath))
+    ? (propertyPath as string)
+      .split('.')
+    : propertyPath;
+
+  let parent = onObject;
+  let currentKey;
+  for (currentKey of keys) {
+    if (!IsObject(parent)) {
+      throw `Property: ${currentKey}, in Path: ${propertyPath}, is not an object. Child property values cannot be set!`;
+    }
+
+    // if this parent doesn't have the property we want, add it as an empty object for now.
+    if (!parent.hasOwnProperty(currentKey)) {
+      parent[currentKey] = {};
+    }
+
+    // if this isn't the last one, set it as parent.
+    if (currentKey != keys[keys.length - 1]) {
+      parent = parent[currentKey];
+    }
+  }
+
+  if (!currentKey) {
+    throw "No Final Key Provided!?";
+  }
+
+  // TODO: add ignore flag options variable for this
+  if (IsFunction(value)) {
+    parent[currentKey] = value(parent[currentKey]);
+  } else {
+    parent[currentKey] = value;
+  }
+}
+
+//#endregion
+
+//#region Filename Utilities
+
+/**
+ * Turn a relative path into a full path
+ *
+ * @param relativePath The relative path to map to. Will preform immediate search if it starts with ?.
+ * @param extension The extension to add. Defaults to no extension (false/empty). If true is passed in .md will be added.
+ * @param rootFolder (Optional) The root folder path the relative path is relative too. Defaults to the current note's folder
+ *
+ * @returns The full file path.
+ */
+export function Path(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null): string {
+  return _addExtension(_findPath(relativePath, extension, rootFolder), extension);
+}
+
+function _findPath(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null): string {
+  if (!relativePath) {
+    return InternalStaticMetadataScrierPluginContainer.Api.current.path
+  }
+
+  let currentFolder: TFolder = rootFolder
+    ? (app.vault.getAbstractFileByPath(rootFolder) as TFolder)
+    : InternalStaticMetadataScrierPluginContainer.Api.Current.Note.parent;
+
+  if (!currentFolder) {
+    throw `Root Folder Not Found: ${currentFolder}.`;
+  }
+
+  if (relativePath.startsWith("?")) {
+    const foundFile = app.metadataCache.getFirstLinkpathDest(_addExtension(relativePath.substring(1), extension), currentFolder.path);
+    if (foundFile) {
+      return foundFile.path.substring(0, foundFile.path.length - foundFile.extension.length - 1);
+    }
+  }
+
+  const [fileName, ...folders] = relativePath.split(Symbols.FolderPathSeperatorCharacter).reverse();
+  let absolutePath = fileName;
+
+  if (folders && folders.length) {
+    for (var folder of folders.reverse()) {
+      if (folder === Symbols.ParentFolderPathSelector) {
+        currentFolder = currentFolder.parent;
+      } else if (folder === Symbols.CurrentFolderPathSelector) {
+        continue;
+      } else {
+        absolutePath = folder + (absolutePath ? Symbols.FolderPathSeperatorCharacter + absolutePath : "");
+      }
+    }
+  } else {
+    const foundFile = app.metadataCache.getFirstLinkpathDest(_addExtension(relativePath, extension), currentFolder.path);
+    if (foundFile) {
+      return foundFile.path.substring(0, foundFile.path.length - foundFile.extension.length - 1);
+    }
+  }
+
+  if (currentFolder.path !== Symbols.FolderPathSeperatorCharacter) {
+    return currentFolder.path + (absolutePath ? Symbols.FolderPathSeperatorCharacter + absolutePath : "");
+  } else {
+    return absolutePath;
+  }
+}
+
+function _addExtension(path: string, extension: string | boolean): string {
+  if (extension) {
+    if (!IsString(extension)) {
+      return path + Symbols.ExtensionFilePathSeperatorCharacter + Symbols.DefaultMarkdownFileExtension;
+    } else {
+      return path + Symbols.ExtensionFilePathSeperatorCharacter + extension;
+    }
+  } else {
+    return path;
+  }
 }
 
 //#endregion
