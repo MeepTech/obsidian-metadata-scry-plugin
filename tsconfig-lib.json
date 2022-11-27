@@ -5,6 +5,7 @@
     "outDir": "./build/lib",
   },
   "include": [
-    "src/lib.ts",
+    "src/types/*.ts",
+	"src/components/*.tsx"
   ]
 }
