@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -skipLibCheck && node esbuild.config.mjs production",
-		"lib": "tsc -skipLibCheck && node esbuild.config.mjs library",
+		"lib": "tsc -skipLibCheck -p \"tsconfig-lib.json\" && node esbuild.config.mjs library",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [

@@ -1,8 +1,5 @@
 {
   "compilerOptions": {
-	"declaration": true,
-    "outFile": "./build/lib/main.d.ts",
-    "emitDeclarationOnly": true,
     "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
@@ -12,7 +9,8 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "strictNullChecks": true,
+    "isolatedModules": true,
+	  "strictNullChecks": true,
     "lib": [
       "DOM",
       "ES5",

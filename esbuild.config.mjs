@@ -45,10 +45,8 @@ if (!lib) {
     treeShaking: true,
     outfile: 'build/plugin/main.js',
   }).catch(() => process.exit(1));
-}
-
-// lib:
-if (prod || lib) {
+} // lib:
+else {
   esbuild.build({
     banner: {
       js: banner,
