@@ -5,7 +5,7 @@ import {
 } from "obsidian";
 import { Link } from "obsidian-dataview";
 import { FileData } from "./data";
-import { Keys } from "src/constants";
+import { Keys } from "../constants";
 
 /**
  * The sources to pull Metadata values from for a file.

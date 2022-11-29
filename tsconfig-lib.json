@@ -1,11 +1,11 @@
 {
   "extends": "./tsconfig.json",
+  "files": [
+    "src/lib.ts"      
+  ],
+  "include": [],
   "compilerOptions": {
     "declaration": true,
-    "outDir": "./build/lib",
-  },
-  "include": [
-    "src/types/*.ts",
-	"src/components/*.tsx"
-  ]
+    "outDir": "./build/lib"
+  }
 }

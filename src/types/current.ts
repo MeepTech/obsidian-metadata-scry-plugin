@@ -2,7 +2,6 @@ import { TFile } from "obsidian";
 import { Frontmatter, Metadata, Cache } from "./data";
 import { Sections } from "./sections";
 import { FrontmatterUpdateSettings, CurrentNoteMetaEditApi } from "./editor";
-import { InputFieldDeclaration } from "./external/meta-bind";
 import { CurrentMetaBindApi } from "./bind";
 
 /**

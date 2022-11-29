@@ -5,7 +5,8 @@ import {
 } from "obsidian";
 import {
   DataArray,
-  DataviewApi} from "obsidian-dataview";
+  DataviewApi
+} from "obsidian-dataview";
 import { MetaScryPluginApi } from "./plugin";
 import { Frontmatter, Metadata, CachedFileMetadata, DataviewMatter, Cache } from "./data";
 import { Sections } from "./sections";
@@ -14,10 +15,10 @@ import { MetaEditApi as MetaEditApi, FrontmatterUpdateSettings } from "./editor"
 import { CurrentNoteMetaScryApi } from "./current";
 import { MetaBindApi } from "./bind";
 
- /**
- * Interface for the Api.
- * Access and edit metadata about a file from multiple sources.
- */
+/**
+* Interface for the Api.
+* Access and edit metadata about a file from multiple sources.
+*/
 export interface MetaScryApi {
 
   /**
@@ -574,7 +575,7 @@ export interface MetaScryApi {
     frontmatterProperties?: string | Array<string> | Record<string, any> | undefined,
     options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
- 
+
   /**
    * Make input fields bound to your frontmatter properties! 
    * (Meta-Bind plugin api access)
@@ -586,7 +587,7 @@ export interface MetaScryApi {
    * @see {@link MetaBindPlugin.buildDeclaration}
    */
   bind: MetaBindApi;
-    
+
   /**
    * Make input fields bound to your frontmatter properties! 
    * (Meta-Bind plugin api access)
@@ -661,17 +662,17 @@ export interface MetaScry {
    * The Api Itself
    */
   readonly Api: MetaScryApi;
- 
+
   /**
    * The currently active plugin.
    */
   readonly Plugin?: MetaScryPluginApi;
-  
+
   /**
    * Default Metadata Sources
    */
   readonly DefaultSources: MetadataSources;
-    
+
   /**
    * Turn a relative path into a full path
    *
@@ -682,7 +683,7 @@ export interface MetaScry {
    * @returns The full file path.
    */
   Path(relativePath?: string, extension?: string | boolean, rootFolder?: string): string;
-  
+
   /**
    * Find a deep property in an object.
    *

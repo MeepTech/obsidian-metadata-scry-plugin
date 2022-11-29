@@ -11,6 +11,7 @@ const banner =
 
 const prod = (process.argv[2] === 'production');
 const lib = (process.argv[2] === 'library');
+const dev = !prod && !lib;
 
 // plugin:
 if (!lib) {
@@ -36,12 +37,12 @@ if (!lib) {
       '@lezer/lr',
       ...builtins],
     format: 'cjs',
-    watch: !prod,
+    watch: dev,
     target: 'es2018',
     logLevel: "info",
-    sourcemap: prod
-      ? false
-      : 'inline',
+    sourcemap: dev 
+      ? 'inline'
+      : false,
     treeShaking: true,
     outfile: 'build/plugin/main.js',
   }).catch(() => process.exit(1));
@@ -69,12 +70,12 @@ else {
       '@lezer/lr',
       ...builtins],
     format: 'cjs',
-    watch: !prod,
+    watch: dev,
     target: 'es2018',
     logLevel: "info",
-    sourcemap: prod
-      ? false
-      : 'inline',
+    sourcemap: dev 
+      ? 'inline'
+      : false,
     treeShaking: true,
     outfile: 'build/lib/main.js',
   }).catch(() => process.exit(1));
