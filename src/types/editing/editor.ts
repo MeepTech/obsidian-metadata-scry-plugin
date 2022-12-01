@@ -1,6 +1,6 @@
 import { Internal as OpdMetadataEditLibrary } from "@opd-libs/opd-metadata-lib/lib/Internal";
-import { Frontmatter } from "./data";
-import { NotesSource } from "./sources";
+import { Frontmatter } from "../datas";
+import { NotesSource } from "../fetching/sources";
 
 /**
  * Api object with all functions found in the 'OPD-metadata-lib' metadata editor library compiled into an easy to use global api object.
@@ -149,9 +149,9 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link MetaScryApi.set}
    */
   setAllFrontmatter(newMatter: Frontmatter, source?: NotesSource): Promise<Frontmatter>;
-}
-;
-/** */
+};
+
+
 /**
  * Api object with all functions found in the 'OPD-metadata-lib' metadata editor plugin, with the targets of all of the functions directed to the desired file.
  *
@@ -301,16 +301,9 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
 }
 
 /**
- * Passed into any update functions to modify what they do.
- */
- export interface FrontmatterUpdateSettings {
-  toValuesFile?: boolean | string;
-  prototype?: string | boolean;
-  inline?: boolean;
-}
-
-/**
  * Methods from the 'OPD-metadata-lib' api that are not specific to a given note file, and just work on metadata objects and raw file contents
+ * 
+ * @internal
  */
 export interface ContextlessMetadataEditApiMethods {
   getMetadataFromFileContent: typeof OpdMetadataEditLibrary.getMetaDataFromFileContent;

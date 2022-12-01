@@ -1,21 +1,11 @@
 import {
     AbstractInputField,
   InputFieldArgumentType,
-  InputFieldMarkdownRenderChildType,
   InputFieldType
-} from "./external/meta-bind";
-import { NotesSource } from "./sources";
-
-/**
- * Settings used for the Binding Api
- */
- export type BindSettings = {
-	templateName?: string;
-	renderMode?: InputFieldMarkdownRenderChildType | 'inline' | 'block' | 'div' | 'span',
-	recurseFrontmatterFields?: boolean,
-	returnAbstractField?: boolean,
-	callOnLoad?: true | boolean
-  } & Object
+} from "../_external_sources/meta-bind";
+import { NotesSource } from "../fetching/sources";
+import { BindSettings } from "../settings";
+import { ScryResults } from "../datas";
 
 //#region global
 
@@ -33,25 +23,25 @@ export type MetaBindApi
  *   undefined from the api on some failures.
  * Fields are retured as HTMLElement by default, but can be returned as AbstractInputField via the BindingSettings.
  * Returns a promise by default, unless awaitOnLoad or callOnLoad options are false
+ *
+ * // TODO: test if we need to check and then call Promise.All() like how we used to call the flatten function.
  */
-export type MetaBindApiReturn
-  = MetaBindApiSyncReturn | MetaBindApiAsyncReturn;
+export type BindingResult
+  = ScryResults<BoundInputField> | ScryResults<Promise<BoundInputField>>;
 
-export type MetaBindApiSyncReturn
-  = AbstractInputField 
-    | Record<string, AbstractInputField | undefined | Record<string, AbstractInputField | undefined>>
-    | HTMLElement
-    | Record<string, HTMLElement | undefined | Record<string, HTMLElement | undefined>>
-    | undefined;
-    
-export type MetaBindApiAsyncReturn
-  = Promise<MetaBindApiSyncReturn>;
+/**
+ * An async return from metabind
+ */
+export type BoundInputField
+  = AbstractInputField | HTMLElement | undefined;
   
 /**
  * A generic meta-bind function for binding to any input type
+ *
+ * @internal
  */
 export type MetaBindGenericFunction = (
-  source: NotesSource | string | undefined | null,
+  source?: NotesSource | string | null,
   /**
    * The frontmatter key to use.
    * If it's true, all fields in the whole file will be bound!
@@ -62,12 +52,12 @@ export type MetaBindGenericFunction = (
   fieldType?: InputFieldType | 'auto',
   args?: Record<InputFieldArgumentType, any> | {},
   options?: BindSettings
-) => MetaBindApiReturn;
+) => BindingResult;
 
 /**
  * Mapped key of all the individual functions by name (lower and capitalized).
  */
-export type MetaBindIndividualInputTypesApi 
+type MetaBindIndividualInputTypesApi 
   = MetaBindIndividualInputTypesLowercaseApi
     & MetaBindIndividualInputTypesCapitalApi;
 
@@ -79,7 +69,7 @@ export type MetaBindIndividualInputTypeFunction = (
   frontmatterKey?: string | Array<String> | undefined | null | false,
   args?: Record<InputFieldArgumentType, any> | {},
   options?: BindSettings
-) => MetaBindApiReturn;
+) => BindingResult;
 
 /**
  * Mapped key of all the individual functions by lowercase name.
@@ -108,6 +98,8 @@ export type CurrentMetaBindApi
 
 /**
  * Used to bind to any kind of input
+ *
+ * @internal
  */
 export type CurrentMetaBindGenericFunction = (
   /**
@@ -117,12 +109,12 @@ export type CurrentMetaBindGenericFunction = (
   fieldType?: InputFieldType | 'auto' | undefined | null,
   args?: Record<InputFieldArgumentType, any> | {},
   options?: BindSettings
-) => MetaBindApiReturn;
+) => BindingResult;
 
 /**
  * Mapped key of all the individual functions by name (lower and capitalized).
  */
-export type CurrentMetaBindIndividualInputTypesApi 
+type CurrentMetaBindIndividualInputTypesApi 
   = CurrentMetaBindIndividualInputTypesLowercaseApi
     & CurrentMetaBindIndividualInputTypesCapitalApi;
 
@@ -133,7 +125,7 @@ export type CurrentMetaBindIndividualInputTypeFunction = (
   frontmatterKey?: string | Array<String> | undefined | null | true | false,
   args?: Record<InputFieldArgumentType, any> | {},
   options?: BindSettings
-) => MetaBindApiReturn;
+) => BindingResult;
 
 /**
  * Mapped key of all the individual functions by lowercase name.

@@ -1,37 +1,39 @@
 import { TFolder } from "obsidian";
-import { InternalStaticMetadataScrierPluginContainer } from "./static";
+import { InternalStaticMetadataScrierPluginContainer } from "../static";
 import {
-	BindSettings,
     CurrentMetaBindApi,
     CurrentMetaBindGenericFunction,
     CurrentMetaBindIndividualInputTypeFunction,
     MetaBindApi,
-    MetaBindApiReturn,
+    BindingResult,
     MetaBindGenericFunction,
     MetaBindIndividualInputTypeFunction
-} from "./types/bind";
+} from "../types/editing/bind";
 import {
     AbstractInputField,
     InputFieldArgumentType,
     InputFieldDeclaration,
     InputFieldMarkdownRenderChildType,
     InputFieldType
-} from "./types/external/meta-bind";
-import { NotesSource } from "./types/sources";
-import { IsArray, ParseFilePathFromSource } from "./utilities";
+} from "../types/_external_sources/meta-bind";
+import { NotesSource } from "../types/fetching/sources";
+import { IsArray, ParsePathFromNoteSource } from "../utilities";
+import { BindSettings } from "../lib";
 
 //#region global
 
 /**
  * The base function for interacting with meta-bind, with child prop functions for specific field types.
+ *
+ * @internal
  */
 const GlobalAnyInputBinder: MetaBindGenericFunction = (
-  source: NotesSource | string | undefined | null,
-  frontmatterKey: string | Array<String> | undefined | null | true | false = undefined,
+  source?: NotesSource | string | null,
+  frontmatterKey?: string | Array<String> | null | true | false,
   fieldType: InputFieldType | 'auto' = 'auto',
   args: Record<InputFieldArgumentType, any> | {} = {},
   options: BindSettings = {}
-): MetaBindApiReturn => {
+): BindingResult => {
   const meta = InternalStaticMetadataScrierPluginContainer.Api;
   const metaBindApi = InternalStaticMetadataScrierPluginContainer.MetaBindApi;
 
@@ -84,7 +86,7 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
       bindTarget: frontmatterKey
     } as InputFieldDeclaration;
     source = (source !== undefined && source !== null)
-      ? ParseFilePathFromSource(source) as string
+      ? ParsePathFromNoteSource(source) as string
       : meta.current.pathex;
   }
     
@@ -137,11 +139,11 @@ for (const fieldType of Object.values(InputFieldType)) {
   }
 
   const fieldTypeInputBinder: MetaBindIndividualInputTypeFunction = (
-    source: NotesSource | undefined | null | undefined,
-    frontmatterKey: string | Array<String> | undefined | null | false = undefined,
+    source?: NotesSource | null,
+    frontmatterKey?: string | Array<String> | null | false,
     args: Record<InputFieldArgumentType, any> | {} = {},
     options: BindSettings = {}
-  ): MetaBindApiReturn =>
+  ): BindingResult =>
     GlobalAnyInputBinder(source, frontmatterKey, fieldType as InputFieldType, args, options);
   
   // lowerCamel
@@ -155,9 +157,11 @@ for (const fieldType of Object.values(InputFieldType)) {
     = fieldTypeInputBinder;
 }
 
+/** @internal*/
 const MetadataInputBinder: MetaBindApi
   = GlobalAnyInputBinder as MetaBindApi;
   
+/** @internal*/
 export { MetadataInputBinder }; 
     
 //#endregion
@@ -166,13 +170,15 @@ export { MetadataInputBinder };
   
 /**
  * The base function for interacting with meta-bind, with child prop functions for specific field types.
+ * 
+ * @internal
  */
 const CurrentAnyInputBinder: CurrentMetaBindGenericFunction = (
-  key: string | Array<String> | undefined | null | false | true = undefined,
+  key?: string | Array<String> | null | false | true,
   fieldType: InputFieldType | 'auto' = 'auto',
   args: Record<InputFieldArgumentType, any> | {} = {},
   options: BindSettings = {}
-): MetaBindApiReturn => {
+): BindingResult => {
   return GlobalAnyInputBinder(null, key, fieldType, args, options);
 };
 
@@ -190,10 +196,10 @@ for (const fieldType of Object.values(InputFieldType)) {
   }
 
   const fieldTypeInputBinder: CurrentMetaBindIndividualInputTypeFunction = (
-    frontmatterKey: string | Array<String> | undefined | null | false = undefined,
+    frontmatterKey?: string | Array<String> | null | false,
     args: Record<InputFieldArgumentType, any> | {} = {},
     options: BindSettings = {}
-  ): MetaBindApiReturn =>
+  ): BindingResult =>
     CurrentAnyInputBinder(frontmatterKey, fieldType as InputFieldType, args, options);
   
   // lowerCamel
@@ -207,8 +213,10 @@ for (const fieldType of Object.values(InputFieldType)) {
     = fieldTypeInputBinder;
 }
 
+/** @internal*/
 const CurrentMetadataInputBinder: CurrentMetaBindApi
   = CurrentAnyInputBinder as CurrentMetaBindApi;
   
+/** @internal*/
 export {CurrentMetadataInputBinder}; 
 //#endregion

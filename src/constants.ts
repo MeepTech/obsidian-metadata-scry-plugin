@@ -1,8 +1,8 @@
-import { FrontmatterUpdateSettings } from "./types/editor";
 import {
+  FrontmatterUpdateSettings,
   MetaScryPluginSettings,
-  SplayKebabCasePropertiesOption
-} from "./types/plugin";
+  SplayKebabCasePropertiesOptions
+} from "./types/settings";
 
 export namespace Paths {
   export const PrototypesFolderDefaultPath = "_/_assets/_data/_prototypes";
@@ -59,57 +59,17 @@ export namespace Symbols {
   export const FolderPathSeperatorCharacter = "/";
 
   export const HeadingLevelMarkerCharachter = '#';
-  export const KebabCaseWordSeperatorCharacter = "-";
   export const SectionLinkSeperatorCharachter = '#';
   export const FrontmatterMarkdownSurroundingTag = "---";
+  export const MarkdownWikiLinkPrefix = "[[";
+  export const DataviewInlineSeperator = "::";
+
   export const SectionIdPartDelimiter = ":|:";
+  
+  export const KebabCasePropertyNameWordSeperatorCharacter = "-";
+  export const EmptySpace = " ";
+  export const NoCharachter = '';
 }
-
-export const DefaultFrontmatterUpdateOptions: FrontmatterUpdateSettings = {
-  toValuesFile: false,
-  prototype: false,
-  inline: false
-}
-
-/**
- * Required to enable the plugin
- */
-// TODO:remove when they're npm libs
-export const MetascryPluginHardDepencencies = [
-  Keys.DataviewPluginKey,
-];
-
-/**
- * Plugins that aren't required for the entire api, but parts of it.
- * The methods these are responsible for will return undefined if their plugin isn't present and a warning will be posted to the console.
- */
-// TODO:remove when they're npm libs
-export const MetascryPluginSoftDepencencies = [
-  Keys.CopyToHtmlPluginKey,
-  Keys.MetaBindWithApiPluginKey
-];
-
-/**
- * Not required, doesn't limit the api, but features are added for compatibility with this plugin:
- */
-// TODO:remove when they're npm libs
-export const MetascryPluginCompatibleNonDepencencies = [
-  Keys.ReactComponentsPluginKey
-];
-
-/**
- * All dependencies for this plugin.
- */
-// TODO:remove when they're npm libs
-export const MetascryPluginDepencencies =
-  MetascryPluginHardDepencencies
-    .concat(MetascryPluginSoftDepencencies);
-
-export const SpacesRegex = / /g;
-export const KebabCaseDashesRegex = /-/g;
-export const MarkdownWikiLinkRegex = new RegExp("\\[\\[(?:(?:([^\\]]*)\\|([^\\]]*))|([^\\]]*))\\]\\]", "g");
-export const DataviewInlineRegex = new RegExp("\\[(?:(?:([^\\[:\\|]*)::([^\\]]*)))\\]|\\((?:(?:([^\\[:\\|]*)::([^\\]]*)))\\)", "g");
-export const PropertyNameIllegalCharachtersRegex = new RegExp("(?:(^[\\d ][^{a-zA-Z_\\-}]*)|([^{a-zA-Z0-9_\\-\\\$ }]))", "g");
 
 export const DefaultPluginSettings: MetaScryPluginSettings = {
   globalCacheNames: Keys.CacheGlobalDefaultPropertyKey,
@@ -119,8 +79,55 @@ export const DefaultPluginSettings: MetaScryPluginSettings = {
   defineScryGlobalVariables: true,
   defineObjectPropertyHelperFunctions: true,
   defineArrayHelperFunctions: true,
-  splayKebabCaseProperties: SplayKebabCasePropertiesOption.LowerAndCamelCase,
+  splayKebabCaseProperties: SplayKebabCasePropertiesOptions.LowerAndCamelCase,
   splayFrontmatterWithoutDataview: true,
   prototypesPath: Paths.PrototypesFolderDefaultPath,
   valuesPath: Paths.ValuesFolderDefaultPath
 }
+
+export const DefaultFrontmatterUpdateOptions: FrontmatterUpdateSettings = {
+  toValuesFile: false,
+  prototype: false,
+  inline: false
+}
+
+/**
+ * Plugins required to enable the meta-scry plugin
+ * 
+ * // TODO: Test if the npm api means we don't need this actually:
+ */
+export const MetascryPluginHardDepencencies = [
+  Keys.DataviewPluginKey
+];
+
+/**
+ * Plugins that aren't required for the entire api, but parts of it.
+ * Methods or features that depend on these plugins may be disabled, or may fail without them.
+ * The api will not be auto-disabled without these plugins however, and you can still try to use it.
+ * // TODO: The methods these are responsible for will return undefined if their plugin isn't present and a warning will be posted to the console.
+ */
+export const MetascryPluginSoftDepencencies = [
+  Keys.MetaBindWithApiPluginKey,
+  Keys.ReactComponentsPluginKey,
+  // TODO:remove when it's an npm lib
+  Keys.CopyToHtmlPluginKey
+];
+
+/**
+ * All dependencies for this plugin.
+ */
+export const MetascryPluginDepencencies =
+  MetascryPluginHardDepencencies
+    .concat(MetascryPluginSoftDepencencies);
+
+/** @internal*/
+export const SpacesRegex = / /g;
+/** @internal*/
+export const KebabCaseDashesRegex = /-/g;
+/** @internal*/
+export const MarkdownWikiLinkRegex = new RegExp("\\[\\[(?:(?:([^\\]]*)\\|([^\\]]*))|([^\\]]*))\\]\\]", "g");
+/** @internal*/
+export const DataviewInlineRegex = new RegExp("\\[(?:(?:([^\\[:\\|]*)::([^\\]]*)))\\]|\\((?:(?:([^\\[:\\|]*)::([^\\]]*)))\\)", "g");
+/** @internal*/
+export const PropertyNameIllegalCharachtersRegex = new RegExp("(?:(^[\\d ][^{a-zA-Z_\\-}]*)|([^{a-zA-Z0-9_\\-\\\$ }]))", "g");
+

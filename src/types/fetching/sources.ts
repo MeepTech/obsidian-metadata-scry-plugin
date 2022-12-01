@@ -4,13 +4,12 @@ import {
   TFolder
 } from "obsidian";
 import { Link } from "obsidian-dataview";
-import { FileData } from "./data";
-import { Keys } from "../constants";
+import { FileData } from "../datas";
+import { Keys } from "../../constants";
 
 /**
  * The sources to pull Metadata values from for a file.
  */
-
 export type MetadataSources = {
 
   /**

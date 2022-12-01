@@ -4,9 +4,8 @@ import {
   Setting
 } from 'obsidian';
 import {
-  MetaScryPluginApi,
-  SplayKebabCasePropertiesOption
-} from "./types/plugin";
+  MetaScryPluginApi} from "./types/plugin";
+import { SplayKebabCasePropertiesOptions } from "./types/settings";
 import { DefaultPluginSettings } from './constants';
 
 /**
@@ -108,12 +107,12 @@ export class MetadataScrierPluginSettingTab extends PluginSettingTab {
       .addDropdown(toggle => toggle
         .setValue(this.plugin.settings.splayKebabCaseProperties.toString())
         .addOptions(Object.fromEntries(
-          Object.entries(SplayKebabCasePropertiesOption).map(([key, value]) => [key.toString(), value.toString()]))
+          Object.entries(SplayKebabCasePropertiesOptions).map(([key, value]) => [key.toString(), value.toString()]))
         )
         .onChange(async (value) => {
           await this.plugin.updateSettings({
             ...this.plugin.settings,
-            splayKebabCaseProperties: (<any>SplayKebabCasePropertiesOption)[parseInt(value)]
+            splayKebabCaseProperties: (<any>SplayKebabCasePropertiesOptions)[parseInt(value)]
           });
         }));
 

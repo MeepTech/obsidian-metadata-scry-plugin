@@ -11,17 +11,19 @@ import { Internal as OpdMetadataEditLibrary } from "@opd-libs/opd-metadata-lib/l
 import {
   MetaEditApi,
   ContextlessMetadataEditApiMethods
-} from "./types/editor";
-import { AppWithPlugins, MetaScryPluginApi, MetaScryPluginSettings } from "./types/plugin";
-import { ContainsDeepProperty, GetDeepProperty, IsFunction, IsObject, ParseFilePathFromSource, Path, SetDeepProperty, TryToGetDeepProperty } from "./utilities";
+} from "./types/editing/editor";
+import { AppWithPlugins, MetaScryPluginApi } from "./types/plugin";
+import { MetaScryPluginSettings } from "./types/settings";
+import { ContainsDeepProperty, GetDeepProperty, IsFunction, IsObject, ParsePathFromNoteSource, Path, SetDeepProperty, Splay, TryToGetDeepProperty } from "./utilities";
 import { TFile } from "obsidian";
-import { NotesSource } from "./types/sources";
-import { MetaBindPlugin } from "./types/external/meta-bind";
+import { NotesSource } from "./types/fetching/sources";
+import { MetaBindPlugin } from "./types/_external_sources/meta-bind";
 import { Keys } from "./constants";
 import { ReactMarkdownComponents } from "./components/markdown";
 import { ReactSectionComponents } from "./components/sections";
-import { MetadataScrier } from "./scrier";
-import { MetaScry, MetaScryApi } from "./types/scrier";
+import { MetadataScrier } from "./fetching/scrier";
+import { MetaScryApi } from "./types/fetching/scrier";
+import { MetaScry } from "./types/static";
 
 /**
  * Static container for the current meta-scry plugin instance.
@@ -200,7 +202,7 @@ export class InternalStaticMetadataScrierPluginContainer {
 
   static _parseSource = (source: NotesSource | undefined): TFile =>
     InternalStaticMetadataScrierPluginContainer.Api.file(IsObject(source)
-      ? ParseFilePathFromSource(source as object) || InternalStaticMetadataScrierPluginContainer.Api.Current.pathex
+      ? ParsePathFromNoteSource(source as object) || InternalStaticMetadataScrierPluginContainer.Api.Current.pathex
       : source || InternalStaticMetadataScrierPluginContainer.Api.Current.pathex) as TFile;
 
   /**
@@ -240,6 +242,7 @@ export class InternalStaticMetadataScrierPluginContainer {
       Api: InternalStaticMetadataScrierPluginContainer._api,
       Plugin: plugin,
       Path,
+	  Splay,
       ContainsDeepProperty,
       TryToGetDeepProperty,
       SetDeepProperty,

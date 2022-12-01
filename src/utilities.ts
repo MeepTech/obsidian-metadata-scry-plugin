@@ -1,11 +1,17 @@
 import { parsePath } from "@opd-libs/opd-metadata-lib/lib/Utils";
 import { TAbstractFile, TFolder } from "obsidian";
 import {
+  DataviewInlineRegex,
+  KebabCaseDashesRegex,
+  MarkdownWikiLinkRegex,
+  PropertyNameIllegalCharachtersRegex,
+  SpacesRegex,
   Symbols
 } from "./constants";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
-import { FileData } from "./types/data";
-import { NotesSource } from "./types/sources";
+import { FileData } from "./types/datas";
+import { NotesSource } from "./types/fetching/sources";
+import { PropertyNamingConventions } from "./types/settings";
 
 //#region Conditionals
 
@@ -45,49 +51,6 @@ export const IsString = (symbol: any) => typeof symbol === "string";
 export const IsArray = (symbol: any) => Array.isArray(symbol);
 
 //#endregion
-
-//#region Path Manipluation
-
-/**
- * Get a file path string based on a file path string or file object.
- *
- * @param {NotesSource} source The file object (with a path property) or file name
- *
- * @returns The file path
- */
-export function ParseFilePathFromSource(source: NotesSource): string | null {
-  let fileName = source || null;
-  if (IsObject(source) && source !== null) {
-    fileName = (source as FileData | TAbstractFile).path!;
-  }
-
-  //@ts-expect-error: Accounted For.
-  return fileName;
-}
-
-/**
- * Get the full path of a data file from it's data path.
- *
- * @param dataPath The path after the value set in settings for the path to data value files.
- *
- * @returns the full path from the root of the vault.
- */
-export function BuildDataValueFileFullPath(dataPath: string) {
-  // @ts-expect-error: app.plugin is not mapped.
-  return app.plugins.plugins[MetadataScrierPluginKey].settings.dataFilesPath + dataPath;
-}
-
-/**
- * Get the full path of a prototype file from it's data path.
- *
- * @param prototypePath The path after the value set in settings for the path to data prototypes files.
- *
- * @returns the full path from the root of the vault.
- */
-export function BuildPrototypeFileFullPath(prototypePath: string) {
-  // @ts-expect-error: app.plugin is not mapped.
-  return app.plugins.plugins[MetadataScrierPluginKey].settings.prototypesPath + prototypePath;
-}
 
 //#region Object Deep Property Utilities
 
@@ -223,6 +186,47 @@ export function SetDeepProperty(propertyPath: string | Array<string>, value: any
 //#region Filename Utilities
 
 /**
+ * Get a file path string based on a file path string or file object.
+ *
+ * @param {NotesSource} source The file object (with a path property) or file name
+ *
+ * @returns The file path
+ */
+export function ParsePathFromNoteSource(source: NotesSource): string | null {
+  let fileName = source || null;
+  if (IsObject(source) && source !== null) {
+    fileName = (source as FileData | TAbstractFile).path!;
+  }
+
+  //@ts-expect-error: Accounted For.
+  return fileName;
+}
+
+/**
+ * Get the full path of a data file from it's data path.
+ *
+ * @param dataPath The path after the value set in settings for the path to data value files.
+ *
+ * @returns the full path from the root of the vault.
+ */
+export function BuildDataValueFileFullPath(dataPath: string) {
+  // @ts-expect-error: app.plugin is not mapped.
+  return app.plugins.plugins[MetadataScrierPluginKey].settings.dataFilesPath + dataPath;
+}
+
+/**
+ * Get the full path of a prototype file from it's data path.
+ *
+ * @param prototypePath The path after the value set in settings for the path to data prototypes files.
+ *
+ * @returns the full path from the root of the vault.
+ */
+export function BuildPrototypeFileFullPath(prototypePath: string) {
+  // @ts-expect-error: app.plugin is not mapped.
+  return app.plugins.plugins[MetadataScrierPluginKey].settings.prototypesPath + prototypePath;
+}
+
+/**
  * Turn a relative path into a full path
  *
  * @param relativePath The relative path to map to. Will preform immediate search if it starts with ?.
@@ -294,4 +298,129 @@ function _addExtension(path: string, extension: string | boolean): string {
   }
 }
 
+//#endregion
+
+//#region String Utilities
+
+/**
+ * Used to splay a property key into it's multiple forms, including:
+ * 
+ * - un-cleaned (Original)
+ * - cleanedOriginal
+ * - kebab-case
+ * - lowercase
+ * - lowerCamelCase
+ * - DefaultCamelCase
+ */
+export function Splay(
+  key: string,
+  conventions: PropertyNamingConventions = PropertyNamingConventions.All,
+  originalConvention: typeof PropertyNamingConventions.Uncleaned | typeof PropertyNamingConventions.Cleaned = PropertyNamingConventions.Uncleaned
+): string[] {
+  // if you just want the unclean key... take it?
+  if (conventions === PropertyNamingConventions.Uncleaned) {
+    return [key];
+  }
+
+  // otherwise we need probably need to clean and split it up.
+  const keys = conventions & originalConvention
+    ? [key]
+    : [];
+
+  // clean the key of dataview values, wikilinks, seperators, and illegal charachters.
+  let cleaned = key;
+  let cleanedWithSeperatorCharsIntact: string | null = null;
+  if (originalConvention !== PropertyNamingConventions.Cleaned) {
+    /// wiki-links syntax
+    if (key.contains(Symbols.MarkdownWikiLinkPrefix)) {
+      cleanedWithSeperatorCharsIntact = key.replace(MarkdownWikiLinkRegex, "$2$3");
+    } else {
+      cleanedWithSeperatorCharsIntact = key;
+    }
+    
+    // dv inline syntax
+    if (cleanedWithSeperatorCharsIntact?.contains(Symbols.DataviewInlineSeperator)) {
+      cleanedWithSeperatorCharsIntact = cleanedWithSeperatorCharsIntact.replace(DataviewInlineRegex, function (_a, b, c, _d, e, _f) {
+        return b ? `${b} ${c}` : e;
+      });
+    }
+
+    // remove special and illegal name characters including
+    cleanedWithSeperatorCharsIntact = cleanedWithSeperatorCharsIntact.replace(PropertyNameIllegalCharachtersRegex, Symbols.NoCharachter);
+    cleaned = cleanedWithSeperatorCharsIntact.replace(SpacesRegex, Symbols.NoCharachter);
+    cleaned = cleanedWithSeperatorCharsIntact.replace(KebabCaseDashesRegex, Symbols.NoCharachter);
+  }
+
+  if (conventions & PropertyNamingConventions.Cleaned) {
+    keys.push(cleaned);
+  }
+
+  if (conventions & PropertyNamingConventions.LowerCase) {
+    const lower = cleaned.toLowerCase();
+
+    keys.push(lower);
+  }
+
+  if (conventions & PropertyNamingConventions.LowerCamelCase) {
+    const lowerCamel = cleaned[0].toLowerCase() + cleaned.substring(1);
+
+    keys.push(lowerCamel);
+  }
+
+  /// can't make the others if it's already been cleaned.
+  if (cleanedWithSeperatorCharsIntact === null) {
+    return keys.unique();
+  }
+
+  let seperatedParts: Array<string> | null = null;
+  if (conventions & PropertyNamingConventions.LowerCamelCase) {
+    seperatedParts ??= cleanedWithSeperatorCharsIntact
+      .split(Symbols.KebabCasePropertyNameWordSeperatorCharacter)
+      .map(p => p.split(Symbols.EmptySpace))
+      .flat();
+
+    keys.push(seperatedParts
+      .map((part, i) => (i !== 0 && part)
+        ? part.charAt(0).toUpperCase() + part.substring(1)
+        : part)
+      .join(Symbols.NoCharachter));
+  }
+
+  if (conventions & PropertyNamingConventions.DefaultCamelCase) {
+    seperatedParts ??= cleanedWithSeperatorCharsIntact
+      .toLowerCase()
+      .split(Symbols.KebabCasePropertyNameWordSeperatorCharacter)
+      .map(p => p.split(Symbols.EmptySpace))
+      .flat();
+
+    keys.push(seperatedParts
+      .map(part => part
+        ? part.charAt(0).toUpperCase() + part.substring(1)
+        : part)
+      .join(Symbols.NoCharachter));
+  }
+
+  if (conventions & PropertyNamingConventions.KebabCase) {
+    if (!seperatedParts) {
+      seperatedParts ??= cleanedWithSeperatorCharsIntact
+        .split(Symbols.KebabCasePropertyNameWordSeperatorCharacter)
+        .map(p => p.split(Symbols.EmptySpace))
+        .flat();
+
+      keys.push(seperatedParts
+        .map(part => part
+          ? part
+          : part)
+        .join(Symbols.KebabCasePropertyNameWordSeperatorCharacter));
+    } else {
+      keys.push(seperatedParts
+        .map(part => part
+          ? part.toLowerCase()
+          : part)
+        .join(Symbols.KebabCasePropertyNameWordSeperatorCharacter));
+    }
+  }
+
+  return keys.unique();
+}
 //#endregion

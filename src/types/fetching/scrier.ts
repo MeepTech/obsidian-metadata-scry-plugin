@@ -7,13 +7,14 @@ import {
   DataArray,
   DataviewApi
 } from "obsidian-dataview";
-import { MetaScryPluginApi } from "./plugin";
-import { Frontmatter, Metadata, CachedFileMetadata, DataviewMatter, Cache } from "./data";
-import { Sections } from "./sections";
+import { MetaScryPluginApi } from "../plugin";
+import { Frontmatter, Metadata, CachedFileMetadata, DataviewMatter, Cache, ScryResults, PromisedScryResults, ScryResult } from "../datas";
+import { Sections } from "../sections/sections";
 import { NotesSource, MetadataSources, SingleFileSource } from "./sources";
-import { MetaEditApi as MetaEditApi, FrontmatterUpdateSettings } from "./editor";
+import { MetaEditApi as MetaEditApi } from "../editing/editor";
 import { CurrentNoteMetaScryApi } from "./current";
-import { MetaBindApi } from "./bind";
+import { MetaBindApi } from "../editing/bind";
+import { FrontmatterUpdateSettings } from "../settings";
 
 /**
 * Interface for the Api.
@@ -197,7 +198,7 @@ export interface MetaScryApi {
    *
    * @alias {@link omfc}
    */
-  obsidianMetadataFileCache(source?: NotesSource): CachedFileMetadata | CachedFileMetadata[] | null;
+  obsidianMetadataFileCache(source?: NotesSource): ScryResults<CachedFileMetadata>;
 
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api.
@@ -208,7 +209,7 @@ export interface MetaScryApi {
    *
    * @alias {@link obsidianMetadataFileCache}
    */
-  omfc(source?: NotesSource): CachedFileMetadata | CachedFileMetadata[] | null;
+  omfc(source?: NotesSource): ScryResults<CachedFileMetadata>;
 
   /**
    * Used to fetch the markdown text of the entire file or all provided files.
@@ -224,7 +225,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.markdown}
    * @see {@link Section.markdown}
    */
-  md(source?: NotesSource): Promise<string>;
+  md(source?: NotesSource): PromisedScryResults<string>;
 
   /**
    * Used to fetch the markdown text of the entire file or all provided files.
@@ -240,7 +241,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.markdown}
    * @see {@link Section.markdown}
    */
-  markdown(source?: NotesSource): Promise<string>;
+  markdown(source?: NotesSource): PromisedScryResults<string>;
 
   /**
    * Used to fetch the rendered html elements resulting from the markdown of the entire file (or all provided files).
@@ -255,7 +256,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.html}
    * @see {@link Section.html}
    */
-  html(source?: NotesSource, rawMd?: string | undefined): Promise<HTMLElement>;
+  html(source?: NotesSource, rawMd?: string): PromisedScryResults<HTMLElement>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
@@ -271,7 +272,7 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  txt(source?: NotesSource): Promise<string>;
+  txt(source?: NotesSource): PromisedScryResults<string>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
@@ -287,12 +288,13 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  text(source?: NotesSource): Promise<string>;
+  text(source?: NotesSource): PromisedScryResults<string>;
 
   /**
    * Used to embed the desired link into a file using a div element.
    * 
    * @param {NotesSource} source The file/folder object(with a path property) or the full path string with the desired optional section after a #
+	 * 
    * @param container (Optional) an existing container to attach the element to.
    * @param intoNote (Optional) the note you are embeding into, this defaults to the current note.
    *
@@ -303,9 +305,9 @@ export interface MetaScryApi {
    */
   embed(
     source: NotesSource,
-    container?: HTMLElement | undefined,
-    intoNote?: SingleFileSource | undefined
-  ): HTMLElement
+    container?: HTMLElement,
+    intoNote?: SingleFileSource
+  ): ScryResults<HTMLElement>
 
   /**
    * Get just the frontmatter for the given file.
@@ -320,7 +322,7 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  frontmatter(source?: NotesSource): Frontmatter | Frontmatter[] | null;
+  frontmatter(source?: NotesSource): ScryResults<Frontmatter>;
 
   /**
    * Get just the frontmatter for the given file.
@@ -335,7 +337,7 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  fm(source?: NotesSource): Frontmatter | Frontmatter[] | null;
+  fm(source?: NotesSource): ScryResults<Frontmatter>;
 
   /**
    * Get just the frontmatter for the given file.
@@ -350,7 +352,7 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  matter(source?: NotesSource): Frontmatter | Frontmatter[] | null;
+  matter(source?: NotesSource): ScryResults<Frontmatter>;
 
   /**
    * Get just the sections for the given file.
@@ -365,7 +367,7 @@ export interface MetaScryApi {
    * @see {@link text}
    * @see {@link CurrentNoteMetaScryApi.sections}
    */
-  sections(source?: NotesSource): Sections | Sections[] | null;
+  sections(source?: NotesSource): ScryResults<Sections>;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
@@ -382,7 +384,7 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  dvMatter(source?: NotesSource, useSourceQuery?: boolean): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null;
+  dvMatter(source?: NotesSource, useSourceQuery?: boolean): ScryResults<DataviewMatter>;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
@@ -399,7 +401,7 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter
    */
-  dataviewFrontmatter(source?: NotesSource, useSourceQuery?: boolean): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null;
+  dataviewFrontmatter(source?: NotesSource, useSourceQuery?: boolean): ScryResults<DataviewMatter>;
 
   /**
    * Get just the (meta-scry) cache data for a file.
@@ -415,7 +417,7 @@ export interface MetaScryApi {
    * @see {@link obsidianMetadataFileCache}
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
-  cache(source?: NotesSource): Cache | Cache[];
+  cache(source?: NotesSource): ScryResults<Cache>;
 
   /**
    * Get just the (meta-scry) cache data for a file.
@@ -431,13 +433,13 @@ export interface MetaScryApi {
    * @see {@link obsidianMetadataFileCache}
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
-  temp(source?: NotesSource): Cache | Cache[];
+  temp(source?: NotesSource): ScryResults<Cache>;
 
   /**
    * Get or Set a global values across all obsidian.
    * WARNING DONT USE THIS IF YOU DONT KNOW WHAT YOURE DOING!
    *
-   * @param {NotesSource} key The key of the global to fetch or set.
+   * @param {string | string[]} key The key or keys of the global to fetch or set.
    *
    * @returns The global or globals with the given key(s)
    *
@@ -446,7 +448,7 @@ export interface MetaScryApi {
    * @see {@link MetadataScrierPlugin.tryToGetExtraGlobal}
    * @see {@link MetadataScrierPlugin.tryToSetExtraGlobal}
    */
-  globals(key: string | string[], setToValue: any): any | any[] | undefined;
+  globals(key: string | string[], setToValue?: any): ScryResults<any>;
 
   /**
    * Get the desired prototypes
@@ -459,7 +461,7 @@ export interface MetaScryApi {
     * @see {@link globals}
     * @see {@link values}
    */
-  prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null;
+  prototypes(prototypePath: string): ScryResults<Frontmatter>;
 
   /**
    * Get the desired values from data storage
@@ -472,7 +474,7 @@ export interface MetaScryApi {
     * @see {@link globals}
     * @see {@link prototypes}
    */
-  values(dataPath: string): Frontmatter | Frontmatter[] | null;
+  values(dataPath: string): ScryResults<Frontmatter>;
 
   /**
    * Get the Metadata for a given file using the supplied sources.
@@ -495,7 +497,7 @@ export interface MetaScryApi {
    * @see {@link dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  get(source?: NotesSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
+  get(source?: NotesSource, sources?: MetadataSources | boolean): ScryResults<Metadata>;
 
   /**
    * Get the Metadata for a given file using the supplied sources.
@@ -518,7 +520,7 @@ export interface MetaScryApi {
    * @see {@link dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  from(source?: NotesSource, sources?: MetadataSources | boolean): Metadata | Metadata[] | null;
+  from(source?: NotesSource, sources?: MetadataSources | boolean): ScryResults<Metadata>;
 
   /**
    * Patch individual properties of the frontmatter metadata.
@@ -536,7 +538,7 @@ export interface MetaScryApi {
   patch(
     file: SingleFileSource,
     frontmatterData: Record<string, any> | any,
-    propertyName?: string | undefined,
+    propertyName?: string,
     options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
 
@@ -572,7 +574,7 @@ export interface MetaScryApi {
    */
   clear(
     file?: SingleFileSource,
-    frontmatterProperties?: string | Array<string> | Record<string, any> | undefined,
+    frontmatterProperties?: string | Array<string> | Record<string, any>,
     options?: FrontmatterUpdateSettings
   ): Promise<Frontmatter>;
 
@@ -638,91 +640,4 @@ export interface MetaScryApi {
   path(relativePath?: string | null, extension?: string | boolean, rootFolder?: string | null): string;
 }
 
-/**
- * A container for access to the whole Api and other features like components and utilities too.
- */
-export interface MetaScry {
 
-  /**
-   * React components and other special functions are stored under this as a namespace
-   */
-  readonly [key: string | number | symbol]: any;
-
-  /**
-   * You can access all built-in react components from this property.
-   */
-  readonly Components?: Record<string, React.Component | React.FC>;
-
-  /**
-   * React components specific to Sections and the Section Api
-   */
-  readonly SectionComponents?: Record<string, React.Component | React.FC>;
-
-  /**
-   * The Api Itself
-   */
-  readonly Api: MetaScryApi;
-
-  /**
-   * The currently active plugin.
-   */
-  readonly Plugin?: MetaScryPluginApi;
-
-  /**
-   * Default Metadata Sources
-   */
-  readonly DefaultSources: MetadataSources;
-
-  /**
-   * Turn a relative path into a full path
-   *
-   * @param relativePath The relative path to map to. Will preform immediate search if it starts with ?.
-   * @param extension The extension to add. Defaults to no extension (false/empty). If true is passed in .md will be added.
-   * @param rootFolder (Optional) The root folder path the relative path is relative too. Defaults to the current note's folder
-   *
-   * @returns The full file path.
-   */
-  Path(relativePath?: string, extension?: string | boolean, rootFolder?: string): string;
-
-  /**
-   * Find a deep property in an object.
-   *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {object} onObject The object containing the desired key
-   *
-   * @returns true if the property exists, false if not.
-   */
-  ContainsDeepProperty(propertyPath: string | Array<string>, onObject: any): boolean
-
-  /**
-   * Get a deep property in an object, null if not found.
-   *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {object} fromObject The object containing the desired key
-   *
-   * @returns The found deep property, or null if not found.
-   */
-  GetDeepProperty(propertyPath: string | Array<string>, fromObject: any): any | null;
-
-  /**
-   * Get a deep property in an object, null if not found.
-   *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
-   * @param {object} fromObject The object containing the desired key
-   *
-   * @returns if the property exists.
-   */
-  TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean
-
-  /**
-   * Set a deep property in an object, even if it doesn't exist.
-   *
-   * @param {string|[string]} propertyPath Array of keys, or dot seperated propery key.
-   * @param {object|function(object)} value The value to set, or a function to update the current value and return it.
-   * @param {object} fromObject The object containing the desired key
-   *
-   * @returns The found deep property, or null if not found.
-   */
-  SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void
-}

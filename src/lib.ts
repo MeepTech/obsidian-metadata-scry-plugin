@@ -3,8 +3,8 @@
  */
 import { DefaultPluginSettings } from "./constants";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
-import { MetaScryPluginSettings } from "./types/plugin";
-import { MetaScry as MetaScry } from "./types/scrier";
+import { MetaScryPluginSettings } from "./types/settings";
+import { MetaScry as MetaScry } from "./types/static";
 import { IsObject } from "./utilities";
 
 // Types
@@ -16,57 +16,62 @@ export type {
   FileData,
   Cache,
   DataviewMatter,
-  CachedFileMetadata
-} from "./types/data";
+  CachedFileMetadata,
+  ScryResult,
+  ScryResultMap,
+  PromisedScryResults,
+  ScryResultPromiseMap,
+  PromisedScryResult
+} from "./types/datas";
 export type {
   Section
-} from "./types/section";
+} from "./types/sections/section";
 export type {
-  Sections,
+  Sections
+} from "./types/sections/sections";
+export type {
   Heading
-} from "./types/sections";
+} from "./types/sections/heading";
 
 //// APIs
 export type {
-  MetaScryPluginApi
+  MetaScryPluginApi as MetaScryPlugin
 } from "./types/plugin";
 export type {
-  MetaScry,
+  MetaScry
+} from "./types/static";
+export type {
   MetaScryApi
-} from "./types/scrier";
+} from "./types/fetching/scrier";
 export type {
   CurrentNoteMetaScryApi
-} from "./types/current";
+} from "./types/fetching/current";
 export type {
   MetaBindApi,
   MetaBindIndividualInputTypeFunction,
   CurrentMetaBindApi,
   CurrentMetaBindIndividualInputTypeFunction,
-  MetaBindApiReturn,
-  MetaBindApiSyncReturn,
-  MetaBindApiAsyncReturn,
-} from "./types/bind";
+  BindingResult,
+  BoundInputField
+} from "./types/editing/bind";
 export type {
   MetaEditApi,
   CurrentNoteMetaEditApi
-} from "./types/editor";
+} from "./types/editing/editor";
 
 //// Settings and Options
 export type {
   MetadataSources,
   NotesSource,
   SingleFileSource
-} from "./types/sources";
+} from "./types/fetching/sources";
 export type {
-  FrontmatterUpdateSettings
-} from "./types/editor";
-export type {
-  BindSettings
-} from "./types/bind";
-export type {
-  SplayKebabCasePropertiesOption,
-  MetaScryPluginSettings
-} from "./types/plugin";
+  FrontmatterUpdateSettings,
+  BindSettings,
+  SplayKebabCasePropertiesOptions,
+  MetaScryPluginSettings,
+  PropertyNamingConventions
+} from "./types/settings";
 export type {
   Keys,
   Symbols,
@@ -85,7 +90,7 @@ export type {
   ReactSectionComponents
 } from "./components/sections"
 
-//// Utility Functions
+//// Utility
 export type {
   IsFunction,
   IsObject,
@@ -96,7 +101,8 @@ export type {
   GetDeepProperty,
   SetDeepProperty,
   Path,
-  ParseFilePathFromSource,
+  Splay,
+  ParsePathFromNoteSource as ParseFilePathFromSource,
   BuildDataValueFileFullPath,
   BuildPrototypeFileFullPath
 } from "./utilities";

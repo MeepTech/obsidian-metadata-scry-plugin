@@ -1,4 +1,5 @@
-import { Heading, Sections } from "./sections";
+import { Sections } from "./sections";
+import { Heading } from "./heading";
 
 /**
  * A section of a note.
@@ -400,6 +401,7 @@ interface SectionInfo {
    */
   get text(): Promise<string>;
 }
+
 /**
  * Sub-sections of a note section
  */

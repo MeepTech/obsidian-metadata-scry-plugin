@@ -1,26 +1,28 @@
 import { TFile } from 'obsidian';
 import {
-  Sections} from './types/sections';
+  Sections} from '../types/sections/sections';
 import {
   MetaScryApi
-} from "./types/scrier";
-import { CurrentNoteMetaScryApi } from "./types/current";
-import { CurrentNoteMetaEditApi, FrontmatterUpdateSettings } from "./types/editor";
+} from "../types/fetching/scrier";
+import { CurrentNoteMetaScryApi } from "../types/fetching/current";
+import { CurrentNoteMetaEditApi } from "../types/editing/editor";
 import {
   Cache, Frontmatter,
   Metadata,
   DataviewMatter
-} from "./types/data";
-import { IsString } from './utilities';
-import { InternalStaticMetadataScrierPluginContainer } from './static';
-import { DefaultFrontmatterUpdateOptions } from './constants';
-import { CurrentMetaBindApi } from './types/bind';
-import { CurrentMetadataInputBinder } from './bind';
+} from "../types/datas";
+import { IsString } from '../utilities';
+import { InternalStaticMetadataScrierPluginContainer } from '../static';
+import { DefaultFrontmatterUpdateOptions } from '../constants';
+import { CurrentMetaBindApi } from '../types/editing/bind';
+import { CurrentMetadataInputBinder } from '../editing/bind';
+import { FrontmatterUpdateSettings } from '../lib';
 
 /**
  * Access to current metadata via localized versions of the calls in MetaScryApi
+ * 
+ * @internal
  */
-
 export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
   private _api: MetaScryApi;
 
@@ -164,7 +166,7 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     return this.edit;
   }
 
-  patch(frontmatterData: any, propertyName: string | undefined = undefined, options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions): any | object {
+  patch(frontmatterData: any, propertyName?: string, options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions): any | object {
     return this._api.patch(this.path, frontmatterData, propertyName, options);
   }
 
@@ -172,7 +174,7 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     return this._api.set(this.path, frontmatterData, options);
   }
 
-  clear(frontmatterProperties: string | Array<string> | object | undefined = undefined, options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions) {
+  clear(frontmatterProperties?: string | Array<string> | object, options: FrontmatterUpdateSettings = DefaultFrontmatterUpdateOptions) {
     return this._api.clear(this.path, frontmatterProperties, options);
   }
   

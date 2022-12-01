@@ -2,7 +2,7 @@ import { MarkdownRenderChild, TFile, Plugin } from "obsidian";
 
 /**
  * Types in this file were borrowed from: https://github.com/mProjectsCode/obsidian-meta-bind-plugin/tree/master/src
- * Up to date for commit: c2eb9d60def42784e081bd4b6c3a021e4fe548f6
+ * Up to date for commit: 
  */
 
 /**
@@ -66,7 +66,7 @@ export enum InputFieldType {
 }
 
 export type InputFieldDeclarationParser = {
-  parse(fullDeclaration: string): InputFieldDeclaration;	
+  parse(fullDeclaration: string): InputFieldDeclaration;
 }
 
 export type InputFieldArgumentContainer = {

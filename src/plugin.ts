@@ -1,11 +1,11 @@
 import { Plugin } from 'obsidian';
 import {
   MetaScryApi
-} from "./types/scrier";
+} from "./types/fetching/scrier";
 import {
-  MetaScryPluginSettings,
   MetaScryPluginApi, AppWithPlugins
 } from "./types/plugin";
+import { MetaScryPluginSettings } from "./types/settings";
 import {
   Keys,
   DefaultPluginSettings,
@@ -24,6 +24,8 @@ import {
 
 /**
  * Metadata Scrier Api Obsidian.md Plugin
+ *
+ * @internal
  */
 export default class MetadataScrierPlugin extends Plugin implements MetaScryPluginApi {
   private _settings: MetaScryPluginSettings;

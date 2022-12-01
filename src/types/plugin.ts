@@ -3,52 +3,10 @@ import {
   Plugin
 } from "obsidian";
 import { Keys } from "../constants";
-import { CopyToHtmlPlugin } from "./external/copy-to-html";
-import { MetaBindPlugin } from "./external/meta-bind";
-import { MetaScryApi } from "./scrier";
-
-/**
- * Enum for the kebab splay settings options
- */
-export enum SplayKebabCasePropertiesOption {
-  /**
-   * Only use original keys
-   */
-  Disabled = 0,
-
-  /**
-   * Splits into only lower camel case
-   */
-  Lowercase = 1,
-
-  /**
-   * Splits only into upper camel case
-   */
-  CamelCase = 2,
-
-  /**
-   * Split into loweCamel and Upper/UntouchedCamelCase
-   */
-  LowerAndCamelCase = 3
-}
-
-/**
- * Internalish Extension to the App with the plugins because it's missing for some reason
- */
-export type AppWithPlugins = {
-  plugins: {
-    enabledPlugins: Set<string>;
-    disablePlugin(key: string): void;
-    plugins: {
-      [Keys.MetadataScrierPluginKey]?: MetaScryPluginApi;
-      [Keys.ReactComponentsPluginKey]?: Plugin;
-      // TODO: remove this plugin field when all of these are moved to npm packages:      
-      [Keys.MetaBindWithApiPluginKey]?: MetaBindPlugin;
-      // TODO: remove this plugin field when all of these are moved to npm packages:      
-      [Keys.CopyToHtmlPluginKey]?: CopyToHtmlPlugin;
-    };
-  };
-} & App;
+import { CopyToHtmlPlugin } from "./_external_sources/copy-to-html";
+import { MetaBindPlugin } from "./_external_sources/meta-bind";
+import { MetaScryApi } from "./fetching/scrier";
+import { MetaScryPluginSettings } from "./settings";
 
 /**
  * Interface for the plugin itself
@@ -116,63 +74,21 @@ export type MetaScryPluginApi = {
 } & Plugin;
 
 /**
- * Interface for the plugin settings
+ * Internalish Extension to the App with the plugins because it's missing for some reason
+ * 
+ * @internal
  */
-export interface MetaScryPluginSettings {
-
-  /**
-  * A comma seperated list of the global property keys for the global 'cache' variable
-   */
-  globalCacheNames: string;
-
-  /**
-   * A comma seperated list of the global property keys for the global 'meta' variable
-   */
-  globalMetaScryExtraNames: string;
-
-  /**
-   * A comma seperated list of he global property keys for the global 'path' function
-   */
-  globalPathFunctionNames: string;
-
-  /**
-   * A comma seperated list of the global property keys for the global 'my'/CurrentFileMetaScryApi variable
-   */
-  globalCurrentFilePropertyNames: string;
-
-  /**
-   * Option to enable or disable the scry and Scry global api variables
-   */
-  defineScryGlobalVariables: boolean;
-
-  /**
-   * if hasprop, getprop, and setprop should be added to all objects
-   */
-  defineObjectPropertyHelperFunctions: boolean;
-
-  /**
-   * if array helper functions like aggegateBy should be added to all arrays
-   */
-  defineArrayHelperFunctions: boolean;
-
-  /**
-   * if kebab-case properties should be splayed, and how.
-   */
-  splayKebabCaseProperties: SplayKebabCasePropertiesOption;
-
-  /**
-   * If frontmatter should be splayed even if DV isn't used to fetch.
-   */
-  splayFrontmatterWithoutDataview: boolean;
-
-  /**
-   * Path for prototype data files
-   */
-  prototypesPath: string;
-
-  /**
-   * Path for value data files
-   */
-  valuesPath: string;
-}
-
+export type AppWithPlugins = {
+    plugins: {
+      enabledPlugins: Set<string>;
+      disablePlugin(key: string): void;
+      plugins: {
+        [Keys.MetadataScrierPluginKey]?: MetaScryPluginApi;
+        [Keys.ReactComponentsPluginKey]?: Plugin;
+        // TODO: remove this plugin field when all of these are moved to npm packages:      
+        [Keys.MetaBindWithApiPluginKey]?: MetaBindPlugin;
+        // TODO: remove this plugin field when all of these are moved to npm packages:      
+        [Keys.CopyToHtmlPluginKey]?: CopyToHtmlPlugin;
+      };
+    };
+  } & App;

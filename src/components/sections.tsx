@@ -1,6 +1,6 @@
 import { Keys } from "src/constants";
 import { IsFunction } from "src/utilities";
-import { Section } from "../types/section";
+import { Section } from "../types/sections/section";
 
 const ComponentLoadingText = "...Loading";
 

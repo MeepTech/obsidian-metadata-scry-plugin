@@ -1,8 +1,9 @@
 import { TFile } from "obsidian";
-import { Frontmatter, Metadata, Cache } from "./data";
-import { Sections } from "./sections";
-import { FrontmatterUpdateSettings, CurrentNoteMetaEditApi } from "./editor";
-import { CurrentMetaBindApi } from "./bind";
+import { Frontmatter, Metadata, Cache } from "../datas";
+import { Sections } from "../sections/sections";
+import { CurrentNoteMetaEditApi } from "../editing/editor";
+import { CurrentMetaBindApi } from "../editing/bind";
+import { FrontmatterUpdateSettings } from "../settings";
 
 /**
  * Interface for the current note within the api

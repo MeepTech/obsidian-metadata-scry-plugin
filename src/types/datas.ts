@@ -1,15 +1,17 @@
 import {
   CachedMetadata
-  } from "obsidian";
+} from "obsidian";
 import {
   SMarkdownPage
 } from "obsidian-dataview";
-import { Sections } from "./sections";
+import { TaskResult } from "obsidian-dataview/lib/api/plugin-api";
+import { Sections } from "./sections/sections";
 
 /**
  * A full metadata set returned from MetaScryApi.get
  */
 export type Metadata = {
+
   /**
    * The 'file' metadata object. This contains things about the file/note itself, such as the date it was made and edited, and it's path.
    * This info isn't written in the note anywhere.
@@ -128,3 +130,42 @@ export type DataviewMatter = {
    */
   file: FileData;
 } & Frontmatter;
+
+/**
+ * Results for commands in the MetaScryApi can return one item, or a record tree of items, indexed by their paths.
+ */
+export type ScryResults<TResult>
+  = ScryResult<TResult> | ScryResultMap<TResult>;
+
+/**
+ * A single item scry result.
+ * (default for single)
+ */
+export type ScryResult<TResult>
+  = TResult | null;
+
+/**
+ * A tree of result maps, with each item/sub-map indexed by a string key (usually the full path)
+ * (default for multiuple)
+ */
+export type ScryResultMap<TResult> = {
+  [path: string]: ScryResults<TResult>;
+};
+
+/**
+ * Results for commands in the MetaScryApi can return one item, or a record tree of items, indexed by their paths.
+ */
+export type PromisedScryResults<TResult>
+  = (PromisedScryResult<TResult> | ScryResultPromiseMap<TResult>)
+
+/**
+ * All scry results, awaiting a single promise. (default for single)
+ */
+export type PromisedScryResult<TResult>
+  = Promise<ScryResults<TResult>>;
+
+/**
+ * A tree of maps promises for each scry result, indexed by a string key (default for multiple)
+ */
+export type ScryResultPromiseMap<TResult>
+  = ScryResultMap<Promise<ScryResults<TResult>>>;
