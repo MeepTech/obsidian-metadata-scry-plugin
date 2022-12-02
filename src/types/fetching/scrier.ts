@@ -448,7 +448,7 @@ export interface MetaScryApi {
    * @see {@link MetadataScrierPlugin.tryToGetExtraGlobal}
    * @see {@link MetadataScrierPlugin.tryToSetExtraGlobal}
    */
-  globals(key: string | string[], setToValue?: any): ScryResults<any>;
+  globals(key: string | string[], setToValue?: any): any | any[] | undefined;
 
   /**
    * Get the desired prototypes

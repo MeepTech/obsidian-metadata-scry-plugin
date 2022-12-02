@@ -205,7 +205,7 @@ export class NoteSections extends Object implements Sections {
       this.path,
       container,
       intoNote
-    );
+    ) as HTMLElement; 
   }
 
   // @ts-expect-error: Default Indexer Type Override
@@ -234,7 +234,7 @@ export class NoteSections extends Object implements Sections {
       return Promise.resolve(this._html);
     } else {
       const md = await this.loadText()
-      return await InternalStaticMetadataScrierPluginContainer.Api.html(this.path, md);
+      return await InternalStaticMetadataScrierPluginContainer.Api.html(this.path, md) as HTMLElement;
     }
   }
 

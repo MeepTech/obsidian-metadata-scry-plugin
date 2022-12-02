@@ -142,7 +142,7 @@ export type ScryResults<TResult>
  * (default for single)
  */
 export type ScryResult<TResult>
-  = TResult | null;
+  = TResult | undefined;
 
 /**
  * A tree of result maps, with each item/sub-map indexed by a string key (usually the full path)
@@ -150,7 +150,7 @@ export type ScryResult<TResult>
  */
 export type ScryResultMap<TResult> = {
   [path: string]: ScryResults<TResult>;
-};
+}
 
 /**
  * Results for commands in the MetaScryApi can return one item, or a record tree of items, indexed by their paths.

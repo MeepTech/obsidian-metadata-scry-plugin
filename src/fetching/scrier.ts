@@ -60,7 +60,8 @@ import { MetadataInputBinder } from '../editing/bind';
  */
 export class MetadataScrier implements MetaScryApi {
   private static _caches: any = {};
-  private _kebabPropSplayer: (base: any, topLevelPropertiesToIgnore: Array<string> | null) => object;
+  // TODO: replace internals with the new splay function
+  private _kebabPropSplayer: (base: any, topLevelPropertiesToIgnore?: Array<string>) => object;
   private _lowerCaseSplayer: (base: any) => object;
 
   //#region Initalization
@@ -73,6 +74,7 @@ export class MetadataScrier implements MetaScryApi {
   //#region Property Name Splayer Initialization
 
   private _initializeKebabPropSplayer() {
+    // TODO: replace internals with the new splay function
     this._kebabPropSplayer = (() => {
       switch (InternalStaticMetadataScrierPluginContainer.Settings.splayKebabCaseProperties) {
         case SplayKebabCasePropertiesOptions.Lowercase:
@@ -257,8 +259,8 @@ export class MetadataScrier implements MetaScryApi {
     if (source instanceof TAbstractFile) {
       return source;
     }
-
     const path = (ParsePathFromNoteSource(source) || this.Current.Path);
+
     return app.vault.getAbstractFileByPath(path)
       ?? app.vault.getAbstractFileByPath(path + Symbols.ExtensionFilePathSeperatorCharacter + Symbols.DefaultMarkdownFileExtension);
   } // aliases:
@@ -268,37 +270,61 @@ export class MetadataScrier implements MetaScryApi {
     this.vault(source) as TFolder;
 
   markdown(source: NotesSource = this.current.path): PromisedScryResults<string> {
-    const file = this.file(source) as TFile;
-    return app.vault.cachedRead(file);
-  } // aliases:
-  md = async (source: NotesSource = this.current.path): PromisedScryResults<string> =>
-    await this.markdown(source);
+    const file = this.vault(source);
+    if (file instanceof TFolder) {
+      return MetadataScrier._splayToPathIndexedRecord(file.children, this.markdown);
+    } else if (file instanceof TFile) {
+      return app.vault.cachedRead(file);
+    }
 
-  async html(source: NotesSource = this.current.path, rawMd?: string): PromisedScryResults<HTMLElement> {
-    const path = ParsePathFromNoteSource(source)!;
-    return await (app as AppWithPlugins).plugins.plugins[Keys.CopyToHtmlPluginKey]!.convertMarkdown(
-      rawMd || (await this.md(path)) as string,
-      path
-    );
+    return Promise.resolve(undefined);
+  } // aliases:
+  md = (source: NotesSource = this.current.path): PromisedScryResults<string> =>
+    this.markdown(source);
+
+  html(source: NotesSource = this.current.path, rawMd?: string): PromisedScryResults<HTMLElement> {
+    const file = this.vault(source);
+    if (file instanceof TFolder) {
+      return MetadataScrier._splayToPathIndexedRecord(file.children, this.html);
+    } else if (file instanceof TFile) {
+      return (async () => (app as AppWithPlugins).plugins.plugins[Keys.CopyToHtmlPluginKey]!.convertMarkdown(
+        rawMd || (await this.md(file)) as string,
+        file.path
+      ))();
+    }
+
+    return Promise.resolve(undefined);
   }
 
-  async text(source: NotesSource = this.current.path): PromisedScryResults<string> {
-    const html = await this.html(source);
-    const text = html!.textContent || "";
+  text(source: NotesSource = this.current.path): PromisedScryResults<string> {
+    const file = this.vault(source);
+    if (file instanceof TFolder) {
+      return MetadataScrier._splayToPathIndexedRecord(file.children, this.text);
+    } else if (file instanceof TFile) {
+      return (async () => {
+        const html = await this.html(source);
+        const text = html!.textContent || "";
 
-    return text as string;
+        return text as string;
+      })();
+    }
+
+    return Promise.resolve(undefined);
   } // aliases:
-  txt = async (source: NotesSource = this.current.path): PromisedScryResults<string> =>
-    await this.text(source);
+  txt = (source: NotesSource = this.current.path): PromisedScryResults<string> =>
+    this.text(source);
 
-  embed(source: NotesSource, container?: HTMLElement, intoNote?: SingleFileSource)
-    : ScryResults<HTMLElement> {
-    source = typeof source === 'string' && source.contains("#")
+  embed(
+    source: NotesSource,
+    container?: HTMLElement,
+    intoNote?: SingleFileSource
+  ): ScryResults<HTMLElement> {
+    source = typeof source === 'string' && source.contains(Symbols.SectionLinkSeperatorCharachter)
       ? source
       : this.vault(source);
 
     if (source instanceof TFolder) {
-      return MetadataScrier._splayToPathIndexedRecord<HTMLElement>(source.children, this.embed);
+      return MetadataScrier._splayToPathIndexedRecord(source.children, this.embed);
     }
 
     const containerEl = container || document.createElement("div");
@@ -338,14 +364,12 @@ export class MetadataScrier implements MetaScryApi {
     return containerEl;
   }
 
-  omfc(source: NotesSource = this.current.path): CachedFileMetadata | CachedFileMetadata[] | null {
+  omfc(source: NotesSource = this.current.path): ScryResults<CachedFileMetadata> {
     const fileObject = this.vault(source);
 
     if (!(fileObject instanceof TFile)) {
       if (fileObject instanceof TFolder) {
-        return (fileObject as TFolder).children.map(
-          sub => this.omfc(sub)!
-        ).flat();
+        return MetadataScrier._splayToPathIndexedRecord(fileObject.children, this.omfc);
       } else {
         throw `Note or Folder Not Found: ${fileObject?.path}`;
       }
@@ -358,47 +382,53 @@ export class MetadataScrier implements MetaScryApi {
 
     return result;
   } // aliases:
-  obsidianMetadataFileCache = (source: NotesSource = this.current.path): CachedFileMetadata | CachedFileMetadata[] | null =>
+  obsidianMetadataFileCache = (source: NotesSource = this.current.path): ScryResults<CachedFileMetadata> =>
     this.omfc(source);
 
-  frontmatter(source: NotesSource = this.current.path): Frontmatter | Frontmatter[] | null {
-    const fileCache = this.omfc(source);
+  frontmatter(source: NotesSource = this.current.path): ScryResults<Frontmatter> {
+    const file = this.vault(source);
 
-    if (Array.isArray(fileCache)) {
-      return fileCache.map(f => this.frontmatter(f.path) as Frontmatter);
+    if (file instanceof TFolder) {
+      return MetadataScrier._splayToPathIndexedRecord(file.children, this.frontmatter);
     } else {
-      return (fileCache && fileCache.frontmatter)
-        ? this._lowerCaseSplayer(this._kebabPropSplayer(fileCache?.frontmatter, null))
-        : null;
+      const fileCache = this.omfc(file);
+      if (fileCache?.frontmatter) {
+        return this._lowerCaseSplayer(this._kebabPropSplayer(fileCache?.frontmatter));
+      }
     }
+
+    return undefined;
   } // aliases:
-  fm = (source: NotesSource = this.current.path): Frontmatter | Frontmatter[] | null =>
+  fm = (source: NotesSource = this.current.path): ScryResults<Frontmatter> =>
     this.frontmatter(source)
-  matter = (source: NotesSource = this.current.path): Frontmatter | Frontmatter[] | null =>
+  matter = (source: NotesSource = this.current.path): ScryResults<Frontmatter> =>
     this.frontmatter(source)
 
-  sections(source: NotesSource = this.current.path): Sections | Sections[] | null {
-    const fileCache = this.omfc(source);
+  sections(source: NotesSource = this.current.path): ScryResults<Sections> {
+    const file = this.vault(source);
 
-    if (Array.isArray(fileCache)) {
-      return fileCache.map(f => this.sections(f.path) as Sections);
-    } else if (!fileCache) {
-      return null;
+    if (file instanceof TFolder) {
+      return MetadataScrier._splayToPathIndexedRecord(file.children, this.sections);
     } else {
-      return new NoteSections(fileCache?.path, fileCache?.headings) as Sections;
+      const fileCache = this.omfc(source) as CachedFileMetadata;
+      if (!fileCache) {
+        return undefined;
+      }
+
+      return new NoteSections(fileCache.path, fileCache?.headings) as Sections;
     }
   }
 
-  dvMatter(source: NotesSource = null, useSourceQuery: boolean = false): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null {
+  dvMatter(source: NotesSource = null, useSourceQuery: boolean = false): ScryResults<DataviewMatter> {
     const providedPath: string = source ? ParsePathFromNoteSource(source) as string : this.Current.Path;
     const paths = InternalStaticMetadataScrierPluginContainer
       .DataviewApi
       .pagePaths(useSourceQuery ? providedPath : (`"` + providedPath + '"'));
 
     if (paths.length > 1) {
-      return paths.map((p: string) => this.dvMatter(p));
+      return MetadataScrier._splayToPathIndexedRecord(paths.array(), this.dvMatter);
     } else if (!paths.length) {
-      return null;
+      return undefined;
     } else {
       const result = InternalStaticMetadataScrierPluginContainer
         .DataviewApi
@@ -410,10 +440,10 @@ export class MetadataScrier implements MetaScryApi {
       ]) as DataviewMatter;
     }
   } // aliases:
-  dataviewFrontmatter = (source: NotesSource = null, useSourceQuery: boolean = false): DataviewMatter | DataArray<DataviewMatter | DataArray<any> | null> | null =>
+  dataviewFrontmatter = (source: NotesSource = null, useSourceQuery: boolean = false): ScryResults<DataviewMatter> =>
     this.dvMatter(source, useSourceQuery);
 
-  cache(source: NotesSource = null): Cache | Cache[] {
+  cache(source: NotesSource = null): ScryResults<Cache> {
     const fileObject = this.vault(source);
     if (fileObject === null) {
       const key = ParsePathFromNoteSource(source);
@@ -425,16 +455,15 @@ export class MetadataScrier implements MetaScryApi {
 
       throw "Invalid Key for File";
     } else if (fileObject instanceof TFolder) {
-      return fileObject.children.map(f => this.cache(f) as (Cache | Cache[])).flat();
+      return MetadataScrier._splayToPathIndexedRecord(fileObject.children, this.cache);
     } else {
       MetadataScrier._caches[fileObject.path] = MetadataScrier._caches[fileObject.path] || {};
 
       return MetadataScrier._caches[fileObject.path];
     }
   } // aliases:
-  temp = (source: NotesSource = null): Cache | Cache[] =>
+  temp = (source: NotesSource = null): ScryResults<Cache> =>
     this.cache(source);
-
 
   globals(key: string | string[], setToValue?: any): any | any[] | undefined {
     if (typeof key === "string") {
@@ -450,15 +479,15 @@ export class MetadataScrier implements MetaScryApi {
     }
   }
 
-  prototypes(prototypePath: string): Frontmatter | Frontmatter[] | null {
+  prototypes(prototypePath: string): ScryResults<Frontmatter> {
     return this.frontmatter(BuildPrototypeFileFullPath(prototypePath));
   }
 
-  values(dataPath: string): Frontmatter | Frontmatter[] | null {
+  values(dataPath: string): ScryResults<Frontmatter> {
     return this.frontmatter(BuildDataValueFileFullPath(dataPath));
   }
 
-  get(source: NotesSource | MetadataSources = this.current.path, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null {
+  get(source: NotesSource | MetadataSources = this.current.path, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): ScryResults<Metadata> {
     // double check the object. If it's a metadata source object, re-run this with that as the sources and the source as the current file.
     if (IsObject(source)) {
       if (source instanceof TFolder) {
@@ -568,7 +597,7 @@ export class MetadataScrier implements MetaScryApi {
 
     return values;
   } // aliases:
-  from = (source: NotesSource = this.current.path, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): Metadata | Metadata[] | null =>
+  from = (source: NotesSource = this.current.path, sources: MetadataSources | boolean = MetadataScrier.DefaultSources): ScryResults<Metadata> =>
     this.get(source, sources);
 
   //#endregion

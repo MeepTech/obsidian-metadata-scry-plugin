@@ -123,7 +123,7 @@ export class NoteSection implements Section {
     return (async () => {
       if (this._html === null) {
         const md = await this.md;
-        this._html = await InternalStaticMetadataScrierPluginContainer.Api.html(this.root.path, md);
+        this._html = await InternalStaticMetadataScrierPluginContainer.Api.html(this.root.path, md) as HTMLElement;
       }
 
       return this._html;
