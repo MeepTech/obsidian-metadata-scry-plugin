@@ -30,6 +30,8 @@ import { MetaScry } from "./types/static";
  * For Internal use. The name is dumb so you don't want to use it anyway.
  * 
  * Internal Static Metadata Scrier Plugin Container
+ *
+ * @internal
  */
 export class InternalStaticMetadataScrierPluginContainer {
   static _api: MetaScryApi;

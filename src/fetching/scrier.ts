@@ -6,7 +6,6 @@ import {
   TFolder
 } from 'obsidian';
 import {
-  DataArray,
   DataviewApi
 } from "obsidian-dataview";
 
@@ -27,7 +26,6 @@ import {
   CachedFileMetadata, DataviewMatter,
   Frontmatter,
   Metadata,
-  PromisedScryResult,
   PromisedScryResults,
   ScryResultMap,
   ScryResults

@@ -10,6 +10,8 @@ import { DefaultPluginSettings } from './constants';
 
 /**
  * Settings for the plugin
+ *
+ * @internal
  */
 export class MetadataScrierPluginSettingTab extends PluginSettingTab {
   plugin: MetaScryPluginApi;

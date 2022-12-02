@@ -1,13 +1,7 @@
 import { HeadingCache } from 'obsidian';
 import { Heading } from "../types/sections/heading";
 import { Section } from "../types/sections/section";
-import { SplayKebabCasePropertiesOptions } from "../types/settings";
 import {
-  DataviewInlineRegex,
-  KebabCaseDashesRegex,
-  MarkdownWikiLinkRegex,
-  PropertyNameIllegalCharachtersRegex,
-  SpacesRegex,
   Symbols
 } from '../constants';
 import { InternalStaticMetadataScrierPluginContainer } from "../static";

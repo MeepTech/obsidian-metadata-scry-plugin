@@ -15,14 +15,14 @@ export namespace ReactSectionComponents {
     renderer?: ((
       section?: Section,
       renderedContents?: string | HTMLElement
-    ) => any)
-    | undefined,
+    ) => any) 
+      | undefined,
     enabled?: ((
       section?: Section,
       renderedContents?: string | HTMLElement
     ) => boolean)
-    | undefined
-    | boolean
+      | undefined
+      | boolean
   };
 
   /**
