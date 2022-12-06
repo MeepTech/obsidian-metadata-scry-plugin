@@ -267,7 +267,7 @@ export class MetadataScrier implements MetaScryApi {
     if (source instanceof TAbstractFile) {
       return source;
     }
-    
+
     const path = (ParsePathFromNoteSource(source) || this.Current.Path);
 
     return app.vault.getAbstractFileByPath(path)
@@ -335,7 +335,11 @@ export class MetadataScrier implements MetaScryApi {
       : this.vault(source);
 
     if (source instanceof TFolder) {
-      return MetadataScrier._splayToPathIndexedRecord(source.children, this.embed, options);
+      return MetadataScrier._splayToPathIndexedRecord(
+        source.children,
+        this.embed,
+        options
+      ) as ScryResultMap<HTMLElement>;
     }
 
     const containerEl = options.container || document.createElement("div");
@@ -375,50 +379,44 @@ export class MetadataScrier implements MetaScryApi {
     return containerEl;
   }
 
-  omfc(
+  omfc = (
     source: NotesSource = this.current.path,
     options: DataFetcherSettings = {}
-  ): ScryResults<CachedFileMetadata> {
-    const fileObject = this.vault(source);
+  ): ScryResults<CachedFileMetadata> =>
+    this._scryForFolderOrFile(
+      source,
+      options,
+      (file, options) => {
+        const result = (app.metadataCache.getFileCache(file) as CachedFileMetadata) || null;
+        if (result !== null) {
+          result.path = file.path;
+        }
 
-    if (!(fileObject instanceof TFile)) {
-      if (fileObject instanceof TFolder) {
-        return MetadataScrier._splayToPathIndexedRecord(fileObject.children, this.omfc, options);
-      } else {
-        throw `Note or Folder Not Found: ${fileObject?.path}`;
+        return result;
       }
-    }
-
-    const result = (app.metadataCache.getFileCache(fileObject) as CachedFileMetadata) || null;
-    if (result !== null) {
-      result.path = fileObject.path;
-    }
-
-    return result;
-  } // aliases:
+    ) as ScryResults<CachedFileMetadata>;
+  // aliases:
   obsidianMetadataFileCache = (
     source: NotesSource = this.current.path,
     options: DataFetcherSettings = {}
   ): ScryResults<CachedFileMetadata> =>
     this.omfc(source, options);
 
-  frontmatter(
+  frontmatter = (
     source: NotesSource = this.current.path,
     options: DataFetcherSettings = {}
-  ): ScryResults<Frontmatter> {
-    const file = this.vault(source);
-
-    if (file instanceof TFolder) {
-      return MetadataScrier._splayToPathIndexedRecord(file.children, this.frontmatter, options);
-    } else {
-      const fileCache = this.omfc(file, options);
-      if (fileCache?.frontmatter) {
-        return /*this._lowerCaseSplayer(*/this._scryResultPropSplayer(fileCache?.frontmatter)/*)*/;
+  ): ScryResults<Frontmatter> =>
+    this._scryForFolderOrFile(
+      source,
+      options,
+      (file, options) => {
+        const fileCache = this.omfc(file, options);
+        if (fileCache?.frontmatter) {
+          return this._scryResultPropSplayer(fileCache?.frontmatter);
+        }
       }
-    }
-
-    return undefined;
-  } // aliases:
+    ) as ScryResults<Frontmatter>;
+  // aliases:
   fm = (
     source: NotesSource = this.current.path,
     options: DataFetcherSettings = {}
@@ -430,23 +428,22 @@ export class MetadataScrier implements MetaScryApi {
   ): ScryResults<Frontmatter> =>
     this.frontmatter(source, options)
 
-  sections(
+  sections = (
     source: NotesSource = this.current.path,
     options: DataFetcherSettings = {}
-  ): ScryResults<Sections> {
-    const file = this.vault(source);
+  ): ScryResults<Sections> =>
+    this._scryForFolderOrFile(
+      source,
+      options,
+      (file, options) => {
+        const fileCache = this.omfc(source, options) as CachedFileMetadata;
+        if (!fileCache) {
+          return undefined;
+        }
 
-    if (file instanceof TFolder) {
-      return MetadataScrier._splayToPathIndexedRecord(file.children, this.sections, options);
-    } else {
-      const fileCache = this.omfc(source, options) as CachedFileMetadata;
-      if (!fileCache) {
-        return undefined;
+        return new NoteSections(fileCache.path, fileCache?.headings) as Sections;
       }
-
-      return new NoteSections(fileCache.path, fileCache?.headings) as Sections;
-    }
-  }
+    ) as ScryResults<Sections>;
 
   dvMatter(
     source?: NotesSource,
@@ -458,7 +455,11 @@ export class MetadataScrier implements MetaScryApi {
       .pagePaths(options?.useSourceQuery ? providedPath : (`"` + providedPath + '"'));
 
     if (paths.length > 1) {
-      return MetadataScrier._splayToPathIndexedRecord(paths.array(), this.dvMatter, options);
+      return MetadataScrier._splayToPathIndexedRecord(
+        paths.array(),
+        this.dvMatter,
+        options
+      ) as ScryResultMap<DataviewMatter>;
     } else if (!paths.length) {
       return undefined;
     } else {
@@ -486,7 +487,7 @@ export class MetadataScrier implements MetaScryApi {
 
     if (fileObject === undefined) {
       const key = ParsePathFromNoteSource(source);
-      if (key !== null && key !== undefined) {
+      if (key !== null) {
         MetadataScrier._caches[key] = MetadataScrier._caches[key] || {};
 
         return MetadataScrier._caches[key];
@@ -494,7 +495,11 @@ export class MetadataScrier implements MetaScryApi {
 
       throw "Invalid Key for File";
     } else if (fileObject instanceof TFolder) {
-      return MetadataScrier._splayToPathIndexedRecord(fileObject.children, this.cache, options);
+      return MetadataScrier._splayToPathIndexedRecord(
+        fileObject.children,
+        this.cache,
+        options
+      ) as ScryResultMap<Cache>;
     } else {
       MetadataScrier._caches[fileObject.path] = MetadataScrier._caches[fileObject.path] || {};
 
@@ -540,14 +545,14 @@ export class MetadataScrier implements MetaScryApi {
     sources: MetadataSources | boolean = MetadataScrier.DefaultSources,
     options: DataFetcherSettings = {}
   ): ScryResults<Metadata> {
-    // double check the object. If it's a metadata source object, re-run this with that as the sources and the source as the current file.
+    // double check the object. If it's a MetadataSources object, re-run this with that as the sources and the source as the current file.
     if (IsObject(source)) {
       if (source instanceof TFolder) {
         return MetadataScrier._splayToPathIndexedRecord(
           source.children,
           (f, o) => this.get(f, sources, o),
           options
-        );
+        ) as ScryResultMap<Metadata>;
       } else if (!source!.hasOwnProperty("path")) {
         if (Keys.MetadataSourceKeys.some(key => source!.hasOwnProperty(key))) {
           if (!Object.keys(source!).some(key => !Keys.MetadataSourceKeys.includes(key))) {
@@ -566,29 +571,14 @@ export class MetadataScrier implements MetaScryApi {
         ?? this.current.path)
       : this.Current.Path;
 
-    if (filePath?.endsWith(Symbols.FolderPathSeperatorCharacter)) {
-      const folderName = filePath.substring(0, -1);
-      const fileObject = this.vault(folderName);
+    const fileObject = this.vault(filePath);
 
-      if (fileObject instanceof TFolder) {
-        return MetadataScrier._splayToPathIndexedRecord(
-          fileObject.children,
-          (f, o) => this.get(f, sources, o),
-          options
-        );
-      } else {
-        throw "Expected folder because of trailing slash(/): '" + filePath + "'.";
-      }
-    } else {
-      const fileObject = this.vault(filePath);
-
-      if (fileObject instanceof TFolder) {
-        return MetadataScrier._splayToPathIndexedRecord(
-          fileObject.children,
-          (f, o) => this.get(f, sources, o),
-          options
-        );
-      }
+    if (fileObject instanceof TFolder) {
+      return MetadataScrier._splayToPathIndexedRecord(
+        fileObject.children,
+        (f, o) => this.get(f, sources, o),
+        options
+      ) as ScryResultMap<Metadata>;
     }
 
     let values: any = {};
@@ -836,7 +826,7 @@ export class MetadataScrier implements MetaScryApi {
       path: TFile,
       options: DataFetcherSettings
     ) => ScryResults<TType>
-  ) : ScryResults<TType> | PromisedScryResults<TType> {
+  ): ScryResults<TType> | PromisedScryResults<TType> {
     const file = this.vault(source);
 
     if (file instanceof TFolder) {
