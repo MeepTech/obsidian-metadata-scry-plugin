@@ -1,7 +1,6 @@
 import { expect, describe, test } from '@jest/globals';
 import { ScryResultPromiseMap } from 'build/lib/lib';
-import { NotesSource, PromisedScryResults, ScryResultMap } from 'src/lib';
-import { DataFetcherSettings } from 'src/types/settings';
+import { NotesSource, PromisedScryResults, DataFetcherSettings } from 'src/lib';
 import { SetVaultFolders, Instance, MakeFolder, SetFileContents, ClearFileContents, ClearVaultFolders } from "tests/helpers/dummies";
 
 export default () =>
@@ -10,18 +9,18 @@ export default () =>
     // - mocks
     const testSubFolder = MakeFolder("test_sub", ["file3.md", "file4.md"]);
     const testFolderInVaultRoot = MakeFolder("test", ["file1.md", "file2.md", testSubFolder]);
+    SetVaultFolders(testFolderInVaultRoot);
     const testFile1Contents = "#Test\n\nThis is a test paragraph.\n\n - and\n - a\n - list\n";
     const testFile2Contents = "This one just contains a single paragraph.";
     const testFile3Contents = "#Test With Headings\n##Like This Sub-Heading\n##And This One";
     const testFile4Contents = "This one contains two paragraphs\n\nThis is the second one.";
-    SetVaultFolders(testFolderInVaultRoot);
     SetFileContents("test/file1.md", testFile1Contents);
     SetFileContents("test/file2.md", testFile2Contents);
     SetFileContents("test/sub_test/file3.md", testFile3Contents);
     SetFileContents("test/sub_test/file4.md", testFile4Contents);
 
     // - test generation methods
-    const testForMarkdownReturn = (method: (source: NotesSource, options?: DataFetcherSettings) => PromisedScryResults<string>) => {
+    const tests_ForMarkdownReturn = (method: (source: NotesSource, options?: DataFetcherSettings) => PromisedScryResults<string>) => {
       describe("=> PromisedScryResult<string>", () => {
         describe("(source: NotesSource)", () => {
           test("Succesfully Fetch Note Content in Plain Text Md", async () => {
@@ -64,7 +63,7 @@ export default () =>
         });
       });
     };
-    const testForTextReturn = (method: (source: NotesSource, options?: DataFetcherSettings) => PromisedScryResults<string>) => {
+    const test_ForTextReturn = (method: (source: NotesSource, options?: DataFetcherSettings) => PromisedScryResults<string>) => {
       describe("=> PromisedScryResult<string>", () => {
         describe("(source: NotesSource)", () => {
           test("Succesfully Fetch Note Content in Plain Text", async () => {
@@ -107,7 +106,7 @@ export default () =>
         });
       });
     };
-    const testForHtmlReturn = (method: (source: NotesSource, options?: DataFetcherSettings & { fromRawMd?: string }) => PromisedScryResults<HTMLElement>) => {
+    const test_ForHtmlReturn = (method: (source: NotesSource, options?: DataFetcherSettings & { fromRawMd?: string }) => PromisedScryResults<HTMLElement>) => {
       describe("=> PromisedScryResult<HTMLElement>", () => {
         describe("(source: NotesSource)", () => {
           test("Succesfully Fetch Note Content in Plain Text Md", async () => {
@@ -160,19 +159,19 @@ export default () =>
 
     // tests
     describe("markdown()", () => {
-      testForMarkdownReturn(Instance.Api.markdown);
+      tests_ForMarkdownReturn(Instance.Api.markdown);
     });
     describe("md()", () => {
-      testForMarkdownReturn(Instance.Api.md);
+      tests_ForMarkdownReturn(Instance.Api.md);
     });
     describe("html()", () => {
-      testForHtmlReturn(Instance.Api.html);
+      test_ForHtmlReturn(Instance.Api.html);
     });
     describe("text()", () => {
-      testForTextReturn(Instance.Api.text);
+      test_ForTextReturn(Instance.Api.text);
     });
     describe("txt()", () => {
-      testForTextReturn(Instance.Api.txt);
+      test_ForTextReturn(Instance.Api.txt);
     });
     describe("embed()", () => {
       // TODO: figure out how to write this?

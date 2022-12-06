@@ -4,7 +4,7 @@
 import { DefaultPluginSettings } from "./constants";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { MetaScryPluginSettings } from "./types/settings";
-import { MetaScry as MetaScry } from "./types/static";
+import { MetaScry } from "./types/static";
 import { IsObject } from "./utilities";
 
 // Types
@@ -17,6 +17,7 @@ export type {
   Cache,
   DataviewMatter,
   CachedFileMetadata,
+  ScryResults,
   ScryResult,
   ScryResultMap,
   PromisedScryResults,
@@ -70,9 +71,12 @@ export type {
   BindSettings,
   SplayKebabCasePropertiesOptions,
   MetaScryPluginSettings,
-  PropertyNamingConventions
+  PropertyNamingConventions,
+  DataFetcherSettings,
+  PromisedDataFetcherSettings,
+  MetadataEditorSettings
 } from "./types/settings";
-export type {
+export {
   Keys,
   Symbols,
   Paths,
@@ -102,7 +106,7 @@ export {
   SetDeepProperty,
   Path,
   Splay,
-  ParsePathFromNoteSource as ParseFilePathFromSource,
+  ParsePathFromNoteSource,
   BuildDataValueFileFullPath,
   BuildPrototypeFileFullPath
 } from "./utilities";

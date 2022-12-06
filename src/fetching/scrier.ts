@@ -817,7 +817,7 @@ export class MetadataScrier implements MetaScryApi {
     return result;
   }
 
-  _scryForFolderOrFile<TType>(
+  private  _scryForFolderOrFile<TType>(
     source: NotesSource,
     options: DataFetcherSettings & {
       isPromised?: boolean

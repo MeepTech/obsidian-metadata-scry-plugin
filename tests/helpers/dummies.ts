@@ -1,6 +1,5 @@
 import { FileManager, MetadataCache, PluginManifest, TAbstractFile, TFile, TFolder, Vault, Workspace } from "obsidian";
-import { DefaultPluginSettings } from "src/constants";
-import { CachedFileMetadata, GetInstance, IsArray } from "src/lib";
+import { CachedFileMetadata, GetInstance, IsArray, Metadata } from "src/lib";
 import MetadataScrierPlugin from "src/plugin";
 import { AppWithPlugins } from "src/types/plugin";
 
@@ -44,7 +43,12 @@ function MakeApp() {
     } as any as Vault,
     workspace: {} as any as Workspace,
     metadataCache: {
-      getFileCache: (file: TFile) => ({} as CachedFileMetadata)
+      getFileCache: (file: TFile): CachedFileMetadata | undefined => {
+        const vault: Vault & { __test__metadata?: Record<string, any>}
+          = this;
+
+        return { frontmatter: vault.__test__metadata?[file.path], path: file.path };
+      }
     } as any as MetadataCache,
 
     fileManager: {} as any as FileManager
@@ -170,9 +174,9 @@ export function ClearFileContents(path?: string | Array<string>, onApp?: AppWith
   }
 }
 
-export function SetFileMatter(path: string, matter?: Record<string, any>, onApp?: AppWithPlugins) {
+export function SetFileMatter(path: string, matter?: Metadata, onApp?: AppWithPlugins) {
   onApp ??= app;
-  const vault: Vault & { __test__metadata?: Record<string, any>}
+  const vault: Vault & { __test__metadata?: Record<string, Metadata>}
     = onApp.vault;
 
   if (matter !== undefined) {
@@ -184,14 +188,14 @@ export function SetFileMatter(path: string, matter?: Record<string, any>, onApp?
 
 export function ClearFileMatter(path?: string | Array<string>, onApp?: AppWithPlugins): void {
   onApp ??= app;
-  const vault: Vault & { __test__metadata?: Record<string, any> }
+  const vault: Vault & { __test__metadata?: Record<string, Metadata> }
     = onApp.vault;
   
   if (vault.__test__metadata) {
     if (path !== undefined) {
       if (IsArray(path)) {
         for (const file of (path as Array<string>)) {
-            delete vault.__test__metadata[file as string];
+          delete vault.__test__metadata[file as string];
         }
       } else
         if (vault.__test__metadata.hasOwnProperty(path as string)) {
@@ -206,4 +210,5 @@ export function ClearFileMatter(path?: string | Array<string>, onApp?: AppWithPl
         delete vault.__test__metadata;
       }
     }
+  }
 }

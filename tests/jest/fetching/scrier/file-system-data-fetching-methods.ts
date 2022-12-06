@@ -1,7 +1,7 @@
 import { expect, describe, test } from '@jest/globals';
 import { TAbstractFile, TFile, TFolder } from "obsidian";
-import { NotesSource, PromisedScryResults } from 'src/lib';
-import { ClearVaultFolders, SetVaultFolders, Instance, MakeFolder, SetFileContents, ClearFileContents } from "tests/helpers/dummies";
+import { NotesSource } from 'src/lib';
+import { ClearVaultFolders, SetVaultFolders, Instance, MakeFolder } from "tests/helpers/dummies";
 
 export default () =>
   describe("*File System Data Fetching Methods", () => {
@@ -28,7 +28,7 @@ export default () =>
     }
 
     // - test generation methods
-    const testForTFolderReturn = (method: (source: NotesSource) => TFile | TFolder | undefined | TAbstractFile) => {
+    const tests_ForTFolderReturn = (method: (source: NotesSource) => TFile | TFolder | undefined | TAbstractFile) => {
       describe("=> TFolder", () => {
         describe("(source: string)", () => {
           test("succesfully found the folder", () => {
@@ -136,14 +136,14 @@ export default () =>
 
     // tests
     describe("vault()", () => {
-      testForTFolderReturn(Instance.Api.vault);
+      tests_ForTFolderReturn(Instance.Api.vault);
       testForTFileReturn(Instance.Api.vault);
     });
     describe("file()", () => {
       testForTFileReturn(Instance.Api.file);
     });
     describe("folder()", () => {
-      testForTFolderReturn(Instance.Api.folder);
+      tests_ForTFolderReturn(Instance.Api.folder);
     });
 
     //cleanup
