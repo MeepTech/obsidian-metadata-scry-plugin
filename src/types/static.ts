@@ -1,6 +1,7 @@
 import { MetaScryPluginApi } from "./plugin";
 import { MetadataSources } from "./fetching/sources";
 import { MetaScryApi } from "./fetching/scrier";
+import { ThenDoCallback } from "./datas";
 
 /**
  * A container for access to the whole Api and other features like components and utilities too.
@@ -52,42 +53,41 @@ export interface MetaScry {
   /**
    * Find a deep property in an object.
    *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {object} onObject The object containing the desired key
+   * @param path Array of keys, or dot seperated propery key."
+   * @param onObject The object containing the desired key
    *
    * @returns true if the property exists, false if not.
    */
-  ContainsDeepProperty(propertyPath: string | Array<string>, onObject: any): boolean;
+  ContainsDeepProperty(path: string | Array<string>, onObject: any): boolean;
 
   /**
    * Get a deep property in an object, null if not found.
    *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {object} fromObject The object containing the desired key
+   * @param path Array of keys, or dot seperated propery key."
+   * @param fromObject The object containing the desired key
    *
    * @returns The found deep property, or null if not found.
    */
-  GetDeepProperty(propertyPath: string | Array<string>, fromObject: any): any | null;
+  GetDeepProperty(path: string | Array<string>, fromObject: any): any | undefined;
 
   /**
    * Get a deep property in an object, null if not found.
    *
-   * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-   * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
-   * @param {object} fromObject The object containing the desired key
+   * @param path Array of keys, or dot seperated propery key."
+   * @param fromObject The object containing the desired key
+   * @param thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
    *
    * @returns if the property exists.
    */
-  TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean;
+  TryToGetDeepProperty(path: string | Array<string>, fromObject: any, thenDo?: ThenDoCallback): boolean;
 
   /**
    * Set a deep property in an object, even if it doesn't exist.
    *
-   * @param {string|[string]} propertyPath Array of keys, or dot seperated propery key.
-   * @param {object|function(object)} value The value to set, or a function to update the current value and return it.
-   * @param {object} fromObject The object containing the desired key
-   *
-   * @returns The found deep property, or null if not found.
+   * @param path Array of keys, or dot seperated propery key.
+   * @param value The value to set, or a function to update the current value and return it.
+   * @param onObject The object containing the desired key
+   * @param valueFunctionIsNotTheValueAndIsUsedToFetchTheValue If this is true, and the value passed in is a function, this will execute that function with no parameters to try to get the value. (defautls to true)
    */
-  SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void;
+  SetDeepProperty(path: string | Array<string>, value: any, onObject: any, valueFunctionIsNotTheValueAndIsUsedToFetchTheValue?: true | boolean): void;
 }

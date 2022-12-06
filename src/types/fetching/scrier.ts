@@ -14,7 +14,7 @@ import { NotesSource, MetadataSources, SingleFileSource } from "./sources";
 import { MetaEditApi as MetaEditApi } from "../editing/editor";
 import { CurrentNoteMetaScryApi } from "./current";
 import { MetaBindApi } from "../editing/bind";
-import { FrontmatterUpdateSettings } from "../settings";
+import { DataFetcherSettings, FrontmatterUpdateSettings, PromisedDataFetcherSettings } from "../settings";
 
 /**
 * Interface for the Api.
@@ -139,7 +139,7 @@ export interface MetaScryApi {
   /**
    * Helper to get the default MetaScryApi.get sources with any desired overrides
    *
-   * @param {MetadataSources} overrides (Optional) any properties you want to override from the Default Sources, in one object. Defaults to all default sources if nothing is provided.
+   * @param overrides (Optional) any properties you want to override from the Default Sources, in one object. Defaults to all default sources if nothing is provided.
    *
    * @see {@link MetadataScrier.DefaultSources}
    * @see {@link sources}
@@ -150,7 +150,7 @@ export interface MetaScryApi {
   /**
    * Get a file or folder from the vault
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
    *
    * @returns the found TFile or TFolder
    *
@@ -159,12 +159,12 @@ export interface MetaScryApi {
    *
    * @see {@link CurrentNoteMetaScryApi.note}
    */
-  vault(source: NotesSource): TFile | TFolder | TAbstractFile | null;
+  vault(source?: NotesSource): TFile | TFolder | TAbstractFile | undefined;
 
   /**
    * Get a file from the vault (alias for vault())
    *
-   * @param {NotesSource} source The file object(with a path property) or the full path string
+   * @param source The file object(with a path property) or the full path string
    *
    * @returns the found TFile
    *
@@ -173,12 +173,12 @@ export interface MetaScryApi {
    * @see {@link folder}
    * @see {@link CurrentNoteMetaScryApi.note}
    */
-  file(source: NotesSource): TFile | null;
+  file(source?: NotesSource): TFile | undefined;
 
   /**
    * Get a folder from the vault
    *
-   * @param {NotesSource} source The folder object(with a path property) or the full path string
+   * @param source The folder object(with a path property) or the full path string
    *
    * @returns the found TFolder
    *
@@ -187,35 +187,38 @@ export interface MetaScryApi {
    * @see {@link file}
    * @see {@link CurrentNoteMetaScryApi.note}
    */
-  folder(source: NotesSource): TFolder | null;
+  folder(source?: NotesSource): TFolder | undefined;
 
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns The cached file metadata object if it exists, or an array of objects if a folder was provided.
    *
    * @alias {@link omfc}
    */
-  obsidianMetadataFileCache(source?: NotesSource): ScryResults<CachedFileMetadata>;
+  obsidianMetadataFileCache(source?: NotesSource, options?: DataFetcherSettings): ScryResults<CachedFileMetadata>;
 
   /**
    * Used to fetch the "Obsidian Metadata File Cache" object from the obsidian api.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns The cached file metadata object if it exists, or an array of objects if a folder was provided.
    *
    * @alias {@link obsidianMetadataFileCache}
    */
-  omfc(source?: NotesSource): ScryResults<CachedFileMetadata>;
+  omfc(source?: NotesSource, options?: DataFetcherSettings): ScryResults<CachedFileMetadata>;
 
   /**
    * Used to fetch the markdown text of the entire file or all provided files.
    * @async
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @alias {@link markdown}
    *
@@ -225,13 +228,14 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.markdown}
    * @see {@link Section.markdown}
    */
-  md(source?: NotesSource): PromisedScryResults<string>;
+  md(source?: NotesSource, options?: PromisedDataFetcherSettings): PromisedScryResults<string>;
 
   /**
    * Used to fetch the markdown text of the entire file or all provided files.
    * @async
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @alias {@link md}
    *
@@ -241,14 +245,15 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.markdown}
    * @see {@link Section.markdown}
    */
-  markdown(source?: NotesSource): PromisedScryResults<string>;
+  markdown(source?: NotesSource, options?: PromisedDataFetcherSettings): PromisedScryResults<string>;
 
   /**
    * Used to fetch the rendered html elements resulting from the markdown of the entire file (or all provided files).
    * @async
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
-   * @param {string} rawMd (optional) Md to render instead of the full file contents.
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
+   * @param options.fromRawMd (optional) Md to render instead of the full file contents.
    * 
    * @see {@link markdown}
    * @see {@link text}
@@ -256,13 +261,18 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.html}
    * @see {@link Section.html}
    */
-  html(source?: NotesSource, rawMd?: string): PromisedScryResults<HTMLElement>;
+  html(
+    source?: NotesSource,
+    options?: PromisedDataFetcherSettings
+      & { fromRawMd?: string }
+  ): PromisedScryResults<HTMLElement>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
    * @async
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @alias {@link text}
    *
@@ -272,13 +282,14 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  txt(source?: NotesSource): PromisedScryResults<string>;
+  txt(source?: NotesSource, options?: PromisedDataFetcherSettings): PromisedScryResults<string>;
 
   /**
    * Used to fetch the plain text contents of the fully rendered markdown+html obsidian note.
    * @async
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @alias {@link txt}
    *
@@ -288,15 +299,15 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.text}
    * @see {@link Section.text}
    */
-  text(source?: NotesSource): PromisedScryResults<string>;
+  text(source?: NotesSource, options?: PromisedDataFetcherSettings): PromisedScryResults<string>;
 
   /**
    * Used to embed the desired link into a file using a div element.
    * 
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string with the desired optional section after a #
-	 * 
-   * @param container (Optional) an existing container to attach the element to.
-   * @param intoNote (Optional) the note you are embeding into, this defaults to the current note.
+   * @param source The file/folder object(with a path property) or the full path string with the desired optional section after a #
+   * @param options (optional) Options to change how the data is fetched and/or returned.
+   * @param options.container (Optional) an existing container to attach the element to.
+   * @param options.intoNote (Optional) the note you are embeding into, this defaults to the current note.
    *
    * @returns A div with the embeded content attached.
    *
@@ -305,14 +316,17 @@ export interface MetaScryApi {
    */
   embed(
     source: NotesSource,
-    container?: HTMLElement,
-    intoNote?: SingleFileSource
+    options?: DataFetcherSettings & {
+      container?: HTMLElement,
+      intoNote?: SingleFileSource
+    }
   ): ScryResults<HTMLElement>
 
   /**
    * Get just the frontmatter for the given file.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns Just the frontmatter for the file.
    *
@@ -322,12 +336,13 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  frontmatter(source?: NotesSource): ScryResults<Frontmatter>;
+  frontmatter(source?: NotesSource, options?: DataFetcherSettings): ScryResults<Frontmatter>;
 
   /**
    * Get just the frontmatter for the given file.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns Just the frontmatter for the file.
    *
@@ -337,12 +352,13 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  fm(source?: NotesSource): ScryResults<Frontmatter>;
+  fm(source?: NotesSource, options?: DataFetcherSettings): ScryResults<Frontmatter>;
 
   /**
    * Get just the frontmatter for the given file.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns Just the frontmatter for the file.
    *
@@ -352,12 +368,13 @@ export interface MetaScryApi {
    * @see {@link get}
    * @see {@link CurrentNoteMetaScryApi.frontmatter}
    */
-  matter(source?: NotesSource): ScryResults<Frontmatter>;
+  matter(source?: NotesSource, options?: DataFetcherSettings): ScryResults<Frontmatter>;
 
   /**
    * Get just the sections for the given file.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string
+   * @param source The file/folder object(with a path property) or the full path string
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns Just the sections under their headings for the file.
    *
@@ -367,13 +384,14 @@ export interface MetaScryApi {
    * @see {@link text}
    * @see {@link CurrentNoteMetaScryApi.sections}
    */
-  sections(source?: NotesSource): ScryResults<Sections>;
+  sections(source?: NotesSource, options?: DataFetcherSettings): ScryResults<Sections>;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
-   * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
+   * @param source The file/folder object(with a path property) or the full path string, or a dv query source.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
+   * @param options.useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
    *
    * @returns Just the dataview(+frontmatter) values for the file.
    *
@@ -384,13 +402,18 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  dvMatter(source?: NotesSource, useSourceQuery?: boolean): ScryResults<DataviewMatter>;
+  dvMatter(
+    source?: NotesSource,
+    options?: PromisedDataFetcherSettings
+      & { useSourceQuery?: boolean }
+  ): ScryResults<DataviewMatter>;
 
   /**
    * Get the dataview api values for the given file; Inline, frontmatter, and the file value.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string, or a dv query source.
-   * @param {boolean} useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
+   * @param source The file/folder object(with a path property) or the full path string, or a dv query source.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
+   * @param options.useSourceQuery (Optional) If you want to use a dv source query instead of assuming a file path is provided. Defaults to false (""s are added to the passed in path by default).
    *
    * @returns Just the dataview(+frontmatter) values for the file.
    *
@@ -401,12 +424,17 @@ export interface MetaScryApi {
    * @see {@link frontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter
    */
-  dataviewFrontmatter(source?: NotesSource, useSourceQuery?: boolean): ScryResults<DataviewMatter>;
+  dataviewFrontmatter(
+    source?: NotesSource,
+    options?: PromisedDataFetcherSettings
+      & { useSourceQuery?: boolean }
+  ): ScryResults<DataviewMatter>;
 
   /**
    * Get just the (meta-scry) cache data for a file.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
+   * @param source The file/folder object(with a path property) or the full path string.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns The cache data only for the requested file
    *
@@ -417,12 +445,13 @@ export interface MetaScryApi {
    * @see {@link obsidianMetadataFileCache}
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
-  cache(source?: NotesSource): ScryResults<Cache>;
+  cache(source?: NotesSource, options?: DataFetcherSettings): ScryResults<Cache>;
 
   /**
    * Get just the (meta-scry) cache data for a file.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
+   * @param source The file/folder object(with a path property) or the full path string.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns The cache data only for the requested file
    *
@@ -433,13 +462,13 @@ export interface MetaScryApi {
    * @see {@link obsidianMetadataFileCache}
    * @see {@link CurrentNoteMetaScryApi.cache}
    */
-  temp(source?: NotesSource): ScryResults<Cache>;
+  temp(source?: NotesSource, options?: DataFetcherSettings): ScryResults<Cache>;
 
   /**
    * Get or Set a global values across all obsidian.
    * WARNING DONT USE THIS IF YOU DONT KNOW WHAT YOURE DOING!
    *
-   * @param {string | string[]} key The key or keys of the global to fetch or set.
+   * @param key The key or keys of the global to fetch or set.
    *
    * @returns The global or globals with the given key(s)
    *
@@ -453,7 +482,8 @@ export interface MetaScryApi {
   /**
    * Get the desired prototypes
    *
-   * @param {string} prototypePath The path to the prototype file desired.
+   * @param prototypePath The path to the prototype file desired.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns An object containing the prototypes in the givne file
    *
@@ -461,12 +491,13 @@ export interface MetaScryApi {
     * @see {@link globals}
     * @see {@link values}
    */
-  prototypes(prototypePath: string): ScryResults<Frontmatter>;
+  prototypes(prototypePath: string, options?: DataFetcherSettings): ScryResults<Frontmatter>;
 
   /**
    * Get the desired values from data storage
    *
-   * @param {string} dataPath The path to the data file desired.
+   * @param dataPath The path to the data file desired.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns An object containing the yaml data stored in the givne file
    *
@@ -474,13 +505,14 @@ export interface MetaScryApi {
     * @see {@link globals}
     * @see {@link prototypes}
    */
-  values(dataPath: string): ScryResults<Frontmatter>;
+  values(dataPath: string, options?: DataFetcherSettings): ScryResults<Frontmatter>;
 
   /**
    * Get the Metadata for a given file using the supplied sources.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
-   * @param {bool|MetadataSources} sources The sources to get metadata from. Defaults to all.
+   * @param source The file/folder object(with a path property) or the full path string.
+   * @param sources The sources to get metadata from. Defaults to all.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns The requested metadata
    *
@@ -496,14 +528,20 @@ export interface MetaScryApi {
    * @see {@link CurrentNoteMetaScryApi.cache}
    * @see {@link dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
+   * @see {@link DefaultSources}
    */
-  get(source?: NotesSource, sources?: MetadataSources | boolean): ScryResults<Metadata>;
+  get(
+    source?: NotesSource | MetadataSources,
+    sources?: MetadataSources | boolean,
+    options?: DataFetcherSettings
+  ): ScryResults<Metadata>;
 
   /**
    * Get the Metadata for a given file using the supplied sources.
    *
-   * @param {NotesSource} source The file/folder object(with a path property) or the full path string.
-   * @param {bool|MetadataSources} sources The sources to get metadata from. Defaults to all.
+   * @param source The file/folder object(with a path property) or the full path string.
+   * @param sources The sources to get metadata from. Defaults to all.
+   * @param options (optional) Options to change how the data is fetched and/or returned.
    *
    * @returns The requested metadata
    *
@@ -520,16 +558,20 @@ export interface MetaScryApi {
    * @see {@link dataviewFrontmatter}
    * @see {@link CurrentNoteMetaScryApi.dataviewFrontmatter}
    */
-  from(source?: NotesSource, sources?: MetadataSources | boolean): ScryResults<Metadata>;
+  from(
+    source?: NotesSource | MetadataSources,
+    sources?: MetadataSources | boolean,
+    options?: DataFetcherSettings
+  ): ScryResults<Metadata>;
 
   /**
    * Patch individual properties of the frontmatter metadata.
    * @async
    *
-   * @param {SingleFileSource} file The name of the file or the file object with a path
-   * @param {Record<string, any>|any} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
-   * @param {string|null} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here. 
-   * @param {FrontmatterUpdateSettings} options (Optional) options.
+   * @param file The name of the file or the file object with a path
+   * @param frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
+   * @param propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here. 
+   * @param options (Optional) options.
    *
    * @see {@link CurrentNoteMetaScryApi.patch}
    * @see {@link set}
@@ -546,9 +588,9 @@ export interface MetaScryApi {
    * Replace the existing frontmatter of a file with entirely new data, clearing out all old data in the process.
    * @async
    *
-   * @param {SingleFileSource} file The name of the file or the file object with a path
-   * @param {Frontmatter} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
-   * @param {FrontmatterUpdateSettings} options (Optional) options.
+   * @param file The name of the file or the file object with a path
+   * @param frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
+   * @param options (Optional) options.
    * 
    * @see {@link CurrentNoteMetaScryApi.set}
    * @see {@link clear}
@@ -564,9 +606,9 @@ export interface MetaScryApi {
    * Used to clear values from metadata.
    * @async
    *
-   * @param {SingleFileSource} file The file to clear properties for. defaults to the current file.
-   * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
-   * @param {FrontmatterUpdateSettings} options (Optional) options.
+   * @param file The file to clear properties for. defaults to the current file.
+   * @param frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
+   * @param options (Optional) options.
    *
    * @see {@link CurrentNoteMetaScryApi.clear}
    * @see {@link set}
@@ -637,7 +679,7 @@ export interface MetaScryApi {
    *
    * @alias {@link global#path}
    */
-  path(relativePath?: string | null, extension?: string | boolean, rootFolder?: string | null): string;
+  path(relativePath?: string, extension?: string | boolean, rootFolder?: string): string;
 }
 
 

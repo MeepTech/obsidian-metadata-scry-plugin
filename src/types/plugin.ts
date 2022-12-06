@@ -52,7 +52,7 @@ export type MetaScryPluginApi = {
   /**
    * Get a global value if it exists.
    *
-   * @param {string} key
+   * @param key
    *
    * @alias {@link MetaScryApi.globals}
    *
@@ -63,8 +63,8 @@ export type MetaScryPluginApi = {
   /**
    * Set a global value (or remove it)
    *
-   * @param {string} key
-   * @param {any} setValue (optional) the value to set. Will remove the value if nothing is passed in.
+   * @param key
+   * @param setValue (optional) the value to set. Will remove the value if nothing is passed in.
    *
    * @alias {@link MetaScryApi.globals}
    *

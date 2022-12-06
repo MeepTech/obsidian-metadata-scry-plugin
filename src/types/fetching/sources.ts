@@ -43,11 +43,11 @@ export type MetadataSources = {
  *
  * Either a 'file/folder' object with a '.path' property, or the path itself as a string.
  */
-export type NotesSource = string | TFile | TFolder | TAbstractFile | FileData | Link | null;
+export type NotesSource = string | TFile | TFolder | TAbstractFile | FileData | Link | null | undefined;
 
 /**
  * Something we can get a specific file's path from.
  *
  * Either a 'file' object with a '.path' property, or the path itself as a string.
  */
-export type SingleFileSource = string | TFile | FileData | Link | null;
+export type SingleFileSource = string | TFile | FileData | Link | null | undefined;

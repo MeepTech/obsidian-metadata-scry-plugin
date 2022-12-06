@@ -107,10 +107,10 @@ export type MetaBindPlugin = {
   /**
    * Accessable function for building an input field.
    * 
-   * @param {string|InputFieldDeclaration} declaration The field declaration string or data.
-   * @param {string} sourcePath The path of the file the element is being inserted into
-   * @param {HTMLElement} container The element to fill with the input element 
-   * @param {InputFieldMarkdownRenderChildType} renderType Inline or Code Block
+   * @param declaration The field declaration string or data.
+   * @param sourcePath The path of the file the element is being inserted into
+   * @param container The element to fill with the input element 
+   * @param renderType Inline or Code Block
    * 
    * @returns The render child produced.
    */
@@ -124,12 +124,12 @@ export type MetaBindPlugin = {
   /**
    * Helper method to build a declaration from some initial data or a string.
    * 
-   * @param {string | InputFieldDeclaration | {}} base The base declaration data or a string to parse for it. Can also be an empty object with the other arguments provided to fill it.
-   * @param {Record<InputFieldArgumentType, string> | {} | undefined } args (Optional) The arguments, indexed by name.
-   * @param {InputFieldType | undefined} inputFieldType (Optional) The input field type if not provided in the base object.
-   * @param {boolean | undefined} isBound (Optional) If the field should try to be bound to a bindTarget.
-   * @param {Record<InputFieldArgumentType, string> | {} | undefined} args (Optional) The bind target of the field.
-   * @param { string | undefined} templateName (Optional) A template to use.
+   * @param base The base declaration data or a string to parse for it. Can also be an empty object with the other arguments provided to fill it.
+   * @param args (Optional) The arguments, indexed by name.
+   * @param inputFieldType (Optional) The input field type if not provided in the base object.
+   * @param isBound (Optional) If the field should try to be bound to a bindTarget.
+   * @param args (Optional) The bind target of the field.
+   * @param templateName (Optional) A template to use.
    * 
    * @returns A constructed InputFieldDeclaration.
    */

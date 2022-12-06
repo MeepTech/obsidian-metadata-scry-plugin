@@ -142,18 +142,18 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
     // Apply the current file as the file to update
     return {
       ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApiMethods,
-      get: (key, inline) =>
-        api.getFieldFromTFile(key, currentFile, inline),
-      exists: (key, inline) =>
-        api.doesFieldExistInTFile(key, currentFile, inline),
-      insert: async (key, value, inline) =>
-        await api.insertFieldInTFile(key, value, currentFile, inline),
-      update: async (key, value, inline) =>
-        await api.updateFieldInTFile(key, value, currentFile, inline),
-      upsert: async (key, value, inline) =>
-        await api.updateOrInsertFieldInTFile(key, value, currentFile, inline),
-      delete: async (key, inline) =>
-        await api.deleteFieldInTFile(key, currentFile, inline),
+      get: (key, options) =>
+        api.getFieldFromTFile(key, currentFile, options),
+      exists: (key, options) =>
+        api.doesFieldExistInTFile(key, currentFile, options),
+      insert: async (key, value, options) =>
+        await api.insertFieldInTFile(key, value, currentFile, options),
+      update: async (key, value, options) =>
+        await api.updateFieldInTFile(key, value, currentFile, options),
+      upsert: async (key, value, options) =>
+        await api.updateOrInsertFieldInTFile(key, value, currentFile, options),
+      delete: async (key, options) =>
+        await api.deleteFieldInTFile(key, currentFile, options),
       replace: async (value) =>
         await api.setAllFrontmatter(value, currentFile),
       clear: async () => {

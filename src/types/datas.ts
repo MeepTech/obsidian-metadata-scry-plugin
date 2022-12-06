@@ -5,6 +5,7 @@ import {
   SMarkdownPage
 } from "obsidian-dataview";
 import { TaskResult } from "obsidian-dataview/lib/api/plugin-api";
+import { type } from "os";
 import { Sections } from "./sections/sections";
 
 /**
@@ -169,3 +170,23 @@ export type PromisedScryResult<TResult>
  */
 export type ScryResultPromiseMap<TResult>
   = ScryResultMap<Promise<ScryResults<TResult>>>;
+
+/**
+ * A callback for certain property helper methods and other settings.
+ */
+export type ThenDoCallback = ThenDoCallbacks
+  | ThenDoOnTrueCallback;
+
+/**
+ * Callback executed on true
+ */
+export type ThenDoOnTrueCallback
+  = (found?: any) => any;
+
+/**
+ * Callback with options for onTrue and onFalse
+ */
+export type ThenDoCallbacks = {
+  onTrue?: ThenDoOnTrueCallback;
+  onFalse?: () => any;
+};

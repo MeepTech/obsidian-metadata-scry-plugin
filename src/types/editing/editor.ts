@@ -1,13 +1,12 @@
 import { Internal as OpdMetadataEditLibrary } from "@opd-libs/opd-metadata-lib/lib/Internal";
 import { Frontmatter } from "../datas";
 import { NotesSource } from "../fetching/sources";
+import { MetadataEditorSettings } from "../settings";
 
 /**
  * Api object with all functions found in the 'OPD-metadata-lib' metadata editor library compiled into an easy to use global api object.
  *
  * From: https://github.com/OPD-libs/OPD-libs/blob/main/libs/OPD-metadata-lib/src/API.ts
- *
- * // TODO: update the inline variable descriptions when functionality is added to opd-metadata-lib.
  *
  * @see {@link CurrentNoteMetaEditApi}
  */
@@ -18,8 +17,8 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * Get the frontmatter field from a given file
    *
    * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {NotesSource} source (optional) Defaults to the current file
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param source (optional) Defaults to the current file
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object
    *
@@ -29,16 +28,16 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link getField}
    * @see {@link MetaScryApi.get}
    */
-  getFieldFromTFile(propertyAccessorKey: string, source?: NotesSource, inline?: boolean): any;
+  getFieldFromTFile(propertyAccessorKey: string, source?: NotesSource, options?: MetadataEditorSettings): any;
 
   /**
    * Check if the frontmatter field exists in the given file
    *
    * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {NotesSource} source (optional) Defaults to the current file
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param source (optional) Defaults to the current file
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
-   * @returns If the frontmatter property is present in the given file
+   * @returns true If the frontmatter property is present in the given file
    *
    * @alias {@link doesFieldExistInTFile} This function is a wrapper for an Opd-Metadata-Lib api function.
    * @see {@link CurrentNoteMetaEditApi.exists}
@@ -47,16 +46,16 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link MetaScryApi.get}
    * @see {@link MetaScryApi.frontmatter}
    */
-  doesFieldExistInTFile(propertyAccessorKey: string, source?: NotesSource, inline?: boolean): boolean;
+  doesFieldExistInTFile(propertyAccessorKey: string, source?: NotesSource, options?: MetadataEditorSettings): boolean;
 
   /**
    * Insert a new field into the frontmatter of the desired file.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {any} value The value to insert
-   * @param {NotesSource} source (optional) Defaults to the current file
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param value The value to insert
+   * @param source (optional) Defaults to the current file
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
@@ -68,16 +67,21 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link MetaScryApi.patch}
    * @see {@link CurrentNoteMetaEditApi.patch}
    */
-  insertFieldInTFile(propertyAccessorKey: string, value: (any | (() => any)), source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
+  insertFieldInTFile(
+    propertyAccessorKey: string,
+    value: (any | (() => any)),
+    source?: NotesSource,
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<any>;
 
   /**
    * Update the value of an existing field in the frontmatter of the desired file.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value.
-   * @param {NotesSource} source (optional) Defaults to the current file
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param newValue The new value to set, or a function that takes the current value and returns an updated value.
+   * @param source (optional) Defaults to the current file
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
@@ -89,16 +93,21 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link MetaScryApi.patch}
    * @see {@link CurrentNoteMetaEditApi.patch}
    */
-  updateFieldInTFile(propertyAccessorKey: string, newValue: any, source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
+  updateFieldInTFile(
+    propertyAccessorKey: string,
+    newValue: (any | ((original?: any) => any)),
+    source?: NotesSource,
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<any>;
 
   /**
    * Update the value of an existing field in the frontmatter of the desired file, or insert it as a new field if it does not yet exist.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value. (no arguments are passed in if the field does not exist yet.)
-   * @param {NotesSource} source (optional) Defaults to the current file
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param newValue The new value to set, or a function that takes the current value and returns an updated value. (no arguments are passed in if the field does not exist yet.)
+   * @param source (optional) Defaults to the current file
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
@@ -110,15 +119,20 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link MetaScryApi.patch}
    * @see {@link CurrentNoteMetaEditApi.patch}
    */
-  updateOrInsertFieldInTFile(propertyAccessorKey: string, newValue: any, source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
+  updateOrInsertFieldInTFile(
+    propertyAccessorKey: string,
+    newValue: (any | ((original?: any) => any)),
+    source?: NotesSource,
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<any>;
 
   /**
    * Delete the existing field in the frontmatter of the desired file.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {NotesSource} source (optional) Defaults to the current file
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param source (optional) Defaults to the current file
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or undefined (if inline is true)
    *
@@ -130,14 +144,18 @@ export interface MetaEditApi extends ContextlessMetadataEditApiMethods {
    * @see {@link MetaScryApi.clear}
    * @see {@link CurrentNoteMetaEditApi.clear}
    */
-  deleteFieldInTFile(propertyAccessorKey: string, source?: NotesSource, inline?: boolean): Promise<Frontmatter> | Promise<any>;
+  deleteFieldInTFile(
+    propertyAccessorKey: string,
+    source?: NotesSource,
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<any>;
 
   /**
    * Set all the frontmatter in a given file
    * @async
    *
    * @param newMatter
-   * @param {NotesSource} source (optional) Defaults to the current file
+   * @param source (optional) Defaults to the current file
    *
    * @returns The updated frontmatter object
    *
@@ -163,7 +181,7 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
    * Get the frontmatter field from a given file
    *
    * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object
    *
@@ -173,13 +191,13 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
    * @see {@link getField}
    * @see {@link MetaScryApi.get}
    */
-  get(propertyAccessorKey: string, inline?: boolean): any;
+  get(propertyAccessorKey: string, options?: MetadataEditorSettings): any;
 
   /**
    * Check if the frontmatter field exists in the given file
    *
    * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns If the frontmatter property is present in the given file
    *
@@ -190,15 +208,15 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
    * @see {@link MetaScryApi.get}
    * @see {@link MetaScryApi.frontmatter}
    */
-  exists(propertyAccessorKey: string, inline?: boolean): boolean;
+  exists(propertyAccessorKey: string, options?: MetadataEditorSettings): boolean;
 
   /**
    * Insert a new field into the frontmatter of the desired file.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {any} value The value to insert
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param value The value to insert
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
@@ -210,15 +228,19 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
    * @see {@link MetaScryApi.patch}
    * @see {@link CurrentNoteMetaEditApi.patch}
    */
-  insert(propertyAccessorKey: string, value: any, inline?: boolean): Promise<Frontmatter> | Promise<any>;
+  insert(
+    propertyAccessorKey: string,
+    value: (any | (() => any)),
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<any>;
 
   /**
    * Update the value of an existing field in the frontmatter of the desired file.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value.
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param newValue The new value to set, or a function that takes the current value and returns an updated value.
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
@@ -230,15 +252,19 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
    * @see {@link MetaScryApi.patch}
    * @see {@link CurrentNoteMetaEditApi.patch}
    */
-  update(propertyAccessorKey: string, newValue: any, inline?: boolean): Promise<Frontmatter> | Promise<any>;
+  update(
+    propertyAccessorKey: string,
+    newValue: (any | ((original?: any) => any)),
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<any>;
 
   /**
    * Update the value of an existing field in the frontmatter of the desired file, or insert it as a new field if it does not yet exist.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {any|(any) => any} newValue The new value to set, or a function that takes the current value and returns an updated value. (no arguments are passed in if the field does not exist yet.)
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param newValue The new value to set, or a function that takes the current value and returns an updated value. (no arguments are passed in if the field does not exist yet.)
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or single inline value (if inline is true)
    *
@@ -250,14 +276,18 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
    * @see {@link MetaScryApi.patch}
    * @see {@link CurrentNoteMetaEditApi.patch}
    */
-  upsert(propertyAccessorKey: string, newValue: any, inline?: boolean): Promise<Frontmatter> | Promise<any>;
+  upsert(
+    propertyAccessorKey: string,
+    newValue: (any | ((original?: any) => any)),
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<any>;
 
   /**
    * Delete the existing field in the frontmatter of the desired file.
    * @async
    *
-   * @param {string} propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
-   * @param {boolean} inline (Not Yet Implemented)(Optional) if this is for an inline dataview field.
+   * @param propertyAccessorKey The key used to access the property. Can be a compound key like "test.key" or even "test[key].inside" etc.
+   * @param options (optional) options for editing/updating/getting the metadata value
    *
    * @returns The updated frontmatter object or undefined (if inline is true)
    *
@@ -269,7 +299,10 @@ export interface CurrentNoteMetaEditApi extends ContextlessMetadataEditApiMethod
    * @see {@link CurrentNoteMetaEditApi.clear}
    * @see {@link deleteField}
    */
-  delete(propertyAccessorKey: string, inline?: boolean): Promise<Frontmatter> | Promise<undefined>;
+  delete(
+    propertyAccessorKey: string,
+    options?: MetadataEditorSettings
+  ): Promise<Frontmatter> | Promise<undefined>;
 
   /**
    * Set all the frontmatter in a given file

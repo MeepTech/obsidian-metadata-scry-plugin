@@ -66,7 +66,7 @@ export class InternalStaticMetadataScrierPluginContainer {
   static get Api(): MetaScryApi {
     return InternalStaticMetadataScrierPluginContainer._api;
   }
- 
+
   /**
    * The current settings instance.
    */
@@ -101,6 +101,7 @@ export class InternalStaticMetadataScrierPluginContainer {
   static get MetadataEditApi(): MetaEditApi {
     const plugin = InternalStaticMetadataScrierPluginContainer.Plugin;
 
+    // TODO: encapsulate this in a class for efficiency
     return {
       ...InternalStaticMetadataScrierPluginContainer.BaseMetadataEditApiMethods,
       setAllFrontmatter: async (value, source) => {
@@ -112,21 +113,21 @@ export class InternalStaticMetadataScrierPluginContainer {
 
         return value;
       },
-      getFieldFromTFile: (key, source, inline) =>
+      getFieldFromTFile: (key, source, options) =>
         getFieldFromTFile(
           key,
           InternalStaticMetadataScrierPluginContainer._parseSource(source),
           plugin,
-          inline
+          options?.inline
         ),
-      doesFieldExistInTFile: (key, source, inline) =>
+      doesFieldExistInTFile: (key, source, options) =>
         doesFieldExistInTFile(
           key,
           InternalStaticMetadataScrierPluginContainer._parseSource(source),
           plugin,
-          inline
+          options?.inline
         ),
-      async insertFieldInTFile(key, value, source, inline) {
+      async insertFieldInTFile(key, value, source, options) {
         const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
 
         if (IsFunction(value)) {
@@ -138,16 +139,16 @@ export class InternalStaticMetadataScrierPluginContainer {
           value,
           file,
           plugin,
-          inline
+          options?.inline
         );
 
-        return inline ? value : this.getMetadataFromFileCache(file, plugin);
+        return options?.inline ? value : this.getMetadataFromFileCache(file, plugin);
       },
-      async updateFieldInTFile(key, value, source, inline) {
+      async updateFieldInTFile(key, value, source, options) {
         const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
 
         if (IsFunction(value)) {
-          value = value(this.getFieldFromTFile(key, source, inline));
+          value = value(this.getFieldFromTFile(key, source, options));
         }
 
         await updateFieldInTFile(
@@ -155,19 +156,19 @@ export class InternalStaticMetadataScrierPluginContainer {
           value,
           file,
           plugin,
-          inline
+          options?.inline
         );
 
-        return inline
+        return options?.inline
           ? value
           : this.getMetadataFromFileCache(file, plugin);
       },
-      async updateOrInsertFieldInTFile(key, value, source, inline) {
+      async updateOrInsertFieldInTFile(key, value, source, options) {
         const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
 
         if (IsFunction(value)) {
-          if (this.doesFieldExistInTFile(key, source, inline)) {
-            value = value(this.getFieldFromTFile(key, source, inline));
+          if (this.doesFieldExistInTFile(key, source, options)) {
+            value = value(this.getFieldFromTFile(key, source, options));
           } else {
             value = value();
           }
@@ -178,24 +179,24 @@ export class InternalStaticMetadataScrierPluginContainer {
           value,
           file,
           plugin,
-          inline
+          options?.inline
         );
 
-        return inline
+        return options?.inline
           ? value
           : this.getMetadataFromFileCache(file, plugin);
       },
-      async deleteFieldInTFile(key, source, inline) {
+      async deleteFieldInTFile(key, source, options) {
         const file = InternalStaticMetadataScrierPluginContainer._parseSource(source);
 
         await deleteFieldInTFile(
           key,
           file,
           plugin,
-          inline
+          options?.inline
         );
 
-        return inline
+        return options?.inline
           ? undefined
           : this.getMetadataFromFileCache(file, plugin);
       }
@@ -225,26 +226,24 @@ export class InternalStaticMetadataScrierPluginContainer {
     } as ContextlessMetadataEditApiMethods;
   }
 
-  static InitalizeStaticApi(
-    {
-      includeReactComponents = true,
-      plugin,
-      defaultSettings
-    }: {
-      includeReactComponents?: boolean;
-      plugin?: MetaScryPluginApi;
-      defaultSettings?: MetaScryPluginSettings;
-    } = {}
-  ) : MetaScry {
-    InternalStaticMetadataScrierPluginContainer._api = new MetadataScrier();  
+  static InitalizeStaticApi({
+    includeReactComponents = true,
+    plugin,
+    defaultSettings
+  }: {
+    includeReactComponents?: boolean;
+    plugin?: MetaScryPluginApi;
+    defaultSettings?: MetaScryPluginSettings;
+  } = {}): MetaScry {
     InternalStaticMetadataScrierPluginContainer._plugin = plugin || (app as AppWithPlugins).plugins.plugins["meta-scry"];
     InternalStaticMetadataScrierPluginContainer._defaultSettings = defaultSettings;
+    InternalStaticMetadataScrierPluginContainer._api = new MetadataScrier();
 
     const apiFunctionsAndPlugin = {
       Api: InternalStaticMetadataScrierPluginContainer._api,
       Plugin: plugin,
       Path,
-	  Splay,
+      Splay,
       ContainsDeepProperty,
       TryToGetDeepProperty,
       SetDeepProperty,
@@ -266,12 +265,12 @@ export class InternalStaticMetadataScrierPluginContainer {
           MarkdownComponents: ReactMarkdownComponents.Components,
           DefaultSources: MetadataScrier.DefaultSources
         } : apiFunctionsAndPlugin;
-    
+
     InternalStaticMetadataScrierPluginContainer._static = staticApi;
 
     return InternalStaticMetadataScrierPluginContainer._static;
   }
-    
+
   static ClearApi(): void {
     InternalStaticMetadataScrierPluginContainer._api = undefined!;
     InternalStaticMetadataScrierPluginContainer._defaultSettings = undefined!;

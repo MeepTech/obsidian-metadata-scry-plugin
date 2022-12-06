@@ -2,6 +2,12 @@
   "files": [
     "src/lib.ts"      
   ],
+  "exclude": [
+    "src/fetching",
+	"src/editing",
+	"src/sections",
+	"src/static.ts"
+  ],
   "compilerOptions": {
     "baseUrl": ".",
     "target": "ES6",

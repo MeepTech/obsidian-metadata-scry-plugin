@@ -10,8 +10,8 @@ export type CopyToHtmlPlugin = {
    * Render a markdown view to an html element, with dataview and other js included.
    * @async
    *
-   * @param {MarkdownView} view The view to conver to html
-   * @param {{ convertSvgToBitmap: boolean }} options (Optional) rendering options.
+   * @param view The view to conver to html
+   * @param options (Optional) rendering options.
    *
    * @returns The detatched container html element of the rendered view.
    *
@@ -26,8 +26,8 @@ export type CopyToHtmlPlugin = {
    * Render a markdown view to an html element, with dataview and other js included.
    * @async
    *
-   * @param {MarkdownView} view The view to conver to html
-   * @param {{ convertSvgToBitmap: boolean }} options (Optional) rendering options.
+   * @param view The view to conver to html
+   * @param options (Optional) rendering options.
    *
    * @returns The detatched container html element of the rendered view.
    *

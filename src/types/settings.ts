@@ -139,8 +139,44 @@ export type BindSettings = {
 /**
  * Passed into any update functions to modify what they do.
  */
-export interface FrontmatterUpdateSettings {
-  toValuesFile?: boolean | string;
-  prototype?: string | boolean;
-  inline?: boolean;
+export interface FrontmatterUpdateSettings extends MetadataEditorSettings {
+   /**
+   * set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
+   */
+  toValuesFile?: false | boolean | string;
+  /**
+   * set this to true if the path is a data prototype file path and you want to set to said data prototype file.You can also pass in the path here instead.
+   */
+  prototype?: false | string | boolean;
+}
+
+/**
+ * Settings for the metadata editor api functions
+ */
+export interface MetadataEditorSettings {
+  /**
+   * (Not Yet Implemented) if this is for an inline dataview field.
+   *
+   * // TODO: update the inline variable descriptions when functionality is added to opd-metadata-lib.
+   */
+  inline?: false | boolean
+}
+
+/**
+ * Settings passable into any of the data fetcher methods.
+ */
+export interface DataFetcherSettings {
+  /**
+   * Flatten the record results, bringing all results up to the root Record as opposed to returning just a tree.
+   */
+  flatten?: false | boolean;
+}
+
+export interface PromisedDataFetcherSettings extends DataFetcherSettings {
+  /**
+   * Flattens all promises into a single promise, and wraps the result list in it.
+   *
+   * // TODO: implement
+   */
+  asASinglePromise?: false | boolean; 
 }

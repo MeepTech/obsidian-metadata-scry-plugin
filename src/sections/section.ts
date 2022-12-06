@@ -8,6 +8,7 @@ import { InternalStaticMetadataScrierPluginContainer } from "../static";
 import { SectionHeader } from './heading';
 import { NoteSections } from './sections';
 import { Splay } from 'src/utilities';
+import { PromisedDataFetcherSettings } from 'src/types/settings';
 
 /**
  * Implementation of Section
@@ -117,7 +118,7 @@ export class NoteSection implements Section {
     return (async () => {
       if (this._html === null) {
         const md = await this.md;
-        this._html = await InternalStaticMetadataScrierPluginContainer.Api.html(this.root.path, md) as HTMLElement;
+        this._html = await InternalStaticMetadataScrierPluginContainer.Api.html(this.root.path, { fromRawMd: md }) as HTMLElement;
       }
 
       return this._html;

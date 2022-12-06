@@ -83,15 +83,15 @@ export type {
 // Functions
 // ===============
 //// React Components
-export type {
+export {
   ReactMarkdownComponents
 } from "./components/markdown"
-export type {
+export {
   ReactSectionComponents
 } from "./components/sections"
 
 //// Utility
-export type {
+export {
   IsFunction,
   IsObject,
   IsArray,

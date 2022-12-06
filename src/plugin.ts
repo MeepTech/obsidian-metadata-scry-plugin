@@ -21,6 +21,7 @@ import {
   SetDeepProperty,
   TryToGetDeepProperty
 } from './utilities';
+import { ThenDoCallback } from './types/datas';
 
 /**
  * Metadata Scrier Api Obsidian.md Plugin
@@ -165,15 +166,16 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   private _initObjectPropertyHelperMethods(): void {
     if (this.settings.defineObjectPropertyHelperFunctions) {
-      /**
-       * Find a deep property in an object, returning true on success.
-       *
-       * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-       * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo (Optional) A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
-       * @returns true if the property exists, false if not.
-       */
       Object.defineProperty(Object.prototype, Keys.HasPropObjectHelperFunctionKey, {
-        value: function (path: string | Array<string>, thenDo: any) {
+        /**
+         * Find a deep property in an object, returning true on success.
+         *
+         * @param path Array of keys, or dot seperated propery key."
+         * @param thenDo A[set of] callback[s] that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
+         
+         * @returns true if the property exists, false if not.
+         */
+        value: function (path: string | Array<string>, thenDo?: ThenDoCallback) {
           if (thenDo) {
             return TryToGetDeepProperty(path, thenDo, this);
           } else {
@@ -183,18 +185,20 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         enumerable: false
       });
 
-      /**
-       * Get a deep property from an object, or return null.
-       *
-       * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
-       *
-       * @returns The found deep property, or undefined if not found.
-       */
       Object.defineProperty(Object.prototype, Keys.GetPropObjectHelperFunctionKey, {
-        value: function (path: string | Array<string>, defaultValue: any) {
+        /**
+         * Get a deep property from an object, or return null.
+         *
+         * @param path Array of keys, or dot seperated propery key.
+         * @param defaultValue (Optional) a default value to return, or a function to execute to get the default value.
+         * @param defaultValueFunctionIsNotTheValueAndIsUsedToFetchTheValue If this is true, and the defaultValue passed in is a function, this will execute that function with no parameters to try to get the value. (defautls to true)
+         *
+         * @returns The found deep property, or undefined if not found.
+         */
+        value: function (path: string | Array<string>, defaultValue?: any, defaultValueFunctionIsNotTheValueAndIsUsedToFetchTheValue?: true | boolean) : any | undefined {
           const value = GetDeepProperty(path, this);
           if (defaultValue !== undefined && (value === undefined)) {
-            if (IsFunction(defaultValue)) {
+            if (defaultValueFunctionIsNotTheValueAndIsUsedToFetchTheValue && IsFunction(defaultValue)) {
               return defaultValue();
             } else {
               return defaultValue;
@@ -206,17 +210,16 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         enumerable: false
       });
 
-      /**
-       * Set a deep property in an object, even if it doesn't exist.
-       *
-       * @param {string|[string]} propertyPath Array of keys, or dot seperated propery key.
-       * @param {object|function(object)} value The value to set, or a function to update the current value and return it.
-       *
-       * @returns The found deep property, or undefined if not found.
-       */
       Object.defineProperty(Object.prototype, Keys.SetPropObjectHelperFunctionKey, {
-        value: function (propertyPath: string | Array<string>, value: any) {
-          return SetDeepProperty(propertyPath, value, this);
+        /**
+         * Set a deep property in an object, even if it doesn't exist.
+         *
+         * @param path Array of keys, or dot seperated propery key.
+         * @param value The value to set, or a function to update the current value and return it.
+         * @param valueFunctionIsNotTheValueAndIsUsedToFetchTheValue If this is true, and the value passed in is a function, this will execute that function with no parameters to try to get the value. (defautls to true)
+         */
+        value: function (path: string | Array<string>, value: any, valueFunctionIsNotTheValueAndIsUsedToFetchTheValue?: true | boolean) : void {
+          return SetDeepProperty(path, value, this, valueFunctionIsNotTheValueAndIsUsedToFetchTheValue);
         },
         enumerable: false
       });
@@ -226,19 +229,19 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
 
   private _initArrayHelperMethods(): void {
     if (this.settings.defineArrayHelperFunctions) {
-      /**
-       * index an array of objects by a shared property with unique values among the
-       * 
-       * @param {string} uniqueKeyPropertyPath The path to the unique key on each object to use as the index of the object in the returned record.
-       * 
-       * @returns An aggregate object with the original objects from the input list indexed by the value of the property at the provided key path.
-       */
       Object.defineProperty(Array.prototype, Keys.IndexByArrayHelperFunctionKey, {
+        /**
+         * index an array of objects by a shared property with unique values among the
+         * 
+         * @param uniqueKeyPropertyPath The path to the unique key on each object to use as the index of the object in the returned record.
+         * 
+         * @returns An aggregate object with the original objects from the input list indexed by the value of the property at the provided key path.
+         */
         value: function (uniqueKeyPropertyPath: string): Record<any, any> {
           const result: Record<any, any> = {};
 
           for (const i of this) {
-            const key = i.getProp(uniqueKeyPropertyPath, undefined);
+            const key = i.getProp(uniqueKeyPropertyPath);
             if (key === undefined) {
               throw `Aggregation Key not found at path: ${uniqueKeyPropertyPath}.`;
             }
@@ -255,14 +258,14 @@ export default class MetadataScrierPlugin extends Plugin implements MetaScryPlug
         enumerable: false
       });
 
-      /**
-       * Aggregate an array of objects by a value
-       * 
-       * @param {string} key The key to aggegate by. This uses getProp so you can pass in a compound key
-       * 
-       * @returns An object with arrays indexed by the value of the property at the key within the object.
-       */
       Object.defineProperty(Array.prototype, Keys.AggregateByArrayHelperFunctionKey, {
+        /**
+         * Aggregate an array of objects by a value
+         * 
+         * @param key The key to aggegate by. This uses getProp so you can pass in a compound key
+         * 
+         * @returns An object with arrays indexed by the value of the property at the key within the object.
+         */
         value: function (key: string): Record<any, any[]> {
           const result: Record<any, any[]> = {};
 

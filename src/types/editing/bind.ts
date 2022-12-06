@@ -41,7 +41,7 @@ export type BoundInputField
  * @internal
  */
 export type MetaBindGenericFunction = (
-  source?: NotesSource | string | null,
+  source?: NotesSource | string,
   /**
    * The frontmatter key to use.
    * If it's true, all fields in the whole file will be bound!
@@ -65,8 +65,8 @@ type MetaBindIndividualInputTypesApi
  * Bind to a specific type of input
  */
 export type MetaBindIndividualInputTypeFunction = (
-  source: NotesSource | string | undefined | null,
-  frontmatterKey?: string | Array<String> | undefined | null | false,
+  source: NotesSource | string,
+  frontmatterKey?: string | Array<String> | null | false,
   args?: Record<InputFieldArgumentType, any> | {},
   options?: BindSettings
 ) => BindingResult;
@@ -105,8 +105,8 @@ export type CurrentMetaBindGenericFunction = (
   /**
    * The frontmatter key to bind (if it contains : it will be parsed as pure source.) 
    */
-  key?: string | Array<String> | undefined | null | true | false,
-  fieldType?: InputFieldType | 'auto' | undefined | null,
+  key?: string | Array<String> | null | true | false,
+  fieldType?: InputFieldType | 'auto',
   args?: Record<InputFieldArgumentType, any> | {},
   options?: BindSettings
 ) => BindingResult;
@@ -122,7 +122,7 @@ type CurrentMetaBindIndividualInputTypesApi
  * Bind to a specific type of input
  */
 export type CurrentMetaBindIndividualInputTypeFunction = (
-  frontmatterKey?: string | Array<String> | undefined | null | true | false,
+  frontmatterKey?: string | Array<String> | null | true | false,
   args?: Record<InputFieldArgumentType, any> | {},
   options?: BindSettings
 ) => BindingResult;

@@ -9,7 +9,7 @@ import {
   Symbols
 } from "./constants";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
-import { FileData } from "./types/datas";
+import { FileData, ThenDoCallback, ThenDoCallbacks, ThenDoOnTrueCallback } from "./types/datas";
 import { NotesSource } from "./types/fetching/sources";
 import { PropertyNamingConventions } from "./types/settings";
 
@@ -57,16 +57,16 @@ export const IsArray = (symbol: any) => Array.isArray(symbol);
 /**
  * Find a deep property in an object.
  *
- * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
- * @param {object} onObject The object containing the desired key
+ * @param path Array of keys, or dot seperated propery key."
+ * @param onObject The object containing the desired key
  *
  * @returns true if the property exists, false if not.
  */
-export function ContainsDeepProperty(propertyPath: string | Array<string>, onObject: any): boolean {
-  const keys = (IsString(propertyPath))
-    ? (propertyPath as string)
+export function ContainsDeepProperty(path: string | Array<string>, onObject: any): boolean {
+  const keys = (IsString(path))
+    ? (path as string)
       .split('.')
-    : propertyPath;
+    : path;
 
   let parent = onObject;
   for (const currentKey of keys) {
@@ -87,23 +87,24 @@ export function ContainsDeepProperty(propertyPath: string | Array<string>, onObj
 /**
  * Get a deep property in an object, null if not found.
  *
- * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
- * @param {{onTrue:function(object), onFalse:function()}|function(object)|[function(object), function()]} thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
- * @param {object} fromObject The object containing the desired key
+ * @param path Array of keys, or dot seperated propery key.
+ * @param fromObject The object containing the desired key
+ * @param thenDo A(set of) callback(s) that takes the found value as a parameter. Defaults to just the onTrue method if a single function is passed in on it's own.
  *
  * @returns if the property exists.
  */
-export function TryToGetDeepProperty(propertyPath: string | Array<string>, thenDo: any, fromObject: any): boolean {
-  const keys = (IsString(propertyPath))
-    ? parsePath(propertyPath as string)
-    : propertyPath;
+export function TryToGetDeepProperty(path: string | Array<string>, fromObject: any, thenDo?: ThenDoCallback): boolean {
+  const keys = (IsString(path))
+    ? parsePath(path as string)
+    : path;
 
   let parent = fromObject;
   for (const currentKey of keys) {
     if (!IsObject(parent) || !parent.hasOwnProperty(currentKey)) {
-      if (thenDo && thenDo.onFalse) {
-        thenDo.onFalse();
+      if (thenDo && (thenDo as ThenDoCallbacks).onFalse) {
+        (thenDo as ThenDoCallbacks).onFalse!();
       }
+
       return false;
     }
 
@@ -111,7 +112,9 @@ export function TryToGetDeepProperty(propertyPath: string | Array<string>, thenD
   }
 
   if (thenDo) {
-    const then = thenDo.onTrue || thenDo;
+    const then: ThenDoOnTrueCallback
+      = ((thenDo as ThenDoCallbacks)?.onTrue ?? thenDo) as ThenDoOnTrueCallback;
+    
     if (then) {
       return then(parent);
     }
@@ -123,39 +126,38 @@ export function TryToGetDeepProperty(propertyPath: string | Array<string>, thenD
 /**
  * Get a deep property in an object, null if not found.
  *
- * @param {string|array[string]} propertyPath Array of keys, or dot seperated propery key."
- * @param {object} fromObject The object containing the desired key
+ * @param path Array of keys, or dot seperated propery key.
+ * @param fromObject The object containing the desired property
  *
  * @returns The found deep property, or null if not found.
  */
-export function GetDeepProperty(propertyPath: string | Array<string>, fromObject: any): any | null {
-  return (IsString(propertyPath)
-    ? (propertyPath as string)
+export function GetDeepProperty(path: string | Array<string>, fromObject: any): any | undefined {
+  return (IsString(path)
+    ? (path as string)
       .split('.')
-    : (propertyPath as string[]))
+    : (path as string[]))
     .reduce((t, p) => t?.[p], fromObject);
 }
 
 /**
- * Set a deep property in an object, even if it doesn't exist.
- *
- * @param {string|[string]} propertyPath Array of keys, or dot seperated propery key.
- * @param {object|function(object)} value The value to set, or a function to update the current value and return it.
- * @param {object} fromObject The object containing the desired key
- *
- * @returns The found deep property, or null if not found.
- */
-export function SetDeepProperty(propertyPath: string | Array<string>, value: any, onObject: any): void {
-  const keys = (IsString(propertyPath))
-    ? (propertyPath as string)
+  * Set a deep property in an object, even if it doesn't exist.
+  *
+  * @param path Array of keys, or dot seperated propery key.
+  * @param value The value to set, or a function to update the current value and return it.
+  * @param onObject The object to set the property on
+  * @param valueFunctionIsNotTheValueAndIsUsedToFetchTheValue If this is true, and the value passed in is a function, this will execute that function with no parameters to try to get the value. (defautls to true)
+  */
+export function SetDeepProperty(path: string | Array<string>, value: any, onObject: any, valueFunctionIsNotTheValueAndIsUsedToFetchTheValue?: true | boolean): void {
+  const keys = (IsString(path))
+    ? (path as string)
       .split('.')
-    : propertyPath;
+    : path;
 
   let parent = onObject;
   let currentKey;
   for (currentKey of keys) {
     if (!IsObject(parent)) {
-      throw `Property: ${currentKey}, in Path: ${propertyPath}, is not an object. Child property values cannot be set!`;
+      throw `Property: ${currentKey}, in Path: ${path}, is not an object. Child property values cannot be set!`;
     }
 
     // if this parent doesn't have the property we want, add it as an empty object for now.
@@ -174,7 +176,7 @@ export function SetDeepProperty(propertyPath: string | Array<string>, value: any
   }
 
   // TODO: add ignore flag options variable for this
-  if (IsFunction(value)) {
+  if (valueFunctionIsNotTheValueAndIsUsedToFetchTheValue && IsFunction(value)) {
     parent[currentKey] = value(parent[currentKey]);
   } else {
     parent[currentKey] = value;
@@ -188,7 +190,7 @@ export function SetDeepProperty(propertyPath: string | Array<string>, value: any
 /**
  * Get a file path string based on a file path string or file object.
  *
- * @param {NotesSource} source The file object (with a path property) or file name
+ * @param source The file object (with a path property) or file name
  *
  * @returns The file path
  */
@@ -235,11 +237,11 @@ export function BuildPrototypeFileFullPath(prototypePath: string) {
  *
  * @returns The full file path.
  */
-export function Path(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null): string {
+export function Path(relativePath?: string, extension: string | boolean = "", rootFolder?: string): string {
   return _addExtension(_findPath(relativePath, extension, rootFolder), extension);
 }
 
-function _findPath(relativePath: string | null = null, extension: string | boolean = "", rootFolder: string | null = null): string {
+function _findPath(relativePath?: string, extension: string | boolean = "", rootFolder?: string): string {
   if (!relativePath) {
     return InternalStaticMetadataScrierPluginContainer.Api.current.path
   }

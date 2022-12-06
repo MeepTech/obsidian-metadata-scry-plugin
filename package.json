@@ -46,6 +46,7 @@
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.14.47",
+		"jest": "^29.3.1",
 		"obsidian": "latest",
 		"obsidian-dataview": "^0.5.51",
 		"tslib": "2.4.0",

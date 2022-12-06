@@ -236,10 +236,9 @@ export interface CurrentNoteMetaScryApi {
   /**
    * Patch individual properties of the current file's frontmatter metadata.
    *
-   * @param {Record<string, any>|any} frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
-   * @param {string|null} propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
-   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to patch said data value file. You can also pass the path in here instead.
-   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to patch said data prototype file. You can also pass in the path here instead.
+   * @param frontmatterData The properties to patch. This can patch properties multiple keys deep as well. If a propertyName is provided then this entire object/value is set to that single property name instead
+   * @param propertyName (Optional) If you want to set the entire frontmatterData parameter value to a single property, specify the name of that property here.
+   * @param options Additional options for updating the frontmatter
    *
    * @alias {@link MetaScryApi.patch}
    *
@@ -256,9 +255,8 @@ export interface CurrentNoteMetaScryApi {
   /**
    * Replace the existing frontmatter the current file with entirely new data, clearing out all old data in the process.
    *
-   * @param {Frontmatter} frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
-   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to set to said data value file. You can also pass the path in here instead.
-   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to set to said data prototype file. You can also pass in the path here instead.
+   * @param frontmatterData The entire frontmatter header to set for the file. This clears and replaces all existing data!
+   * @param options Additional options for updating the frontmatter
    *
    * @alias {@link MetaScryApi.set}
    *
@@ -275,10 +273,9 @@ export interface CurrentNoteMetaScryApi {
   /**
    * Used to clear values from metadata.
    *
-   * @param {object|string} file The file to clear properties for. defaults to the current file.
-   * @param {string|Array<string>|Record<string, any>|null} frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
-   * @param {boolean|string} toValuesFile (Optional) set this to true if the path is a data value file path and you want to clear from said data value file. You can also pass the path in here instead.
-   * @param {boolean|string} prototype (Optional) set this to true if the path is a data prototype file path and you want to clear from said data prototype file. You can also pass in the path here instead.
+   * @param file The file to clear properties for. defaults to the current file.
+   * @param frontmatterProperties (optional)The name of the property, an array of property names, or an object with the named keys you want cleared. If left blank, all frontmatter for the file is cleared!
+   * @param options Additional options for updating the frontmatter
    *
    * @alias {@link MetaScryApi.clear}
    *

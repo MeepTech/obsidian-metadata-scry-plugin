@@ -28,7 +28,7 @@ import { BindSettings } from "../lib";
  * @internal
  */
 const GlobalAnyInputBinder: MetaBindGenericFunction = (
-  source?: NotesSource | string | null,
+  source?: NotesSource | string,
   frontmatterKey?: string | Array<String> | null | true | false,
   fieldType: InputFieldType | 'auto' = 'auto',
   args: Record<InputFieldArgumentType, any> | {} = {},
@@ -85,7 +85,7 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
       inputFieldType: fieldType,
       bindTarget: frontmatterKey
     } as InputFieldDeclaration;
-    source = (source !== undefined && source !== null)
+    source = (source !== undefined)
       ? ParsePathFromNoteSource(source) as string
       : meta.current.pathex;
   }
@@ -139,7 +139,7 @@ for (const fieldType of Object.values(InputFieldType)) {
   }
 
   const fieldTypeInputBinder: MetaBindIndividualInputTypeFunction = (
-    source?: NotesSource | null,
+    source?: NotesSource | string,
     frontmatterKey?: string | Array<String> | null | false,
     args: Record<InputFieldArgumentType, any> | {} = {},
     options: BindSettings = {}
@@ -179,7 +179,7 @@ const CurrentAnyInputBinder: CurrentMetaBindGenericFunction = (
   args: Record<InputFieldArgumentType, any> | {} = {},
   options: BindSettings = {}
 ): BindingResult => {
-  return GlobalAnyInputBinder(null, key, fieldType, args, options);
+  return GlobalAnyInputBinder(undefined, key, fieldType, args, options);
 };
 
 for (const fieldType of Object.values(InputFieldType)) {

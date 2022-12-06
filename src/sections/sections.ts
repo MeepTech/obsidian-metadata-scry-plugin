@@ -18,6 +18,8 @@ import { Splay } from 'src/utilities';
 
 /**
  * Implementation of Sections
+ * 
+ * @internal
  */
 export class NoteSections extends Object implements Sections {
   //#region Fields
@@ -203,8 +205,7 @@ export class NoteSections extends Object implements Sections {
   ): HTMLElement {
     return InternalStaticMetadataScrierPluginContainer.Api.embed(
       this.path,
-      container,
-      intoNote
+      { container, intoNote }
     ) as HTMLElement; 
   }
 
@@ -234,7 +235,7 @@ export class NoteSections extends Object implements Sections {
       return Promise.resolve(this._html);
     } else {
       const md = await this.loadText()
-      return await InternalStaticMetadataScrierPluginContainer.Api.html(this.path, md) as HTMLElement;
+      return await InternalStaticMetadataScrierPluginContainer.Api.html(this.path, { fromRawMd: md }) as HTMLElement;
     }
   }
 
