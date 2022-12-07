@@ -121,7 +121,7 @@ export {
  * @returns The current MetaScry interface object instance.
  */
 export function GetInstance(
-  defaultSettings: MetaScryPluginSettings = DefaultPluginSettings
+  defaultSettings: MetaScryPluginSettings = DefaultPluginSettings,
 ): MetaScry {
   if (IsObject(InternalStaticMetadataScrierPluginContainer.Static)) {
     return InternalStaticMetadataScrierPluginContainer.Static;

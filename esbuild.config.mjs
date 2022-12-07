@@ -11,7 +11,25 @@ const banner =
 
 const prod = (process.argv[2] === 'production');
 const lib = (process.argv[2] === 'library');
-const dev = !prod && !lib;
+const test = (process.argv[2] === 'test');
+const dev = !prod && !lib && !test;
+
+// tests:
+if (test) {
+  esbuild.build({
+    banner: {
+      js: banner,
+    },
+    entryPoints: ['tests/jest/lib.ts'],
+    bundle: false,
+    format: 'cjs',
+    target: 'es2018',
+    logLevel: "info",
+    sourcemap: 'inline',
+    treeShaking: true,
+    outdir: 'build/tests/jest',
+  }).catch(() => process.exit(1));
+}
 
 // plugin:
 if (!lib) {

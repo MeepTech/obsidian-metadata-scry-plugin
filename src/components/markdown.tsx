@@ -1,4 +1,3 @@
-// TODO: Export this file to the npm importable api when that's made.
 import { Keys } from "src/constants";
 
 export namespace ReactMarkdownComponents {

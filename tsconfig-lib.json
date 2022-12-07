@@ -4,9 +4,9 @@
   ],
   "exclude": [
     "src/fetching",
-	"src/editing",
-	"src/sections",
-	"src/static.ts"
+    "src/editing",
+    "src/sections",
+    "src/static.ts"
   ],
   "compilerOptions": {
     "baseUrl": ".",
@@ -15,8 +15,8 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
-	"strictNullChecks": true,
-	"stripInternal": true,
+    "strictNullChecks": true,
+    "stripInternal": true,
     "lib": [
       "DOM",
       "ES5",
@@ -29,7 +29,7 @@
     ],
     "jsx": "react",
     "declaration": true,
-	"emitDeclarationOnly": true,
+	  "emitDeclarationOnly": true,
     "outDir": "build/lib"
   }
 }

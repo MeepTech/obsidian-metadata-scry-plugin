@@ -10,9 +10,10 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "isolatedModules": true,
-	"noEmit": true,
-	"skipLibCheck": true,
-	"strictNullChecks": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
     "lib": [
       "DOM",
       "ES5",
@@ -28,5 +29,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "exclude": [
+    "tests/"
   ]
 }
