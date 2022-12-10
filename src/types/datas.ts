@@ -150,14 +150,15 @@ export type ScryResult<TResult>
  * (default for multiuple)
  */
 export type ScryResultMap<TResult> = {
-  [path: string]: ScryResults<TResult>;
-}
+  readonly [path: string]: ScryResults<TResult>;
+  readonly [index: number]: ScryResults<TResult>;
+} & { readonly count: number };
 
 /**
  * Results for commands in the MetaScryApi can return one item, or a record tree of items, indexed by their paths.
  */
 export type PromisedScryResults<TResult>
-  = (PromisedScryResult<TResult> | ScryResultPromiseMap<TResult>)
+  = PromisedScryResult<TResult> | ScryResultPromiseMap<TResult>
 
 /**
  * All scry results, awaiting a single promise. (default for single)
@@ -168,8 +169,10 @@ export type PromisedScryResult<TResult>
 /**
  * A tree of maps promises for each scry result, indexed by a string key (default for multiple)
  */
-export type ScryResultPromiseMap<TResult>
-  = ScryResultMap<Promise<ScryResults<TResult>>>;
+export type ScryResultPromiseMap<TResult> = {
+  readonly [path: string]: PromisedScryResults<TResult>;
+  readonly [index: number]: PromisedScryResults<TResult>;
+} & { readonly count: number };
 
 /**
  * A callback for certain property helper methods and other settings.

@@ -6,7 +6,9 @@
     "src/fetching",
     "src/editing",
     "src/sections",
-    "src/static.ts"
+    "src/static.ts",
+    "build",
+    "test"
   ],
   "compilerOptions": {
     "baseUrl": ".",

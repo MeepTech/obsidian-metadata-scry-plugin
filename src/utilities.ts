@@ -1,5 +1,5 @@
 import { parsePath } from "@opd-libs/opd-metadata-lib/lib/Utils";
-import { TAbstractFile, TFolder } from "obsidian";
+import { TAbstractFile, TFile, TFolder } from "obsidian";
 import {
   DataviewInlineRegex,
   KebabCaseDashesRegex,
@@ -22,24 +22,28 @@ import { PropertyNamingConventions } from "./types/settings";
  * 
  * @returns true if the item is a function
  */
-export const IsFunction = (symbol: any) => typeof symbol === "function";
+export const IsFunction = (symbol: any)
+  : symbol is Function =>
+    typeof symbol === "function";
 
 /**
- * Helper to check if somethings an object or an array.
+ * Helper to check if somethings an object.
  * 
  * @param symbol The symbol to check 
  * @param includeNulls (optional) If the value of 'null' returns true or not. (Defaults to false)
  * 
  * @returns true if it's an object 
  */
-export const IsObject = (symbol: any, includeNulls: boolean = false) =>
-  typeof symbol === "object"
-    ? includeNulls
-      ? true
-      : symbol !== null
-    : false;
-
-export const IsString = (symbol: any) => typeof symbol === "string";
+export const IsObject = (symbol: any)
+  : symbol is Record<any, any> & object =>
+    typeof symbol === "object" && symbol !== null;
+    
+/**
+ * Helper to check if something is a string.
+ */
+export const IsString = (symbol: any)
+  : symbol is string =>
+    typeof symbol === "string";
 
 /**
  * Helper to check if somethings specifically an array.
@@ -48,7 +52,53 @@ export const IsString = (symbol: any) => typeof symbol === "string";
  * 
  * @returns true if it's an array
  */
-export const IsArray = (symbol: any) => Array.isArray(symbol);
+export const IsArray = (symbol: any)
+  : symbol is Array<any> =>
+    Array.isArray(symbol);
+
+/**
+ * Check if something is a TAbstractFile (test safe)
+ */
+export function IsTAbstractFile(source: NotesSource): source is TFile | TFolder | TAbstractFile {
+  if (process.env.NODE_ENV !== "test") {
+    return source instanceof TAbstractFile;
+  }
+
+  // in testing, instanceof doesn't work.
+  return IsObject(source)
+    && source.hasOwnProperty("vault")
+    && source.hasOwnProperty("parent");;
+}
+
+/**
+ * Check if something is a TFile (test safe)
+ */
+export function IsTFile(source: NotesSource): source is TFile {
+  if (process.env.NODE_ENV !== "test") {
+    return source instanceof TFile;
+  }
+
+  // in testing, instanceof doesn't work.
+  const sourceAsObject = (source as TFile) as object;
+
+  return IsTAbstractFile(source)
+    && sourceAsObject.hasOwnProperty("basename");
+}
+
+/**
+ * Check if something is a TFolder (test safe)
+ */
+export function IsTFolder(source: NotesSource): source is TFolder {
+  if (process.env.NODE_ENV !== "test") {
+    return source instanceof TFolder;
+  }
+
+  // in testing, instanceof doesn't work.
+  const sourceAsObject = (source as TFolder) as object;
+
+  return IsTAbstractFile(source)
+    && sourceAsObject.hasOwnProperty("children");
+}
 
 //#endregion
 

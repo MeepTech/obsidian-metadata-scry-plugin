@@ -17,7 +17,7 @@ import {
     InputFieldType
 } from "../types/_external_sources/meta-bind";
 import { NotesSource } from "../types/fetching/sources";
-import { IsArray, ParsePathFromNoteSource } from "../utilities";
+import { IsArray, IsTFolder, ParsePathFromNoteSource } from "../utilities";
 import { BindSettings } from "../lib";
 
 //#region global
@@ -40,10 +40,11 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
   // check if one or many files.
   var declaration: string | InputFieldDeclaration;
   var files = meta.vault(source ?? meta.current.pathex);
-  if (files instanceof TFolder) {
+  if (IsTFolder(files)) {
     var allByFile
       = {} as Record<string, AbstractInputField | undefined | Record<string, AbstractInputField | undefined>>;
     
+    let count = 0;
     for (const path in files.children) {
       allByFile[path] = GlobalAnyInputBinder(
         path,
@@ -52,9 +53,19 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
         args,
         options
       ) as AbstractInputField | undefined | Record<string, AbstractInputField | undefined>;
+      allByFile[count] = allByFile[path];
+      Object.defineProperty(allByFile, count, {
+        value: allByFile[path],
+        enumerable: false
+      });
+      count++;
     }
     
-    return allByFile;
+    Object.defineProperty(allByFile, "count", {
+      value: count,
+      enumerable: false
+    });
+    return allByFile as BindingResult;
   }
   
   if (frontmatterKey === true) {
@@ -73,11 +84,27 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
   } // map of multiple keys
   else if (IsArray(frontmatterKey)) {
     var all = {} as Record<string, AbstractInputField | undefined>;
-    for (const key of frontmatterKey as Array<string>) {
-      all[key] = GlobalAnyInputBinder(source, key, fieldType, args, options) as AbstractInputField | undefined;
-    }
 
-    return all;
+    let count = 0;
+    for (const key of frontmatterKey as Array<string>) {
+      all[key] = GlobalAnyInputBinder(
+        source,
+        key,
+        fieldType,
+        args,
+        options
+      ) as AbstractInputField | undefined;
+      Object.defineProperty(all, count, {
+        value: all[key],
+        enumerable: false
+      });
+      count++;
+    }
+    Object.defineProperty(all, "count", {
+      value: count,
+      enumerable: false
+    });
+    return all as BindingResult;
   } // if we have a frontmatter key we need to build and validate the argument based inputfieldeclaration
   else {
     declaration = {

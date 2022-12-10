@@ -178,5 +178,5 @@ export interface PromisedDataFetcherSettings extends DataFetcherSettings {
    *
    * // TODO: implement
    */
-  asASinglePromise?: false | boolean; 
+  asASinglePromise?: boolean; 
 }

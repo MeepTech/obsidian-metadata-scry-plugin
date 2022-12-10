@@ -74,7 +74,7 @@ export namespace ReactSectionComponents {
     // wait for content to render/load
     if (renderedContent !== null) {
       // is-enabled check using the loaded content
-      if ((IsFunction(enabled) && (enabled as Function)(section, renderedContent)) || enabled) {
+      if ((IsFunction(enabled) && enabled(section, renderedContent)) || enabled) {
         // custom renderer option
         if (renderer) {
           return renderer(section, renderedContent);
@@ -179,7 +179,7 @@ export namespace ReactSectionComponents {
       }
       if (filter) {
         childProps.enabled = IsFunction(filter)
-          ? (s: Section, r: string | HTMLElement) => (filter as Function)(s, r, sections, renderedSections)
+          ? (s: Section, r: string | HTMLElement) => filter(s, r, sections, renderedSections)
           : filter;
       }
 

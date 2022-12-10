@@ -14,7 +14,17 @@ import {
 } from "./types/editing/editor";
 import { AppWithPlugins, MetaScryPluginApi } from "./types/plugin";
 import { MetaScryPluginSettings } from "./types/settings";
-import { ContainsDeepProperty, GetDeepProperty, IsFunction, IsObject, ParsePathFromNoteSource, Path, SetDeepProperty, Splay, TryToGetDeepProperty } from "./utilities";
+import {
+  ContainsDeepProperty,
+  GetDeepProperty,
+  IsFunction,
+  IsObject,
+  ParsePathFromNoteSource,
+  Path,
+  SetDeepProperty,
+  Splay,
+  TryToGetDeepProperty
+} from "./utilities";
 import { TFile } from "obsidian";
 import { NotesSource } from "./types/fetching/sources";
 import { MetaBindPlugin } from "./types/_external_sources/meta-bind";
