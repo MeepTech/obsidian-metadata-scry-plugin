@@ -67,6 +67,7 @@ export namespace Symbols {
   export const SectionIdPartDelimiter = ":|:";
   
   export const KebabCasePropertyNameWordSeperatorCharacter = "-";
+  export const UnderscoreCasePropertyNameWordSeperatorCharacter = "_";
   export const EmptySpace = " ";
   export const NoCharachter = '';
 }
@@ -122,6 +123,8 @@ export const MetascryPluginDepencencies =
 
 /** @internal*/
 export const SpacesRegex = / /g;
+/** @internal*/
+export const UnderscoresRegex = /_/g;
 /** @internal*/
 export const KebabCaseDashesRegex = /-/g;
 /** @internal*/

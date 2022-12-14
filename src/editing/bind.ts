@@ -147,9 +147,9 @@ const GlobalAnyInputBinder: MetaBindGenericFunction = (
   }
     
   if (options.returnAbstractField) {
-    return abstractField;
+    return abstractField as BindingResult;
   } else {
-    return abstractField?.inputFieldMarkdownRenderChild.containerEl;
+    return abstractField?.inputFieldMarkdownRenderChild.containerEl as BindingResult;
   }
 };
 

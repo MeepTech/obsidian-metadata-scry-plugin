@@ -4,9 +4,8 @@ import {
 import {
   SMarkdownPage
 } from "obsidian-dataview";
-import { TaskResult } from "obsidian-dataview/lib/api/plugin-api";
-import { type } from "os";
 import { Sections } from "./sections/sections";
+import { DataFetcherSettings } from "./settings";
 
 /**
  * A full metadata set returned from MetaScryApi.get
@@ -136,35 +135,72 @@ export type DataviewMatter = {
  * Results for commands in the MetaScryApi can return one item, or a record tree of items, indexed by their paths.
  */
 export type ScryResults<TResult>
-  = ScryResult<TResult> | ScryResultMap<TResult>;
+  = ((ScryResult<TResult> | ScryResultsMap<TResult>)
+    & SingleScryResultConversionProperties<TResult>
+    & ScryResultMapConversionProperties<TResult>)
+  | undefined;
 
 /**
  * A single item scry result.
  * (default for single)
  */
 export type ScryResult<TResult>
-  = TResult | undefined;
-
+  = ((TResult & SingleScryResultConversionProperties<TResult>) | undefined)
+  
 /**
  * A tree of result maps, with each item/sub-map indexed by a string key (usually the full path)
  * (default for multiuple)
  */
-export type ScryResultMap<TResult> = {
+export type ScryResultsMap<TResult>
+  = ScryResultMap<TResult>
+    & ScryResultMapConversionProperties<TResult>;
+
+/**
+ * Properties to easily convert a result object to the result.
+ */
+interface SingleScryResultConversionProperties<TResult> {
+  readonly value: TResult;
+  readonly options: DataFetcherSettings;
+}
+
+/**
+ * Just a map of scry results
+ */
+export interface ScryResultMap<TResult> extends ScryResultMapProperties {
+  /**@ts-expect-error */
   readonly [path: string]: ScryResults<TResult>;
   readonly [index: number]: ScryResults<TResult>;
-} & { readonly count: number };
+}
+
+export interface ScryResultMapProperties {
+  readonly keys: Array<string>;
+  readonly count: number;
+}
+
+/**
+ * Properties to easily convert a result map into accessable results.
+ */
+interface ScryResultMapConversionProperties<TResult> extends ScryResultMapProperties {
+  readonly map: ScryResultsMap<TResult>;
+  readonly options: DataFetcherSettings;
+  readonly all: Array<ScryResult<TResult>>;
+  readonly values: Array<TResult>;
+  readonly any: boolean;
+};
 
 /**
  * Results for commands in the MetaScryApi can return one item, or a record tree of items, indexed by their paths.
  */
 export type PromisedScryResults<TResult>
-  = PromisedScryResult<TResult> | ScryResultPromiseMap<TResult>
+  = (PromisedScryResult<TResult> | ScryResultPromiseMap<TResult>)
+    & SingleScryResultConversionProperties<TResult>
+    & PromisedScryResultMapConversionProperties<TResult>;
 
 /**
  * All scry results, awaiting a single promise. (default for single)
  */
 export type PromisedScryResult<TResult>
-  = Promise<ScryResults<TResult>>;
+  = Promise<ScryResults<TResult>> & SingleScryResultConversionProperties<TResult>;
 
 /**
  * A tree of maps promises for each scry result, indexed by a string key (default for multiple)
@@ -172,7 +208,18 @@ export type PromisedScryResult<TResult>
 export type ScryResultPromiseMap<TResult> = {
   readonly [path: string]: PromisedScryResults<TResult>;
   readonly [index: number]: PromisedScryResults<TResult>;
-} & { readonly count: number };
+} & PromisedScryResultMapConversionProperties<TResult>;
+
+/**
+ * Properties to easily convert a result map into accessable results.
+ */
+interface PromisedScryResultMapConversionProperties<TResult> extends ScryResultMapProperties {
+  readonly map: ScryResultPromiseMap<TResult>;
+  readonly options: DataFetcherSettings;
+  readonly all: Array<PromisedScryResult<TResult>>;
+  readonly values: Array<Promise<TResult>>;
+  readonly any: boolean;
+};
 
 /**
  * A callback for certain property helper methods and other settings.

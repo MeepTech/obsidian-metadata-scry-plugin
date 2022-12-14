@@ -14,7 +14,7 @@ import {
 } from "../static";
 import { SingleFileSource } from '../types/fetching/sources';
 import { NoteSection } from './section';
-import { Splay } from 'src/utilities';
+import { Splay } from '../utilities';
 
 /**
  * Implementation of Sections
@@ -192,10 +192,14 @@ export class NoteSections extends Object implements Sections {
   named(
     name: string
   ): NoteSection[] {
-    return Splay(name)
-      .map(k => this._all[k])
-      .filter(s => s)
-      .flat();
+    const sections = [];
+    for (const key in Splay(name)) {
+      if (this._all[key]) {
+        sections.push(this._all[key]);
+      }
+    }
+
+    return sections.flat();
   }
 
   // @ts-expect-error: Default Indexer Type Override

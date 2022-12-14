@@ -7,8 +7,7 @@ import {
 import { InternalStaticMetadataScrierPluginContainer } from "../static";
 import { SectionHeader } from './heading';
 import { NoteSections } from './sections';
-import { Splay } from 'src/utilities';
-import { PromisedDataFetcherSettings } from 'src/types/settings';
+import { Splay } from '../utilities';
 
 /**
  * Implementation of Section
@@ -28,7 +27,7 @@ export class NoteSection implements Section {
   // @ts-expect-error: Default Indexer Type Override
   private _md: string = null!;
   // @ts-expect-error: Default Indexer Type Override
-  private _keys: string[] = [];
+  private _keys: Set<string> = [];
   // @ts-expect-error: Default Indexer Type Override
   private _count: number = 0;
   // @ts-expect-error: Default Indexer Type Override
@@ -52,9 +51,9 @@ export class NoteSection implements Section {
 
   [key: string]: NoteSection;
   // @ts-expect-error: Default Indexer Type Override
-  get keys(): string[] { return this._keys; }
+  get keys(): Set<string> { return this._keys; }
   // @ts-expect-error: Default Indexer Type Override
-  get Keys(): string[] { return this._keys; }
+  get Keys(): Set<string> { return this._keys; }
   // @ts-expect-error: Default Indexer Type Override
   get count(): number { return this._count; }
   // @ts-expect-error: Default Indexer Type Override

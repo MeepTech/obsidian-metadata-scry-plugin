@@ -21,22 +21,20 @@ import {
   MetaScryPluginApi,
   AppWithPlugins
 } from "../types/plugin";
-import { DataFetcherSettings, FrontmatterUpdateSettings, SplayKebabCasePropertiesOptions } from "../types/settings";
+import { DataFetcherSettings, FrontmatterUpdateSettings } from "../types/settings";
 import {
   CachedFileMetadata, DataviewMatter,
   Frontmatter,
   Metadata,
   PromisedScryResults,
-  ScryResultMap,
+  ScryResultsMap,
   ScryResultPromiseMap,
   ScryResults
 } from "../types/datas";
 import {
   Keys,
   Symbols,
-  DefaultFrontmatterUpdateOptions,
-  DefaultPluginSettings
-} from '../constants';
+  DefaultFrontmatterUpdateOptions} from '../constants';
 import { InternalStaticMetadataScrierPluginContainer } from "../static";
 import { CurrentNoteScrier } from "./current";
 import { NoteSections } from '../sections/sections';
@@ -56,6 +54,7 @@ import {
 import { MetadataSources, NotesSource, SingleFileSource } from '../types/fetching/sources';
 import { MetaBindApi } from '../types/editing/bind';
 import { MetadataInputBinder } from '../editing/bind';
+import { ScryResultsMap as ScryResultsConstructor, SingleScryResult } from './result';
 
 /**
  * Access and edit metadata about a file from multiple sources.
@@ -257,7 +256,7 @@ export class MetadataScrier implements MetaScryApi {
       source,
       { ...options, isPromised: true },
       async (file) => {
-        const html = await this.html(source);
+        const html = await this.html(file);
         const text = html!.textContent || "";
 
         return text as string;
@@ -283,7 +282,7 @@ export class MetadataScrier implements MetaScryApi {
         source.children,
         this.embed,
         options
-      ) as ScryResultMap<HTMLElement>;
+      ) as ScryResultsMap<HTMLElement> as ScryResults<HTMLElement>;
     }
 
     const containerEl = options.container || document.createElement("div");
@@ -307,7 +306,7 @@ export class MetadataScrier implements MetaScryApi {
       linktext: source,
       remainingNestLevel: 5,
       showTitle: true,
-      sourcePath: source
+      sourcePath: ParsePathFromNoteSource(source)
     };
 
     //@ts-expect-error secret function
@@ -320,7 +319,7 @@ export class MetadataScrier implements MetaScryApi {
     embed.load();
     embed.loadFile();
 
-    return containerEl;
+    return SingleScryResult(containerEl, options) as ScryResults<HTMLElement>;
   }
 
   omfc = (
@@ -380,7 +379,7 @@ export class MetadataScrier implements MetaScryApi {
       source,
       options,
       (file, options) => {
-        const fileCache = this.omfc(source, options) as CachedFileMetadata;
+        const fileCache = this.omfc(file, options) as CachedFileMetadata;
         if (!fileCache) {
           return undefined;
         }
@@ -403,7 +402,7 @@ export class MetadataScrier implements MetaScryApi {
         paths.array(),
         this.dvMatter,
         options
-      ) as ScryResultMap<DataviewMatter>;
+      ) as ScryResultsMap<DataviewMatter> as ScryResults<DataviewMatter>;
     } else if (!paths.length) {
       return undefined;
     } else {
@@ -414,7 +413,7 @@ export class MetadataScrier implements MetaScryApi {
       return this._scryResultPropSplayer(result, [
         Keys.FileMetadataPropertyLowercaseKey,
         Keys.FileMetadataPropertyUppercaseKey
-      ]) as DataviewMatter;
+      ]) as DataviewMatter as ScryResults<DataviewMatter>;
     }
   } // aliases:
   dataviewFrontmatter = (
@@ -443,7 +442,7 @@ export class MetadataScrier implements MetaScryApi {
         fileObject.children,
         this.cache,
         options
-      ) as ScryResultMap<Cache>;
+      ) as ScryResultsMap<Cache> as ScryResults<Cache>;
     } else {
       MetadataScrier._caches[fileObject.path] = MetadataScrier._caches[fileObject.path] || {};
 
@@ -497,7 +496,7 @@ export class MetadataScrier implements MetaScryApi {
           potentialFolder.children,
           (f, o) => this.get(f, sources, o),
           options
-        ) as ScryResultMap<Metadata>;
+        ) as ScryResultsMap<Metadata> as ScryResults<Metadata>;
       } // If it's a MetadataSources object, re-run this with that as the sources and the source as the current file.
       else if (!source!.hasOwnProperty("path")) {
         if (Keys.MetadataSourceKeys.some(key => source!.hasOwnProperty(key))) {
@@ -524,7 +523,7 @@ export class MetadataScrier implements MetaScryApi {
         fileObject.children,
         (f, o) => this.get(f, sources, o),
         options
-      ) as ScryResultMap<Metadata>;
+      ) as ScryResultsMap<Metadata> as ScryResults<Metadata>;
     }
 
     let values: any = {};
@@ -538,7 +537,7 @@ export class MetadataScrier implements MetaScryApi {
       ) || {};
     } else {
       if (sources === false) {
-        return {};
+        return {} as ScryResults<Metadata>;
       }
 
       // if we need dv sources
@@ -741,17 +740,21 @@ export class MetadataScrier implements MetaScryApi {
 
   private _splayToPathIndexedRecord<TType>(
     paths: Array<NotesSource>,
-    using: (path: NotesSource, options: DataFetcherSettings) => (ScryResults<TType> | PromisedScryResults<TType>),
+    singleFileLogic: (
+      path: TFile,
+      options: DataFetcherSettings
+    ) => ScryResults<TType> | TType | undefined | Promise<TType>,
     options: DataFetcherSettings
-  ): ScryResultMap<TType> | ScryResultPromiseMap<TType> {
-    const result: ScryResultMap<TType> | ScryResultPromiseMap<TType> = {} as any;
+  ): ScryResultsMap<TType> | ScryResultPromiseMap<TType> {
+    const result: ScryResultsMap<TType> | ScryResultPromiseMap<TType> = {} as any;
     let count = 0;
+    const keys: Array<string> = []
 
     for (const source of paths) {
       const subResult = this._scryForFolderOrFile(
         source,
         options,
-        using
+        singleFileLogic
       );
 
       const sourcePath = ParsePathFromNoteSource(source)!;
@@ -760,6 +763,7 @@ export class MetadataScrier implements MetaScryApi {
         value: subResult,
         enumerable: false
       });
+      keys.push(sourcePath);
 
       if (options?.flatten) {
         if (subResult instanceof Promise) {
@@ -772,6 +776,7 @@ export class MetadataScrier implements MetaScryApi {
               value: children[childPath],
               enumerable: false
             });
+            keys.push(childPath);
           }
         }
       }
@@ -783,8 +788,15 @@ export class MetadataScrier implements MetaScryApi {
       value: count,
       enumerable: false
     });
+    Object.defineProperty(collection, "keys", {
+      value: keys,
+      enumerable: false
+    });
 
-    return collection;
+    return ScryResultsConstructor(
+      collection,
+      options
+    ) as ScryResultsMap<TType> | ScryResultPromiseMap<TType>;
   }
 
   private  _scryForFolderOrFile<TType>(
@@ -795,7 +807,7 @@ export class MetadataScrier implements MetaScryApi {
     singleFileLogic: (
       path: TFile,
       options: DataFetcherSettings
-    ) => ScryResults<TType>
+    ) => ScryResults<TType> | TType | undefined | Promise<TType>
   ): ScryResults<TType> | PromisedScryResults<TType> {
     const file = this.vault(source);
 
@@ -804,14 +816,14 @@ export class MetadataScrier implements MetaScryApi {
         file.children,
         singleFileLogic,
         options
-      );
+      ) as ScryResults<TType> | PromisedScryResults<TType>;
     } else if (IsTFile(file)) {
-      return singleFileLogic(file, options);
+      return SingleScryResult(singleFileLogic(file, options), options) as ScryResults<TType> | PromisedScryResults<TType>;
     }
 
     return options.isPromised
-      ? Promise.resolve(undefined)
-      : undefined;
+      ? (Promise.resolve(undefined) as any as PromisedScryResults<TType>)
+      : (undefined as any as ScryResults<TType>);
   }
 
   //#endregion

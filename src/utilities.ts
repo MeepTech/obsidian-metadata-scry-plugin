@@ -6,7 +6,8 @@ import {
   MarkdownWikiLinkRegex,
   PropertyNameIllegalCharachtersRegex,
   SpacesRegex,
-  Symbols
+  Symbols,
+  UnderscoresRegex
 } from "./constants";
 import { InternalStaticMetadataScrierPluginContainer } from "./static";
 import { FileData, ThenDoCallback, ThenDoCallbacks, ThenDoOnTrueCallback } from "./types/datas";
@@ -368,10 +369,10 @@ export function Splay(
   key: string,
   conventions: PropertyNamingConventions = PropertyNamingConventions.All,
   originalConvention: typeof PropertyNamingConventions.Uncleaned | typeof PropertyNamingConventions.Cleaned = PropertyNamingConventions.Uncleaned
-): string[] {
+): Set<string> {
   // if you just want the unclean key... take it?
   if (conventions === PropertyNamingConventions.Uncleaned) {
-    return [key];
+    return new Set([key]);
   }
 
   // otherwise we need probably need to clean and split it up.
@@ -384,14 +385,14 @@ export function Splay(
   let cleanedWithSeperatorCharsIntact: string | null = null;
   if (originalConvention !== PropertyNamingConventions.Cleaned) {
     /// wiki-links syntax
-    if (key.contains(Symbols.MarkdownWikiLinkPrefix)) {
+    if (key.includes(Symbols.MarkdownWikiLinkPrefix)) {
       cleanedWithSeperatorCharsIntact = key.replace(MarkdownWikiLinkRegex, "$2$3");
     } else {
       cleanedWithSeperatorCharsIntact = key;
     }
     
     // dv inline syntax
-    if (cleanedWithSeperatorCharsIntact?.contains(Symbols.DataviewInlineSeperator)) {
+    if (cleanedWithSeperatorCharsIntact?.includes(Symbols.DataviewInlineSeperator)) {
       cleanedWithSeperatorCharsIntact = cleanedWithSeperatorCharsIntact.replace(DataviewInlineRegex, function (_a, b, c, _d, e, _f) {
         return b ? `${b} ${c}` : e;
       });
@@ -400,7 +401,8 @@ export function Splay(
     // remove special and illegal name characters including
     cleanedWithSeperatorCharsIntact = cleanedWithSeperatorCharsIntact.replace(PropertyNameIllegalCharachtersRegex, Symbols.NoCharachter);
     cleaned = cleanedWithSeperatorCharsIntact.replace(SpacesRegex, Symbols.NoCharachter);
-    cleaned = cleanedWithSeperatorCharsIntact.replace(KebabCaseDashesRegex, Symbols.NoCharachter);
+    cleaned = cleaned.replace(UnderscoresRegex, Symbols.NoCharachter);
+    cleaned = cleaned.replace(KebabCaseDashesRegex, Symbols.NoCharachter);
   }
 
   if (conventions & PropertyNamingConventions.Cleaned) {
@@ -421,15 +423,12 @@ export function Splay(
 
   /// can't make the others if it's already been cleaned.
   if (cleanedWithSeperatorCharsIntact === null) {
-    return keys.unique();
+    return new Set(keys);
   }
 
   let seperatedParts: Array<string> | null = null;
   if (conventions & PropertyNamingConventions.LowerCamelCase) {
-    seperatedParts ??= cleanedWithSeperatorCharsIntact
-      .split(Symbols.KebabCasePropertyNameWordSeperatorCharacter)
-      .map(p => p.split(Symbols.EmptySpace))
-      .flat();
+    seperatedParts ??= seperateWordParts(cleanedWithSeperatorCharsIntact);
 
     keys.push(seperatedParts
       .map((part, i) => (i !== 0 && part)
@@ -439,11 +438,7 @@ export function Splay(
   }
 
   if (conventions & PropertyNamingConventions.DefaultCamelCase) {
-    seperatedParts ??= cleanedWithSeperatorCharsIntact
-      .toLowerCase()
-      .split(Symbols.KebabCasePropertyNameWordSeperatorCharacter)
-      .map(p => p.split(Symbols.EmptySpace))
-      .flat();
+    seperatedParts ??= seperateWordParts(cleanedWithSeperatorCharsIntact);
 
     keys.push(seperatedParts
       .map(part => part
@@ -454,25 +449,27 @@ export function Splay(
 
   if (conventions & PropertyNamingConventions.KebabCase) {
     if (!seperatedParts) {
-      seperatedParts ??= cleanedWithSeperatorCharsIntact
-        .split(Symbols.KebabCasePropertyNameWordSeperatorCharacter)
-        .map(p => p.split(Symbols.EmptySpace))
-        .flat();
+      seperatedParts ??= seperateWordParts(cleanedWithSeperatorCharsIntact);
 
       keys.push(seperatedParts
-        .map(part => part
-          ? part
-          : part)
         .join(Symbols.KebabCasePropertyNameWordSeperatorCharacter));
     } else {
       keys.push(seperatedParts
-        .map(part => part
-          ? part.toLowerCase()
-          : part)
         .join(Symbols.KebabCasePropertyNameWordSeperatorCharacter));
     }
   }
 
-  return keys.unique();
+  return new Set(keys);
+
+  // helper functions
+  function seperateWordParts(cleanedWithSeperatorCharsIntact: string) {
+    return cleanedWithSeperatorCharsIntact
+      .toLowerCase()
+      .split(Symbols.KebabCasePropertyNameWordSeperatorCharacter)
+      .map(p => p.split(Symbols.UnderscoreCasePropertyNameWordSeperatorCharacter))
+      .flat()
+      .map(p => p.split(Symbols.EmptySpace))
+      .flat();
+  }
 }
 //#endregion

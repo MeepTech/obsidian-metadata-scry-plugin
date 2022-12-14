@@ -85,7 +85,7 @@ interface SectionInfo {
    * @see {@link Id}
    * @see {@link id}
    */
-  get Keys(): string[];
+  get Keys(): Set<string>;
 
   /**
    * The keys that can be used to identify and access this section.
@@ -101,7 +101,7 @@ interface SectionInfo {
    * @see {@link Id}
    * @see {@link id}
    */
-  get keys(): string[];
+  get keys(): Set<string>;
 
   /**
    * The number of sub-sections directly within this section.

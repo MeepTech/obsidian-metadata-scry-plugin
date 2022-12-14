@@ -19,7 +19,7 @@ export type {
   CachedFileMetadata,
   ScryResults,
   ScryResult,
-  ScryResultMap,
+  ScryResultsMap as ScryResultMap,
   PromisedScryResults,
   ScryResultPromiseMap,
   PromisedScryResult
