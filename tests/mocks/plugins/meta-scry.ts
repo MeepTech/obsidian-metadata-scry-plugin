@@ -12,6 +12,8 @@ import {
   KeymapEventHandler
 } from "obsidian";
 import { DefaultPluginSettings } from "../../../src/constants";
+import { MetadataScrier } from "../../../src/fetching/scrier";
+import { InternalStaticMetadataScrierPluginContainer } from "../../../src/static";
 import { MetaScryApi } from "../../../src/types/fetching/scrier";
 import { MetaScryPluginSettings } from "../../../src/types/settings";
 import App from "../app-api/app";
@@ -40,6 +42,11 @@ export default class MetaScryPlugin {
   public static Mock(): MetaScryPlugin {
     const plugin: MetaScryPlugin = new MetaScryPlugin();
     plugin._settings = DefaultPluginSettings;
+    plugin.api = new MetadataScrier();
+    InternalStaticMetadataScrierPluginContainer.InitalizeStaticApi({
+      includeReactComponents: true,
+      plugin: this as any,
+    });
 
     return plugin;
   }

@@ -1,6 +1,6 @@
 import { describe, test, beforeAll, expect } from "@jest/globals";
 import { Path } from "../../../src/utilities";
-import util from 'node:util';
+import util from 'util';
 import Vault, { FILE } from "../../mocks/app-api/vault";
 
 const TEST_CASES = [
@@ -97,7 +97,7 @@ describe("Path($)", () => {
   ]);
 
   beforeAll(() => {
-    file_0.setMockAsCurrentNote();
+    file_0.setAsCurrentNote();
   });
 
   test.each(TEST_CASES)("($params) => $output | $when", (testCase) => {

@@ -34,7 +34,8 @@ import {
 import {
   Keys,
   Symbols,
-  DefaultFrontmatterUpdateOptions} from '../constants';
+  DefaultFrontmatterUpdateOptions
+} from '../constants';
 import { InternalStaticMetadataScrierPluginContainer } from "../static";
 import { CurrentNoteScrier } from "./current";
 import { NoteSections } from '../sections/sections';
@@ -63,59 +64,6 @@ import { ScryResultsMap as ScryResultsConstructor, SingleScryResult } from './re
  */
 export class MetadataScrier implements MetaScryApi {
   private static _caches: any = {};
-  private _scryResultPropSplayer: (base: any, topLevelPropertiesToIgnore?: Array<string>) => object;
-
-  //#region Initalization
-
-  constructor() {
-    this._initializeKebabPropSplayer();
-    //this._initializePropLowercaseSplayer();
-  }
-
-  //#region Property Name Splayer Initialization
-
-  private _initializeKebabPropSplayer() {
-    this._scryResultPropSplayer = (key, topLevelPropertiesToIgnore) => {
-      return MetadataScrier._recurseOnAllObjectProperties(
-        key,
-        (k, v, d) => {
-          for (const name of Splay(k)) {
-            d[name] = v;
-          }
-        },
-        topLevelPropertiesToIgnore
-      );
-    };
-  }
-
-  private static _recurseOnAllObjectProperties(
-    value: any,
-    fn: (key: string, value: any, data: any | object) => any | object,
-    topLevelPropertiesToIgnore: Array<string> | null = null
-  ): any {
-    if (value && IsObject(value)) {
-      if (IsArray(value)) {
-        return value.map((i: any) => this._recurseOnAllObjectProperties(i, fn));
-      } else {
-        const data: any = {};
-        for (const key of Object.keys(value)) {
-          if (topLevelPropertiesToIgnore && topLevelPropertiesToIgnore.contains(key)) {
-            data[key] = value[key];
-          } else {
-            fn(key, this._recurseOnAllObjectProperties(value[key], fn), data);
-          }
-        }
-
-        return data;
-      }
-    } else {
-      return value;
-    }
-  }
-
-  //#endregion
-
-  //#endregion
 
   //#region Static Api Access
 
@@ -799,7 +747,7 @@ export class MetadataScrier implements MetaScryApi {
     ) as ScryResultsMap<TType> | ScryResultPromiseMap<TType>;
   }
 
-  private  _scryForFolderOrFile<TType>(
+  private _scryForFolderOrFile<TType>(
     source: NotesSource,
     options: DataFetcherSettings & {
       isPromised?: boolean
@@ -824,6 +772,44 @@ export class MetadataScrier implements MetaScryApi {
     return options.isPromised
       ? (Promise.resolve(undefined) as any as PromisedScryResults<TType>)
       : (undefined as any as ScryResults<TType>);
+  }
+
+
+  private static _recurseOnAllObjectProperties(
+    value: any,
+    fn: (key: string, value: any, data: any | object) => any | object,
+    topLevelPropertiesToIgnore: Array<string> | null = null
+  ): any {
+    if (value && IsObject(value)) {
+      if (IsArray(value)) {
+        return value.map((i: any) => this._recurseOnAllObjectProperties(i, fn));
+      } else {
+        const data: any = {};
+        for (const key of Object.keys(value)) {
+          if (topLevelPropertiesToIgnore && topLevelPropertiesToIgnore.contains(key)) {
+            data[key] = value[key];
+          } else {
+            fn(key, this._recurseOnAllObjectProperties(value[key], fn), data);
+          }
+        }
+
+        return data;
+      }
+    } else {
+      return value;
+    }
+  }
+
+  private _scryResultPropSplayer(value: any, topLevelPropertiesToIgnore?: Array<string>) {
+    return MetadataScrier._recurseOnAllObjectProperties(
+      value,
+      (k, v, d) => {
+        for (const name of Splay(k)) {
+          d[name] = v;
+        }
+      },
+      topLevelPropertiesToIgnore
+    );
   }
 
   //#endregion

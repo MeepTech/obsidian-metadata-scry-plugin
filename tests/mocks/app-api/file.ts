@@ -1,5 +1,6 @@
 import { Metadata } from "../../../src/types/datas";
 import { AppWithPlugins } from "../../../src/types/plugin";
+import App from "./app";
 import TFolder from "./folder";
 import MetadataCache from "./metadata-cache";
 import Vault from "./vault";
@@ -37,13 +38,16 @@ export default class TFile extends TAbstractFile {
     return tfile;
   }
 
-  public addToVault = (onApp?: AppWithPlugins): void =>
-     (app as any).addAbstractFileToRootOfVault(this, onApp);
+  setAsCurrentNote = (onApp?: AppWithPlugins): void =>
+    ((onApp ?? app as any) as App).setMockAsCurrentNote(this, onApp);
+  
+  addToVault = (onApp?: AppWithPlugins): void =>
+     ((onApp ?? app as any) as App).addAbstractFileToRootOfVault(this, onApp);
 
-  public removeFromVault = (onApp?: AppWithPlugins): void =>
-    (app as any).removeAbstractFileFromRootOfVault(this, onApp);
+  removeFromVault = (onApp?: AppWithPlugins): void =>
+    ((onApp ?? app as any) as App).removeAbstractFileFromRootOfVault(this, onApp);
 
-  public setContents(contents?: string, onApp?: AppWithPlugins): void {
+  setContents(contents?: string, onApp?: AppWithPlugins): void {
     onApp ??= app as AppWithPlugins;
     const vault: Vault & { __test__fileContents?: Record<string, string>; } = onApp.vault as any;
 
@@ -58,7 +62,7 @@ export default class TFile extends TAbstractFile {
     }
   }
 
-  public clearContents(onApp?: AppWithPlugins): void {
+  clearContents(onApp?: AppWithPlugins): void {
     onApp ??= app as AppWithPlugins;
     const vault: Vault & { __test__fileContents?: Record<string, string>; } = onApp.vault as any;
 
@@ -73,7 +77,7 @@ export default class TFile extends TAbstractFile {
     }
   }
 
-  public setMatter(matter?: Metadata, onApp?: AppWithPlugins): void {
+  setMatter(matter?: Metadata, onApp?: AppWithPlugins): void {
     onApp ??= app as AppWithPlugins;
     const cache: MetadataCache & { __test__metadata?: Record<string, Metadata>; }
       = onApp.metadataCache as any;

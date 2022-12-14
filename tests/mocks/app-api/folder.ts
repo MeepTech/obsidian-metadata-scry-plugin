@@ -1,4 +1,5 @@
 import { AppWithPlugins } from "../../../src/types/plugin";
+import App from "./app";
 import TFile, {TAbstractFile} from "./file";
 import Vault from "./vault";
 
@@ -12,14 +13,14 @@ export default class TFolder extends TAbstractFile {
     return false;
   }
 
-  public static MockRoot(): TFolder {
+  static MockRoot(): TFolder {
     const mock = this.Mock("");
     mock.isRoot = () => true;
 
     return mock;
   }
 
-  public static Mock(path: string, files: Array<string | TFile | TFolder> | undefined = [], vault?: Vault): TFolder {
+  static Mock(path: string, files: Array<string | TFile | TFolder> | undefined = [], vault?: Vault): TFolder {
     const folder: TFolder = new TFolder();
     folder.name = path.split('/').pop()!;
     folder.path = path;
@@ -37,7 +38,7 @@ export default class TFolder extends TAbstractFile {
     return folder;
   }
 
-  public setMockedChild<TItem extends TAbstractFile>(item: TItem, index?: number): TItem {
+  setMockedChild<TItem extends TAbstractFile>(item: TItem, index?: number): TItem {
     item = TFolder._setParentFolder(
       item as any as (TFile | TFolder),
       this
@@ -52,7 +53,7 @@ export default class TFolder extends TAbstractFile {
     return item;
   }
 
-  public file(key: string | number): TFile {
+  file(key: string | number): TFile {
     if (typeof key === "string") {
       return (this.children.find(f => f.path === key)
         ?? this.children.find(f => f.name === key)
@@ -63,7 +64,7 @@ export default class TFolder extends TAbstractFile {
     }
   }
 
-  public folder(key: string | number): TFolder {
+  folder(key: string | number): TFolder {
     if (typeof key === "string") {
       return (this.children.find(f => f.path === key)
         ?? this.children.find(f => f.name === key)
@@ -73,11 +74,11 @@ export default class TFolder extends TAbstractFile {
     }
   }
 
-  public addToVaultAsMock = (onApp?: AppWithPlugins): void =>
-    (app as any).addAbstractFileToRootOfVault(this, onApp);
+  addToVaultAsMock = (onApp?: AppWithPlugins): void =>
+    ((onApp ?? app as any) as App).addAbstractFileToRootOfVault(this, onApp);
 
-  public removeThisMockFromVault = (onApp?: AppWithPlugins): void =>
-    (app as any).removeAbstractFileFromRootOfVault(this, onApp);
+  removeThisMockFromVault = (onApp?: AppWithPlugins): void =>
+    ((onApp ?? app as any) as App).removeAbstractFileFromRootOfVault(this, onApp);
 
   private static _setParentFolder(child: TFolder | TFile, parent: TFolder): TFolder | TFile {
     child.parent = parent;

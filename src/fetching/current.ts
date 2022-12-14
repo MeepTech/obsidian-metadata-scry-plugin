@@ -39,19 +39,6 @@ export class CurrentNoteScrier implements CurrentNoteMetaScryApi {
   }
 
   get Note(): TFile {
-    const specialCache = this._api.cache("_zpec:a|") as Cache;
-    if (IsString(specialCache["CurrentPath"])) {
-      const current = this._api.vault(
-        specialCache["CurrentPath"]
-      ) as TFile;
-      
-      if (!current) {
-        throw "No Current File";
-      }
-      
-      return current;
-    }
-
     const current = app.workspace.getActiveFile();
 
     if (!current) {

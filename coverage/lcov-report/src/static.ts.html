@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
+                <span class="strong">31.57% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>19/57</span>
+                <span class='fraction'>18/57</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.63% </span>
+                <span class="strong">2.81% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/71</span>
+                <span class='fraction'>2/71</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">15% </span>
+                <span class="strong">10% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/20</span>
+                <span class='fraction'>2/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
+                <span class="strong">31.57% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>19/57</span>
+                <span class='fraction'>18/57</span>
             </div>
         
             
@@ -422,23 +422,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -446,6 +430,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -711,15 +711,15 @@ export class InternalStaticMetadataScrierPluginContainer {
   /**
    * The current instance of the Static Metadata Scry Api.
    */
-  static get Static(): MetaScry {
-    return InternalStaticMetadataScrierPluginContainer._static;
+<span class="fstat-no" title="function not covered" >  static </span>get Static(): MetaScry {
+<span class="cstat-no" title="statement not covered" >    return InternalStaticMetadataScrierPluginContainer._static;</span>
   }
 &nbsp;
   /**
    * The current instance of the MetadataScryApi api
    */
-<span class="fstat-no" title="function not covered" >  static </span>get Api(): MetaScryApi {
-<span class="cstat-no" title="statement not covered" >    return InternalStaticMetadataScrierPluginContainer._api;</span>
+  static get Api(): MetaScryApi {
+    return InternalStaticMetadataScrierPluginContainer._api;
   }
 &nbsp;
   /**
@@ -734,8 +734,8 @@ export class InternalStaticMetadataScrierPluginContainer {
    * Access to the Dataview Api
    * (Read access and Data display)
    */
-  static get DataviewApi(): DataviewApi {
-    return getAPI() as DataviewApi;
+<span class="fstat-no" title="function not covered" >  static </span>get DataviewApi(): DataviewApi {
+<span class="cstat-no" title="statement not covered" >    return getAPI() as DataviewApi;</span>
   }
 &nbsp;
   /**
@@ -882,7 +882,7 @@ export class InternalStaticMetadataScrierPluginContainer {
   }
 &nbsp;
   static InitalizeStaticApi({
-    includeReactComponents = true,
+    includeReactComponents = <span class="branch-0 cbranch-no" title="branch not covered" >true,</span>
     plugin,
     defaultSettings
   }: {
@@ -890,7 +890,7 @@ export class InternalStaticMetadataScrierPluginContainer {
     plugin?: MetaScryPluginApi;
     defaultSettings?: MetaScryPluginSettings;
   } = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span>: MetaScry {
-    InternalStaticMetadataScrierPluginContainer._plugin = plugin || (app as AppWithPlugins).plugins.plugins["meta-scry"];
+    InternalStaticMetadataScrierPluginContainer._plugin = plugin || (<span class="branch-1 cbranch-no" title="branch not covered" >app as AppWithPlugins).plugins.plugins["meta-scry"];</span>
     InternalStaticMetadataScrierPluginContainer._defaultSettings = defaultSettings;
     InternalStaticMetadataScrierPluginContainer._api = new MetadataScrier();
 &nbsp;
@@ -940,7 +940,7 @@ export class InternalStaticMetadataScrierPluginContainer {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2022-12-13T01:53:28.652Z
+                at 2022-12-14T06:08:00.825Z
             </div>
         <script src="../prettify.js"></script>
         <script>
