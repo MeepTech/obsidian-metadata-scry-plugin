@@ -6,12 +6,13 @@ import Vault, { FILE } from "../../mocks/app-api/vault";
 const TEST_CASES = [
   {
     input: [],
-    expected: "folder/file_0.md",
+    params: undefined,
+    expected: "folder/file_0",
     output: "Current Note Path"
-  },
+  }/*,
   {
     input: [`""`],
-    expected: "folder/file_0.md",
+    expected: "folder/file_0",
     output: "Current Note Path"
   },
   {
@@ -71,7 +72,7 @@ const TEST_CASES = [
     input: [`"/"`],
     expected: "",
     output: "Root Folder Path"
-  },
+  }*/,
 ];
 
 describe("Path($)", () => {
@@ -106,8 +107,8 @@ describe("Path($)", () => {
         testCase.params
           ? testCase.input.map(
             (input: string | undefined, index: number) =>
-            (input && testCase.params[index])
-              ? util.format(input, testCase.params[index])
+            (input && testCase.params![index])
+              ? util.format(input, testCase.params![index])
               : input
           ) : testCase.input
       ))
